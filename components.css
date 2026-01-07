@@ -1,0 +1,350 @@
+/* ========================
+   1. HEADER & NAVIGATION
+   ======================== */
+.app-header {
+    flex-shrink: 0;
+    height: var(--header-height);
+    background: rgba(15, 16, 20, 0.98);
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid #333;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 15px;
+    z-index: 100;
+}
+
+.logo {
+    font-size: 20px;
+    font-weight: 800;
+    color: var(--primary);
+    letter-spacing: 0.5px;
+}
+
+/* css/components.css update */
+
+/* Bottom Nav Container */
+.bottom-nav {
+    position: fixed;
+    bottom: 0; left: 0; width: 100%;
+    height: 65px;
+    background: #16171b;
+    border-top: 1px solid #333;
+    display: flex;
+    justify-content: space-between; /* Items ko barabar failao */
+    align-items: center;
+    z-index: 1000;
+    padding-bottom: 5px;
+}
+
+/* Bottom Nav Container */
+.bottom-nav {
+    position: fixed;
+    bottom: 0; left: 0; width: 100%;
+    height: 65px;
+    background: #16171b;
+    border-top: 1px solid #333;
+    display: flex;
+    justify-content: space-around; /* Space between items */
+    align-items: center;
+    z-index: 1000;
+    padding-bottom: 5px;
+}
+
+/* Nav Item (Button) */
+.nav-item {
+    flex: 1; /* Sabko barabar jagah mile */
+    flex-shrink: 0; /* IMPORTANT: Kisi ko bhi dabne mat do */
+    min-width: 0; /* Text overflow handle karne ke liye */
+    
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    
+    color: #666;
+    font-size: 10px;
+    gap: 4px;
+    background: none;
+    transition: color 0.2s, transform 0.2s;
+    height: 100%;
+    text-decoration: none; /* Link underline hatane ke liye */
+}
+
+/* Icon */
+
+}
+
+/* Text Label */
+.nav-item span {
+    white-space: nowrap; /* Text ko tootne mat do */
+    overflow: hidden;    /* Extra text chupao */
+    text-overflow: ellipsis; /* ... dikhao */
+    width: 100%;
+    text-align: center;
+}
+
+/* Active State */
+.nav-item.active { 
+    color: var(--primary); 
+}
+
+/* ========================
+   2. BUTTONS & INPUTS
+   ======================== */
+.btn-primary {
+    background: var(--primary);
+    color: white;
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 14px;
+    transition: 0.2s;
+    display: flex; align-items: center; justify-content: center; gap: 8px;
+}
+.btn-primary:active { transform: scale(0.96); opacity: 0.9; }
+
+.search-box {
+    width: 100%;
+    background: var(--bg-input);
+    border: 1px solid #333;
+    padding: 12px 15px;
+    border-radius: 25px;
+    color: white;
+    font-size: 14px;
+}
+.search-box:focus { border-color: var(--primary); }
+
+/* Floating Action Button (FAB) */
+.fab-btn {
+    position: fixed; bottom: 85px; right: 20px;
+    width: 55px; height: 55px; border-radius: 50%;
+    background: var(--primary); color: white;
+    display: flex; align-items: center; justify-content: center;
+    box-shadow: 0 5px 20px rgba(124, 77, 255, 0.4);
+    font-size: 24px; z-index: 900;
+    transition: transform 0.2s;
+}
+.fab-btn:active { transform: scale(0.9); }
+
+/* ========================
+   3. CARDS (General)
+   ======================== */
+/* Grid Card (Home) */
+.anime-card {
+    background: var(--bg-card);
+    border-radius: 10px;
+    overflow: hidden;
+    position: relative;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+}
+.anime-card img { width: 100%; height: 160px; object-fit: cover; }
+.card-content { padding: 10px; }
+.card-title { font-size: 13px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+/* Grid Container */
+.grid-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+    gap: 12px;
+}
+
+/* ========================
+   4. WATCHLIST (MAL Style)
+   ======================== */
+.mal-card {
+    display: flex; align-items: center;
+    background: var(--bg-card);
+    margin-bottom: 12px;
+    border-radius: 6px;
+    border-left: 4px solid var(--primary); /* Status Color */
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    position: relative; overflow: hidden;
+    padding-right: 10px;
+}
+.mal-img { width: 60px; height: 90px; object-fit: cover; flex-shrink: 0; }
+.mal-info { flex: 1; padding: 0 12px; overflow: hidden; }
+.mal-title { font-size: 14px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-bottom: 4px; }
+.mal-meta { font-size: 11px; color: #aaa; }
+
+/* Episode Controls */
+.ep-control-box {
+    display: flex; align-items: center;
+    background: #0f1014;
+    border-radius: 6px; border: 1px solid #333;
+}
+.ctrl-btn {
+    width: 32px; height: 32px; background: transparent; color: #ccc;
+    display: flex; align-items: center; justify-content: center;
+}
+.ctrl-btn:active { background: #333; color: white; }
+.ep-display { font-size: 12px; font-weight: bold; padding: 0 6px; min-width: 50px; text-align: center; }
+
+/* Rating Star Button */
+.btn-rate {
+    width: 30px; height: 30px; border-radius: 50%; border: 1px solid #333;
+    background: #0f1014; color: #ffd700; margin-right: 8px;
+    display: flex; align-items: center; justify-content: center;
+}
+
+/* ========================
+   5. CHAT SYSTEM
+   ======================== */
+.chat-item {
+    display: flex; align-items: center; gap: 15px;
+    padding: 15px; background: rgba(255,255,255,0.03);
+    border-radius: 12px; margin-bottom: 8px;
+    border: 1px solid rgba(255,255,255,0.05);
+}
+.chat-avatar { width: 50px; height: 50px; border-radius: 50%; object-fit: cover; border: 2px solid #333; }
+.chat-info { flex: 1; overflow: hidden; }
+.chat-name { font-weight: 600; font-size: 16px; margin-bottom: 2px; }
+.chat-last-msg { font-size: 13px; color: #aaa; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+/* Chat Bubbles */
+.msg {
+    max-width: 75%; padding: 10px 15px; border-radius: 18px;
+    font-size: 14px; line-height: 1.4; margin-bottom: 2px;
+    position: relative; word-wrap: break-word;
+}
+.msg-me { align-self: flex-end; background: var(--primary); color: white; border-bottom-right-radius: 4px; }
+.msg-other { align-self: flex-start; background: #252530; color: white; border-top-left-radius: 4px; }
+.msg-time { font-size: 9px; opacity: 0.7; display: block; text-align: right; margin-top: 3px; }
+
+/* ========================
+   6. POLLS
+   ======================== */
+.poll-card {
+    background: var(--bg-card); padding: 20px; border-radius: 12px;
+    margin-bottom: 15px; border: 1px solid #333;
+}
+.vote-btn {
+    width: 100%; padding: 12px; margin-bottom: 8px;
+    background: rgba(255,255,255,0.05); border: 1px solid #444;
+    border-radius: 8px; color: #ddd; text-align: left;
+    display: flex; justify-content: space-between;
+}
+.result-bar-container {
+    background: rgba(255,255,255,0.05); height: 40px; border-radius: 8px;
+    position: relative; overflow: hidden; margin-bottom: 8px;
+}
+.result-fill { height: 100%; background: rgba(124, 77, 255, 0.3); border-left: 4px solid var(--primary); }
+.result-text {
+    position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+    display: flex; align-items: center; justify-content: space-between; padding: 0 15px;
+}
+
+/* ========================
+   7. MODALS (Popups)
+   ======================== */
+.modal-overlay {
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(0,0,0,0.85); z-index: 2000;
+    display: flex; justify-content: center; align-items: center;
+    visibility: hidden; opacity: 0; transition: 0.2s; backdrop-filter: blur(5px);
+}
+.modal-overlay.show { visibility: visible; opacity: 1; }
+
+.modal-box {
+    background: #1e1e24; width: 85%; max-width: 350px;
+    border-radius: 20px; padding: 25px;
+    border: 1px solid #333; box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+    transform: scale(0.9); transition: 0.2s;
+}
+.modal-overlay.show .modal-box { transform: scale(1); }
+
+/* Common Modal Inputs */
+.modal-inp {
+    width: 100%; padding: 12px; background: #0f1014;
+    border: 1px solid #444; color: white; border-radius: 8px;
+    margin-bottom: 15px;
+}
+/* ========================
+   CHAT PAGE SPECIFIC FIXES
+   ======================== */
+
+/* Chat Room Container ko Full Height aur Flex do */
+#chatRoomView {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    width: 100%;
+    overflow: hidden;
+}
+
+/* Header Fix */
+.chat-header {
+    flex-shrink: 0; /* Shrink mat hona */
+    height: 60px;
+    z-index: 50;
+    display: flex;
+    align-items: center;
+    background: #1b1d24; /* Background ensure karo */
+    border-bottom: 1px solid #333;
+}
+
+/* Messages Area (Beech wala hissa) */
+.chat-messages {
+    flex: 1; /* Baki bachi saari jagah le lo */
+    overflow-y: auto; /* Scroll sirf yahan hoga */
+    padding: 15px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    background: #0f1014;
+    
+    /* Scrollbar ke peeche chupne se bachao */
+    min-height: 0; 
+}
+
+/* Input Area (Bottom wala hissa) */
+.chat-input-area {
+    flex-shrink: 0; /* Shrink mat hona */
+    min-height: 60px; /* Height fix */
+    padding: 10px;
+    background: #16161e;
+    border-top: 1px solid #333;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    
+    /* Z-Index High taaki upar dikhe */
+    position: relative; 
+    z-index: 60;
+    
+    /* Bottom Nav ke upar aana chahiye agar wo dikh raha hai to */
+    margin-bottom: 0;
+}
+
+/* Important: Chat Room khulne par Bottom Nav chupana chahiye */
+/* Iske liye hum JS se nav ko hide karte hain, lekin CSS se bhi ensure karte hain */
+#chatRoomView ~ .bottom-nav {
+    display: none !important;
+}
+<button class="fab-btn" onclick="openCreateModal()">
+    <i class="fa-solid fa-plus"></i>
+</button>
+
+<div id="createModal" class="modal-overlay">
+    <div class="modal-box">
+        <h3 style="color:white; margin-bottom:15px; text-align:center;">Create New Poll</h3>
+        
+        <label style="font-size:12px; color:#aaa;">Poll Question</label>
+        <input type="text" id="pollQuestion" class="modal-inp" placeholder="Example: Who is the best MC?">
+
+        <label style="font-size:12px; color:#aaa;">Options (At least 2)</label>
+        <div id="optionList">
+            <input type="text" class="modal-inp option-field" placeholder="Option 1">
+            <input type="text" class="modal-inp option-field" placeholder="Option 2">
+        </div>
+        
+        <button onclick="addOptionField()" style="background:none; border:1px dashed #444; color:#aaa; width:100%; padding:10px; border-radius:8px; margin-bottom:15px; cursor:pointer;">
+            <i class="fa-solid fa-plus"></i> Add More Option
+        </button>
+
+        <div style="display:flex; gap:10px;">
+            <button onclick="createPoll()" class="btn-primary" style="flex:1;">Post Poll</button>
+            <button onclick="closeModal()" style="flex:1; background:transparent; color:#aaa; border:1px solid #444; border-radius:8px; cursor:pointer;">Cancel</button>
+        </div>
+    </div>
+</div>

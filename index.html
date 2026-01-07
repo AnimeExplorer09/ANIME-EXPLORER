@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AnimeExplorer</title>
+    <link rel="stylesheet" href="main.css">
+    <link rel="stylesheet" href="components.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .anime-card { background: var(--bg-card); border-radius: 10px; overflow: hidden; position: relative; transition: 0.3s; }
+        .anime-card:active { transform: scale(0.95); }
+        .anime-card img { width: 100%; height: 180px; object-fit: cover; background: #333; }
+        .card-content { padding: 10px; }
+        .card-title { font-size: 13px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #fff; }
+        .grid-container { display: grid; grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); gap: 10px; padding: 15px; }
+        .search-box { width: 100%; background: #23252b; border: 1px solid #5738B0; padding: 12px 15px; border-radius: 25px; color: white; outline: none; }
+        
+        .chip-slider { display: flex; gap: 10px; overflow-x: auto; padding: 15px 5px; scrollbar-width: none; }
+        .chip-slider::-webkit-scrollbar { display: none; }
+        .chip { background: #23252b; color: white; padding: 8px 16px; border-radius: 20px; font-size: 13px; font-weight: 500; white-space: nowrap; border: 1px solid #333; text-decoration: none; cursor: pointer; }
+        .chip.active { background: white; color: black; border-color: white; }
+        
+        body { height: auto !important; overflow-y: auto !important; display: block !important; background-color: #0f1116; color: white; padding-bottom: 80px; }
+        .hidden { display: none !important; }
+        #loading { text-align: center; padding: 20px; width: 100%; }
+
+        .load-more-container { text-align: center; padding: 20px; margin-bottom: 20px; }
+        .btn-load-more { 
+            background: transparent; color: #5738B0; border: 2px solid #5738B0;
+            padding: 10px 30px; border-radius: 25px; font-weight: bold;
+            cursor: pointer; transition: 0.3s;
+        }
+        .btn-load-more:active { background: #5738B0; color: white; }
+
+        #ageVerificationModal {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.9); z-index: 10000;
+            display: flex; align-items: center; justify-content: center;
+            backdrop-filter: blur(8px);
+        }
+        .modal-content {
+            background: #1a1c22; padding: 25px; width: 85%; max-width: 350px;
+            border-radius: 20px; text-align: center; border: 1px solid #5738B0;
+        }
+        .modal-btn { padding: 10px 20px; border-radius: 25px; border: none; margin: 5px; font-weight: bold; cursor: pointer; }
+        .btn-yes { background: #5738B0; color: white; }
+        .btn-no { background: #333; color: white; }
+
+        .nsfw-badge {
+            background: #ff0000; color: white; font-size: 9px; padding: 1px 5px;
+            border-radius: 4px; font-weight: 800; display: inline-block;
+            margin-left: 8px; vertical-align: middle;
+        }
+/* BOTTOM NAVIGATION CSS */
+/* OPTIMIZED BOTTOM NAVIGATION */
+/* FIXED UNIFORM BOTTOM NAV */
+.bottom-nav {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 70px; /* Fix standard height for both pages */
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    background: #1a1c22; /* Same dark theme */
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    padding-bottom: env(safe-area-inset-bottom);
+    z-index: 5000; /* Sabse upar rahega */
+}
+
+.nav-item {
+    text-decoration: none;
+    color: #94a3b8;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    flex: 1;
+    gap: 4px;
+    transition: 0.2s ease;
+}
+
+.nav-item i {
+    font-size: 20px; /* Standard Icon Size */
+}
+
+.nav-item span {
+    font-size: 10px; /* Standard Text Size */
+    font-weight: 600;
+}
+
+/* Active Page Highlight */
+.nav-item.active {
+    color: #5738B0; /* Your Brand Purple */
+}
+
+/* Touch Effect */
+.nav-item:active {
+    transform: scale(0.9);
+}
+
+
+
+
+    </style>
+</head>
+<body>
+    <div id="ageVerificationModal" class="hidden">
+        <div class="modal-content">
+            <i class="fa-solid fa-circle-exclamation" style="font-size: 40px; color: #e91e63; margin-bottom: 15px;"></i>
+            <h2 style="font-size: 18px;">Age Verification</h2>
+            <p style="font-size: 14px; color: #ccc; margin: 10px 0;">This content is rated 18+. Are you of legal age to view this?</p>
+            <button class="modal-btn btn-yes" id="confirmAge">Yes, I am 18+</button>
+            <button class="modal-btn btn-no" id="cancelAge">No, Go back</button>
+        </div>
+    </div>
+
+    <header class="app-header">
+        <div class="logo">AnimeExplorer</div>
+    </header>
+
+    <div class="container" style="padding:15px;">
+        <input type="text" id="searchInput" class="search-box" placeholder="Search anime and press Enter...">
+        
+       <div class="chip-slider">
+    <div class="chip active" id="chip-all">All</div>
+    <div class="chip" id="chip-trending">Trending</div>
+    <div class="chip" id="chip-movies">Movies</div>
+</div>
+
+
+        <h3 id="listTitle" style="margin: 10px 0 10px 5px; color: #5738B0;">Trending Now</h3>
+        <div id="animeGrid" class="grid-container"></div>
+        
+        <div id="loading" class="hidden">
+            <i class="fa-solid fa-spinner fa-spin" style="font-size:30px; color:#5738B0;"></i>
+        </div>
+
+        <div class="load-more-container" id="loadMoreSection">
+            <button class="btn-load-more" id="loadMoreBtn">Load More</button>
+        </div>
+    </div>
+
+    <nav class="bottom-nav">
+    <a href="index.html" class="nav-item active">
+        <i class="fa-solid fa-compass"></i>
+        <span>Home</span>
+    </a>
+    <a href="watchlist.html" class="nav-item">
+        <i class="fa-solid fa-bookmark"></i>
+        <span>List</span>
+    </a>
+    <a href="poll.html" class="nav-item">
+        <i class="fa-solid fa-chart-simple"></i>
+        <span>Polls</span>
+    </a>
+    <a href="chat.html" class="nav-item">
+        <i class="fa-solid fa-comments"></i>
+        <span>Chat</span>
+    </a>
+    <a href="profile.html" class="nav-item">
+        <i class="fa-solid fa-user"></i>
+        <span>Profile</span>
+    </a>
+</nav>
+
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+        
+        const firebaseConfig = { apiKey: "AIzaSyDLd3TW-y89lwShUmcIHw3YGzDjo4cg3y4", authDomain: "animea2z.firebaseapp.com", projectId: "animea2z", storageBucket: "animea2z.firebasestorage.app", messagingSenderId: "673605765684", appId: "1:673605765684:web:a6f851e0d79836b79b1861" };
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+
+        onAuthStateChanged(auth, user => { if(!user) window.location.href = "login.html"; });
+
+        const grid = document.getElementById('animeGrid');
+        const loader = document.getElementById('loading');
+        const ageModal = document.getElementById('ageVerificationModal');
+        const loadMoreBtn = document.getElementById('loadMoreBtn');
+        const loadMoreSection = document.getElementById('loadMoreSection');
+        const listTitle = document.getElementById('listTitle');
+        
+        let currentPage = 1;
+        let isFetching = false;
+        let currentQuery = '';
+        let currentType = ''; // '' for all, 'movie' for movies
+        let hasNextPage = true;
+        let pendingUrl = '';
+
+        fetchAnime();
+
+        // Movie Chip Logic
+        document.getElementById('chip-movies').onclick = function() {
+            updateActiveChip(this);
+            currentType = 'movie';
+            currentQuery = '';
+            resetAndFetch("Anime Movies");
+        };
+
+        document.getElementById('chip-all').onclick = function() {
+            updateActiveChip(this);
+            currentType = '';
+            currentQuery = '';
+            resetAndFetch("Trending Now");
+        };
+
+        document.getElementById('chip-trending').onclick = function() {
+            updateActiveChip(this);
+            currentType = '';
+            currentQuery = '';
+            resetAndFetch("Trending Now");
+        };
+
+        function updateActiveChip(el) {
+            document.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
+            el.classList.add('active');
+        }
+
+        function resetAndFetch(title) {
+            currentPage = 1;
+            grid.innerHTML = '';
+            hasNextPage = true;
+            listTitle.innerText = title;
+            fetchAnime();
+        }
+
+        loadMoreBtn.onclick = () => { if (!isFetching && hasNextPage) { currentPage++; fetchAnime(); } };
+
+        document.getElementById('cancelAge').onclick = () => ageModal.classList.add('hidden');
+        document.getElementById('confirmAge').onclick = () => {
+            ageModal.classList.add('hidden');
+            if(pendingUrl) location.href = pendingUrl;
+        };
+
+        document.getElementById('searchInput').addEventListener('keypress', (e) => {
+            if(e.key === 'Enter') {
+                currentQuery = e.target.value.trim();
+                currentType = '';
+                updateActiveChip(document.getElementById('chip-all'));
+                resetAndFetch(currentQuery ? `Results: ${currentQuery}` : "Trending Now");
+            }
+        });
+
+        async function fetchAnime() {
+            if (isFetching) return;
+            isFetching = true;
+            loader.classList.remove('hidden');
+            loadMoreSection.classList.add('hidden');
+            
+            let endpoint = '';
+            if (currentQuery) {
+                endpoint = `anime?q=${currentQuery}&page=${currentPage}&limit=15`;
+            } else if (currentType === 'movie') {
+                endpoint = `anime?type=movie&order_by=popularity&page=${currentPage}&limit=15`;
+            } else {
+                endpoint = `top/anime?filter=bypopularity&page=${currentPage}&limit=15`;
+            }
+
+            try {
+                const res = await fetch(`https://api.jikan.moe/v4/${endpoint}`);
+                const data = await res.json();
+                
+                if(!data.data || data.data.length === 0) {
+                    hasNextPage = false;
+                    return;
+                }
+
+                hasNextPage = data.pagination.has_next_page;
+                
+                data.data.forEach(anime => {
+                    const card = document.createElement('div');
+                    card.className = 'anime-card';
+                    const isNSFW = anime.rating && (anime.rating.includes('Hentai') || anime.rating.includes('Explicit'));
+                    
+                    card.onclick = () => {
+                        if(isNSFW) {
+                            pendingUrl = `details.html?id=${anime.mal_id}`;
+                            ageModal.classList.remove('hidden');
+                        } else {
+                            location.href = `details.html?id=${anime.mal_id}`;
+                        }
+                    };
+                    
+                    const imgUrl = anime.images.jpg.image_url; // 240p-ish quality
+                    
+                    card.innerHTML = `
+                        <img src="${imgUrl}" loading="lazy" alt="anime">
+                        <div class="card-content">
+                            <div class="card-title">${anime.title_english || anime.title}</div>
+                            <div style="font-size:11px; color:#aaa; display: flex; align-items: center;">
+                                <span>⭐ ${anime.score || 'N/A'}</span>
+                                ${isNSFW ? '<span class="nsfw-badge">18+</span>' : ''}
+                            </div>
+                        </div>`;
+                    grid.appendChild(card);
+                });
+
+                if(hasNextPage) loadMoreSection.classList.remove('hidden');
+
+            } catch(e) { 
+                console.error("Fetch Error:", e); 
+            } finally {
+                isFetching = false;
+                loader.classList.add('hidden');
+            }
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,443 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Profile - AnimeA2Z</title>
+    <link rel="stylesheet" href="main.css">
+    <link rel="stylesheet" href="components.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/croppie/2.6.5/croppie.min.css">
+    
+    <style>
+        :root { --accent: #7c4dff; --bg-card: #16161e; --bg-dark: #0b0c10; --danger: #ff5252; }
+        
+        body { 
+            background: var(--bg-dark); 
+            color: #fff; 
+            padding-bottom: 100px; 
+            font-family: 'Inter', sans-serif; 
+            margin: 0;
+            overflow-y: auto;
+        }
+
+        .profile-header { width: 100%; position: relative; }
+        .profile-banner { 
+            width: 100%; height: 180px; 
+            background: linear-gradient(to bottom, transparent 50%, var(--bg-dark)), #1a1a2e;
+            background-size: cover; background-position: center;
+        }
+        
+        .profile-info-wrap { 
+            margin-top: -60px; display: flex; flex-direction: column; 
+            align-items: center; position: relative; z-index: 10; 
+        }
+
+        .avatar-box { position: relative; margin-bottom: 10px; }
+        .profile-avatar { 
+            width: 115px; height: 115px; border-radius: 50%; 
+            border: 4px solid var(--bg-dark); object-fit: cover; background: #222;
+        }
+        .lvl-badge { 
+            position: absolute; bottom: 5px; right: 0; background: var(--accent); 
+            font-size: 10px; font-weight: 900; padding: 3px 10px; border-radius: 20px; 
+            border: 2px solid var(--bg-dark);
+        }
+
+        .user-name { font-size: 24px; font-weight: 800; margin: 0; color: white; }
+        .id-container { 
+            display: inline-flex; align-items: center; gap: 8px; 
+            background: rgba(124,77,255,0.15); padding: 5px 12px;
+            border-radius: 30px; margin-top: 8px; border: 1px solid rgba(124,77,255,0.3);
+        }
+        .id-val { font-size: 12px; color: #b099ff; font-family: monospace; font-weight: bold; }
+        .copy-icon { color: #fff; cursor: pointer; font-size: 12px; opacity: 0.7; }
+
+        .f-stats-row { display: flex; gap: 30px; margin: 15px 0; }
+        .f-item { text-align: center; }
+        .f-num { display: block; font-size: 18px; font-weight: 800; }
+        .f-lab { font-size: 10px; color: #555; text-transform: uppercase; }
+
+        .main-content { padding: 0 20px; }
+        .bio-box { background: var(--bg-card); padding: 18px; border-radius: 20px; text-align: center; font-size: 14px; color: #bbb; border: 1px solid rgba(255,255,255,0.03); }
+        .joined-text { font-size: 11px; color: #444; margin-top: 10px; display: block; text-align: center; }
+
+        .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 20px; }
+        .s-card { background: var(--bg-card); padding: 15px; border-radius: 18px; text-align: center; border-bottom: 2px solid var(--accent); }
+
+        .social-bar { display: flex; justify-content: center; gap: 15px; margin: 20px 0; }
+        .soc-link { width: 42px; height: 42px; background: var(--bg-card); border-radius: 12px; display: flex; align-items: center; justify-content: center; color: #444; border: 1px solid rgba(255,255,255,0.05); text-decoration: none; }
+        .soc-link.active { color: var(--accent); border-color: var(--accent); }
+
+        .btn-list { display: flex; flex-direction: column; gap: 10px; margin-top: 20px; }
+        .btn-wide { background: var(--bg-card); color: white; border: none; padding: 15px; border-radius: 16px; font-weight: 600; display: flex; align-items: center; justify-content: center; gap: 10px; cursor: pointer; border: 1px solid rgba(255,255,255,0.02); width: 100%; }
+        .btn-follow { background: var(--accent); width: 100%; height: 50px; border-radius: 15px; border: none; color: white; font-weight: 800; display: none; margin-bottom: 15px; cursor: pointer; }
+
+        /* Cropper Overrides */
+        #cropperModal { position: fixed; inset: 0; background: #000; z-index: 3000; display: none; flex-direction: column; }
+        .croppie-container { height: 80vh !important; }
+        /* Level Progress Bar Styles */
+.lvl-container {
+    width: 100%;
+    margin-top: 15px;
+    background: var(--bg-card);
+    padding: 15px;
+    border-radius: 18px;
+    box-sizing: border-box;
+    border: 1px solid rgba(255,255,255,0.03);
+}
+.lvl-info-flex {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+}
+.lvl-text { font-size: 12px; font-weight: 700; color: #888; }
+.xp-needed { font-size: 11px; color: var(--accent); font-weight: 600; }
+.progress-bar-bg {
+    width: 100%;
+    height: 8px;
+    background: rgba(255,255,255,0.05);
+    border-radius: 10px;
+    overflow: hidden;
+}
+.progress-bar-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--accent), #b099ff);
+    width: 0%; /* JS se update hoga */
+    transition: width 1s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 0 10px rgba(124, 77, 255, 0.4);
+}
+
+/* FIXED UNIFORM BOTTOM NAV - CONSISTENT ACROSS APP */
+.bottom-nav {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 70px;
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    background: #1a1c22;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    padding-bottom: env(safe-area-inset-bottom);
+    z-index: 5000;
+}
+
+.nav-item {
+    text-decoration: none;
+    color: #94a3b8;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    flex: 1;
+    gap: 4px;
+    transition: 0.2s ease;
+}
+
+.nav-item i {
+    font-size: 20px;
+}
+
+.nav-item span {
+    font-size: 10px;
+    font-weight: 600;
+}
+
+/* Profile page par 'Profile' active rahega */
+.nav-item.active {
+    color: #5738B0;
+}
+
+.nav-item:active {
+    transform: scale(0.9);
+}
+
+    </style>
+</head>
+<body>
+
+    <div class="profile-header">
+        <div id="userBanner" class="profile-banner"></div>
+        <div class="profile-info-wrap">
+            <div class="avatar-box">
+                <img id="userAvatar" src="https://via.placeholder.com/115" class="profile-avatar">
+                <div class="lvl-badge">LVL <span id="userLevel">1</span></div>
+            </div>
+            <h2 id="userName" class="user-name">Loading...</h2>
+            <div class="id-container">
+                <span id="userId" class="id-val">ID: --------</span>
+                <i class="fa-regular fa-copy copy-icon" onclick="copyId()"></i>
+            </div>
+            <div class="lvl-container">
+    <div class="lvl-info-flex">
+        <span class="lvl-text">Level <span id="currentLvlNum">1</span> Progress</span>
+        <span id="xpToNext" class="xp-needed">0 / 100 XP</span>
+    </div>
+    <div class="progress-bar-bg">
+        <div id="lvlFill" class="progress-bar-fill"></div>
+    </div>
+</div>
+
+            <div class="f-stats-row">
+                <div class="f-item"><span id="followerCount" class="f-num">0</span><span class="f-lab">Followers</span></div>
+                <div class="f-item"><span id="followingCount" class="f-num">0</span><span class="f-lab">Following</span></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="main-content">
+        <div id="userBio" class="bio-box">Loading bio...</div>
+        <span id="userJoined" class="joined-text">Joined --/--/----</span>
+
+        <button id="followBtn" class="btn-follow"><i class="fa-solid fa-plus"></i> Follow</button>
+
+        <div class="stats-grid">
+            <div class="s-card"><span id="watchCount" style="color:var(--accent); font-weight:800; font-size:20px;">0</span><br><span class="f-lab">Watchlist</span></div>
+            <div class="s-card"><span id="xpValue" style="color:var(--accent); font-weight:800; font-size:20px;">0</span><br><span class="f-lab">Total XP</span></div>
+        </div>
+
+        <div class="social-bar">
+            <a id="linkInsta" href="#" target="_blank" class="soc-link"><i class="fa-brands fa-instagram"></i></a>
+            <a id="linkDiscord" href="#" target="_blank" class="soc-link"><i class="fa-brands fa-discord"></i></a>
+        </div>
+
+        <div id="myActions" class="btn-list">
+            <button class="btn-wide" onclick="openEdit()"><i class="fa-solid fa-user-pen" style="color:var(--accent)"></i> Edit Profile</button>
+            <button class="btn-wide" onclick="handleLogout()" style="color:var(--danger)"><i class="fa-solid fa-power-off"></i> Logout Account</button>
+        </div>
+    </div>
+
+    <div id="editModal" class="modal-overlay">
+        <div class="modal-box">
+            <h3 style="margin:0 0 20px 0; color:white; text-align:center;">Edit Settings</h3>
+            <input type="text" id="inpName" class="modal-inp" placeholder="Display Name">
+            <input type="text" id="inpBio" class="modal-inp" placeholder="Profile Bio">
+            <input type="text" id="inpInsta" class="modal-inp" placeholder="Instagram Username (e.g. user_name)">
+            
+            <div style="display:flex; gap:10px; margin-bottom:15px;">
+                <label for="avUp" style="flex:1; background:#222; color:white; padding:12px; border-radius:12px; text-align:center; font-size:12px; cursor:pointer; border:1px solid #333;">Change DP</label>
+                <label for="bnUp" style="flex:1; background:#222; color:white; padding:12px; border-radius:12px; text-align:center; font-size:12px; cursor:pointer; border:1px solid #333;">Change Banner</label>
+            </div>
+            <input type="file" id="avUp" hidden onchange="startCrop(this, 'avatar')" accept="image/*">
+            <input type="file" id="bnUp" hidden onchange="startCrop(this, 'banner')" accept="image/*">
+
+            <button onclick="saveAll()" id="saveBtn" class="btn-primary" style="width:100%; height:50px; background:var(--accent);">Save Changes</button>
+            <button onclick="closeEdit()" style="width:100%; background:transparent; border:none; color:#777; margin-top:10px; cursor:pointer;">Cancel</button>
+        </div>
+    </div>
+
+    <div id="cropperModal">
+        <div id="cropArea" style="flex:1;"></div>
+        <div style="padding:20px; display:flex; gap:10px; background:#0b0c10; border-top:1px solid #222;">
+            <button onclick="uploadToCloud()" id="upBtn" class="btn-primary" style="flex:1; background:var(--accent);">Apply Crop</button>
+            <button onclick="document.getElementById('cropperModal').style.display='none'" style="flex:1; background:#333; border:none; color:white; border-radius:12px;">Cancel</button>
+        </div>
+    </div>
+
+<nav class="bottom-nav">
+    <a href="index.html" class="nav-item">
+        <i class="fa-solid fa-compass"></i>
+        <span>Home</span>
+    </a>
+    <a href="watchlist.html" class="nav-item">
+        <i class="fa-solid fa-bookmark"></i>
+        <span>List</span>
+    </a>
+    <a href="poll.html" class="nav-item">
+        <i class="fa-solid fa-chart-simple"></i>
+        <span>Polls</span>
+    </a>
+    <a href="chat.html" class="nav-item">
+        <i class="fa-solid fa-comments"></i>
+        <span>Chat</span>
+    </a>
+    <a href="profile.html" class="nav-item active">
+        <i class="fa-solid fa-user"></i>
+        <span>Profile</span>
+    </a>
+</nav>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/croppie/2.6.5/croppie.min.js"></script>
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+        import { getFirestore, doc, getDoc, updateDoc, collection, getDocs, setDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+        const firebaseConfig = { 
+            apiKey: "AIzaSyDLd3TW-y89lwShUmcIHw3YGzDjo4cg3y4", 
+            authDomain: "animea2z.firebaseapp.com", 
+            projectId: "animea2z", 
+            storageBucket: "animea2z.firebasestorage.app", 
+            messagingSenderId: "673605765684", 
+            appId: "1:673605765684:web:a6f851e0d79836b79b1861" 
+        };
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        let cp, cpMode, newUrls = {};
+
+        onAuthStateChanged(auth, u => {
+            if(!u) return location.href="login.html";
+            const params = new URLSearchParams(location.search);
+            const target = params.get('id') || u.uid;
+            
+            if(target === u.uid) {
+                document.getElementById('myActions').style.display = 'flex';
+                document.getElementById('followBtn').style.display = 'none';
+            } else {
+                document.getElementById('myActions').style.display = 'none';
+                document.getElementById('followBtn').style.display = 'block';
+                checkFollowStatus(u.uid, target);
+            }
+            fetchData(target);
+        });
+
+        async function fetchData(uid) {
+            const s = await getDoc(doc(db, "users", uid));
+            if(!s.exists()) return;
+            const d = s.data();
+            
+            document.getElementById('userName').innerText = d.username || "User";
+            document.getElementById('userId').innerText = "ID: " + (d.customId || "---");
+            document.getElementById('userBio').innerText = d.bio || "No bio yet.";
+            if(d.avatar) document.getElementById('userAvatar').src = d.avatar;
+            if(d.banner) document.getElementById('userBanner').style.backgroundImage = `url('${d.banner}')`;
+            
+            // --- Level & Progress Logic ---
+            const totalXP = d.xp || 0;
+            const currentLevel = Math.floor(totalXP / 100) + 1;
+            const xpInCurrentLevel = totalXP % 100; // Remaining XP for progress bar
+
+            document.getElementById('xpValue').innerText = totalXP;
+            document.getElementById('userLevel').innerText = currentLevel;
+            
+            // Level Bar UI Update (Ensuring elements exist before updating)
+            if(document.getElementById('currentLvlNum')) {
+                document.getElementById('currentLvlNum').innerText = currentLevel;
+                document.getElementById('xpToNext').innerText = `${xpInCurrentLevel} / 100 XP`;
+                document.getElementById('lvlFill').style.width = xpInCurrentLevel + "%";
+            }
+            // ------------------------------
+            
+            if(d.insta) { 
+                document.getElementById('linkInsta').href = "https://instagram.com/" + d.insta.replace('@',''); 
+                document.getElementById('linkInsta').classList.add('active'); 
+            }
+
+            // Sync Modal Inputs
+            document.getElementById('inpName').value = d.username || "";
+            document.getElementById('inpBio').value = d.bio || "";
+            document.getElementById('inpInsta').value = d.insta || "";
+
+            const w = await getDocs(collection(db, "users", uid, "watchlist"));
+            document.getElementById('watchCount').innerText = w.size;
+
+            const fers = await getDocs(collection(db, "users", uid, "followers"));
+            const fing = await getDocs(collection(db, "users", uid, "following"));
+            document.getElementById('followerCount').innerText = fers.size;
+            document.getElementById('followingCount').innerText = fing.size;
+        }
+
+        // Global functions for HTML
+        window.openEdit = () => document.getElementById('editModal').classList.add('show');
+        window.closeEdit = () => document.getElementById('editModal').classList.remove('show');
+        
+        window.copyId = () => {
+            const id = document.getElementById('userId').innerText.replace("ID: ", "");
+            navigator.clipboard.writeText(id).then(() => alert("ID Copied!"));
+        };
+
+        window.handleLogout = () => { 
+            if(confirm("Logout from account?")) signOut(auth).then(() => location.href="login.html"); 
+        };
+
+        window.startCrop = (input, mode) => {
+            if(!input.files[0]) return;
+            cpMode = mode;
+            const reader = new FileReader();
+            reader.onload = e => {
+                document.getElementById('cropperModal').style.display='flex';
+                if(cp) cp.destroy();
+                cp = new Croppie(document.getElementById('cropArea'), {
+                    viewport: mode === 'avatar' ? {width:180, height:180, type:'circle'} : {width:320, height:160, type:'square'},
+                    boundary: {width:'100%', height:400}
+                });
+                cp.bind({url: e.target.result});
+            };
+            reader.readAsDataURL(input.files[0]);
+        };
+
+        window.uploadToCloud = async () => {
+            const btn = document.getElementById('upBtn');
+            btn.innerText = "Processing...";
+            const blob = await cp.result({type:'blob', size:'viewport'});
+            const fd = new FormData();
+            fd.append('file', blob);
+            fd.append('upload_preset', 'anime_chat_preset');
+            
+            try {
+                const res = await fetch(`https://api.cloudinary.com/v1_1/dw2j3sgsd/image/upload`, {method:'POST', body:fd});
+                const data = await res.json();
+                newUrls[cpMode] = data.secure_url;
+                document.getElementById('cropperModal').style.display='none';
+                alert(cpMode + " ready! Click 'Save Changes' to finish.");
+            } catch (e) {
+                alert("Upload failed. Check connection.");
+            } finally {
+                btn.innerText = "Apply Crop";
+            }
+        };
+
+        window.saveAll = async () => {
+            const btn = document.getElementById('saveBtn');
+            btn.innerText = "Saving...";
+            const data = {
+                username: document.getElementById('inpName').value.trim(),
+                bio: document.getElementById('inpBio').value.trim(),
+                insta: document.getElementById('inpInsta').value.trim()
+            };
+            if(newUrls.avatar) data.avatar = newUrls.avatar;
+            if(newUrls.banner) data.banner = newUrls.banner;
+
+            try {
+                await updateDoc(doc(db, "users", auth.currentUser.uid), data);
+                location.reload();
+            } catch (e) {
+                alert("Error saving profile");
+                btn.innerText = "Save Changes";
+            }
+        };
+
+        async function checkFollowStatus(myId, targetId) {
+            const btn = document.getElementById('followBtn');
+            const s = await getDoc(doc(db, "users", targetId, "followers", myId));
+            if(s.exists()) {
+                btn.innerHTML = '<i class="fa-solid fa-user-check"></i> Following';
+                btn.style.background = "#222";
+                btn.onclick = () => unfollow(myId, targetId);
+            } else {
+                btn.innerHTML = '<i class="fa-solid fa-plus"></i> Follow';
+                btn.style.background = "var(--accent)";
+                btn.onclick = () => follow(myId, targetId);
+            }
+        }
+
+        async function follow(myId, targetId) {
+            await setDoc(doc(db, "users", targetId, "followers", myId), {time: Date.now()});
+            await setDoc(doc(db, "users", myId, "following", targetId), {time: Date.now()});
+            location.reload();
+        }
+
+        async function unfollow(myId, targetId) {
+            await deleteDoc(doc(db, "users", targetId, "followers", myId));
+            await deleteDoc(doc(db, "users", myId, "following", targetId));
+            location.reload();
+        }
+    </script>
+
+</body>
+</html>

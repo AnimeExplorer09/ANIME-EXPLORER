@@ -1,0 +1,61 @@
+:root {
+    /* --- COLOR PALETTE --- */
+    --bg-main: #0f1014;       /* Deepest Black/Blue */
+    --bg-card: #1b1d24;       /* Card Background */
+    --bg-input: #23252b;      /* Inputs */
+    
+    --primary: #7c4dff;       /* App Theme Purple */
+    --primary-dark: #651fff;
+    
+    --text-main: #ffffff;
+    --text-muted: #a0a0a0;
+    
+    --success: #00e676;       /* Completed */
+    --warning: #ffab00;       /* Plan */
+    --danger: #ff5252;        /* Delete/Error */
+    --info: #2979ff;          /* Watching */
+
+    /* --- DIMENSIONS --- */
+    --header-height: 60px;
+    --nav-height: 65px;
+}
+
+/* --- RESET & BASE --- */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    -webkit-tap-highlight-color: transparent;
+}
+
+body {
+    background-color: var(--bg-main);
+    color: var(--text-main);
+    height: 100vh;
+    width: 100vw;
+    overflow: hidden; /* App feel ke liye body scroll band */
+    display: flex;
+    flex-direction: column;
+}
+
+/* --- SCROLLBARS (Sleek) --- */
+::-webkit-scrollbar { width: 4px; height: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: #333; border-radius: 4px; }
+
+/* --- LINKS & BUTTONS --- */
+a { text-decoration: none; color: inherit; }
+button { cursor: pointer; border: none; outline: none; font-family: inherit; }
+input, textarea, select { font-family: inherit; outline: none; }
+
+/* --- UTILITIES --- */
+.hidden { display: none !important; }
+.text-center { text-align: center; }
+.container {
+    flex: 1; /* Baki bachi jagah lega */
+    overflow-y: auto; /* Scroll sirf yahan hoga */
+    padding: 15px;
+    padding-bottom: 90px; /* Bottom Nav ke liye jagah */
+    width: 100%;
+}
