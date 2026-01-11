@@ -2,821 +2,393 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Community Hub</title>
-    
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My List</title>
+    <link rel="stylesheet" href="main.css">
+    <link rel="stylesheet" href="components.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
-
+    
     <style>
-        /* ========================================
-           ADVANCED DESIGN SYSTEM 
-           ======================================== */
-        :root {
-            --primary: #5738B0;
- 
-            --bg-dark: #050505;
-            --bg-card: #0f1015;
-            --bg-modal: #12141c;
-            --text-main: #ffffff;
-            --text-dim: #94a3b8;
-            --accent-green: #00e676;
-            --accent-red: #ff5252;
-            --glass-border: rgba(255, 255, 255, 0.08);
-            --header-h: 70px;
-            --search-h: 60px;
-        }
+        /* --- FILTERS --- */
+        .filter-container { display: flex; gap: 12px; padding: 15px 5px; margin-bottom: 5px; overflow-x: auto; scrollbar-width: none; }
+        .filter-container::-webkit-scrollbar { display: none; }
+        .filter-btn { display: flex; align-items: center; gap: 8px; padding: 8px 18px; background: rgba(255, 255, 255, 0.08); color: #aaa; border-radius: 30px; font-size: 13px; font-weight: 600; white-space: nowrap; border: 1px solid transparent; cursor: pointer; transition: 0.3s; }
+        .filter-btn.active { color: white; border-color: rgba(255,255,255,0.2); }
+        .filter-btn[data-filter="all"].active { background: #444; }
+        .filter-btn[data-filter="watching"].active { background: #2979ff; }
+        .filter-btn[data-filter="completed"].active { background: #00e676; color: black; }
+        .filter-btn[data-filter="plan"].active { background: #ffab00; color: black; }
 
-        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-        ::-webkit-scrollbar { display: none; }
-
-        body {
-            background: var(--bg-dark);
-            color: var(--text-main);
-            font-family: 'Inter', sans-serif;
-            margin: 0;
-            height: 100vh;
-            display: flex;
-            flex-direction: column;
-            overflow: hidden;
-            letter-spacing: -0.01em;
-        }
-
-        /* DYNAMIC HEADER */
-        .app-header {
-            position: fixed; top: 0; left: 0; width: 100%; z-index: 2000;
-            background: rgba(5, 5, 5, 0.85); backdrop-filter: saturate(180%) blur(25px);
-            border-bottom: 1px solid var(--glass-border);
-            padding-top: env(safe-area-inset-top);
-        }
-
-        .header-content {
-            height: var(--header-h);
-            display: flex; align-items: center; justify-content: space-between;
-            padding: 0 20px;
-        }
-
-        /* Logo Color Update */
-.brand-logo {
-    background: #5738B0 !important;
-    -webkit-background-clip: text !important;
-    -webkit-text-fill-color: transparent !important;
-}
-
-/* Custom Long-press Popup Design */
-.comment-popup {
-    position: fixed; background: var(--bg-modal); border: 1px solid var(--glass-border);
-    border-radius: 18px; padding: 8px; z-index: 9999; display: none;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.5); width: 150px;
-}
-.popup-item {
-    padding: 12px; color: var(--accent-red); font-weight: 700; font-size: 14px;
-    cursor: pointer; display: flex; align-items: center; gap: 10px; border-radius: 12px;
-}
-.popup-item:active { background: rgba(255,255,255,0.05); }
-
-/* Comment User UI */
-.comment-user-info { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; cursor: pointer; }
-.comment-avatar { width: 24px; height: 24px; border-radius: 8px; object-fit: cover; }
-
-
-        .search-area {
-            height: var(--search-h);
-            padding: 0 15px 10px 15px;
-            display: flex; align-items: center;
-        }
-
-        .search-wrapper {
-            width: 100%; height: 44px; background: #1a1c24;
-            border: 1px solid var(--glass-border); border-radius: 14px;
-            display: flex; align-items: center; padding: 0 15px;
-            transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-
-        .search-wrapper:focus-within {
-            border-color: var(--primary);
-            box-shadow: 0 0 0 4px var(--primary-glow);
-        }
-
-        .search-wrapper input {
-            background: transparent; border: none; color: white;
-            flex: 1; padding: 0 10px; outline: none; font-size: 14px;
-        }
-
-        .nav-chips {
-            display: flex; gap: 10px; padding: 0 20px 15px 20px;
-            overflow-x: auto; scrollbar-width: none;
-        }
-
-        .chip-btn {
-            background: rgba(255,255,255,0.05); color: var(--text-dim);
-            padding: 8px 20px; border-radius: 20px; font-size: 13px;
-            font-weight: 700; border: 1px solid var(--glass-border);
-            cursor: pointer; transition: 0.3s; white-space: nowrap;
-            display: flex; align-items: center; gap: 8px;
-        }
-
-        .chip-btn.active {
-            background: var(--primary); color: white;
-            border-color: var(--primary);
-            box-shadow: 0 8px 20px var(--primary-glow);
-        }
-
-        /* FEED ENGINE */
-        .main-scroller {
-            flex: 1; overflow-y: auto;
-            padding: calc(var(--header-h) + var(--search-h) + 70px) 15px 120px 15px;
-        }
-
-        .feed-container { max-width: 680px; margin: 0 auto; width: 100%; }
-
-        /* POLL CARD */
-        .poll-card {
-            background: var(--bg-card);
-            border: 1px solid var(--glass-border);
-            border-radius: 28px; padding: 24px; margin-bottom: 25px;
-            position: relative; transition: transform 0.3s ease;
-        }
-
-        .creator-info { display: flex; align-items: center; gap: 12px; margin-bottom: 20px; }
-        .creator-img { width: 44px; height: 44px; border-radius: 15px; object-fit: cover; background: #222; border: 1px solid var(--glass-border); }
-
-        .poll-title { font-size: 20px; font-weight: 800; line-height: 1.4; margin-bottom: 20px; color: #fff; }
-
-        .opt-text-btn {
-            width: 100%; padding: 16px 20px; border-radius: 16px;
-            background: rgba(255,255,255,0.02); border: 1px solid var(--glass-border);
-            color: #fff; text-align: left; margin-bottom: 12px;
-            font-weight: 600; cursor: pointer; transition: 0.2s;
-            display: flex; justify-content: space-between; align-items: center;
-        }
-
-        .opt-text-btn:hover { background: rgba(124,77,255,0.1); border-color: var(--primary); }
-
-        .image-poll-grid {
-            display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 20px;
-        }
-
-        .opt-image-card {
-            position: relative; height: 160px; border-radius: 20px;
-            overflow: hidden; cursor: pointer; border: 2px solid transparent;
-            transition: 0.3s;
-        }
-
-        .opt-image-card img { width: 100%; height: 100%; object-fit: cover; }
-
-        .opt-image-overlay {
-            position: absolute; inset: 0; 
-            background: linear-gradient(transparent, rgba(0,0,0,0.8));
-            display: flex; align-items: flex-end; padding: 15px;
-            font-size: 13px; font-weight: 700;
-        }
-
-        /* Result bars */
-        .res-bar-wrap { position: relative; height: 54px; background: rgba(255,255,255,0.03); border-radius: 14px; overflow: hidden; margin-bottom: 12px; border: 1px solid rgba(255,255,255,0.05); }
-        .res-fill { height: 100%; background: var(--primary); opacity: 0.3; transition: width 1.2s cubic-bezier(0.18, 0.89, 0.32, 1.28); }
-        .res-content { position: absolute; inset: 0; display: flex; justify-content: space-between; align-items: center; padding: 0 18px; font-size: 14px; font-weight: 700; }
-
-        /* Voters View */
-        .voter-count-badge { font-size: 11px; color: var(--text-dim); margin-top: -10px; margin-bottom: 15px; display: block; }
-
-        .poll-actions {
-            display: flex; justify-content: space-between; align-items: center;
-            margin-top: 15px; padding-top: 20px; border-top: 1px solid var(--glass-border);
-        }
-
-        .action-group { display: flex; gap: 15px; }
-        .action-btn {
-            background: transparent; border: none; color: var(--text-dim);
-            font-size: 13px; font-weight: 700; display: flex; align-items: center; gap: 8px;
-            cursor: pointer; transition: 0.2s;
-        }
-
-        .action-btn:hover { color: #fff; }
-        .action-btn.liked { color: #ff2d55; }
-        .delete-trigger { color: var(--accent-red); opacity: 0.6; cursor: pointer; }
-
-        /* MODALS */
-        .overlay {
-            position: fixed; inset: 0; background: rgba(0,0,0,0.9);
-            z-index: 5000; display: none; backdrop-filter: blur(15px);
-            align-items: center; justify-content: center; padding: 20px;
-        }
-        .overlay.show { display: flex; }
-
-        .modal-card {
-            background: var(--bg-modal); width: 100%; max-width: 440px;
-            border-radius: 32px; border: 1px solid var(--glass-border);
-            padding: 30px; animation: modalIn 0.4s cubic-bezier(0.18, 0.89, 0.32, 1.28);
-        }
-
-        @keyframes modalIn { from { transform: translateY(30px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
-
-        .custom-input {
-            width: 100%; background: #1a1c24; border: 1px solid var(--glass-border);
-            border-radius: 14px; padding: 15px; color: white; outline: none; margin-bottom: 15px;
-            font-family: inherit;
+        /* --- CARD --- */
+        .mal-card {
+            display: flex; align-items: center; background: var(--bg-card);
+            margin-bottom: 12px; border-radius: 6px; border-left: 4px solid var(--primary);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.3); position: relative; overflow: hidden;
+            padding-right: 10px; transition: transform 0.1s linear;
+            user-select: none; -webkit-user-select: none; touch-action: pan-y;
         }
         
-        .comment-drawer {
-            position: fixed; bottom: 0; left: 0; width: 100%; height: 85%;
-           background: #0f1015; border-radius: 30px 30px 0 0; z-index: 6000;
-            transform: translateY(100%); transition: 0.5s cubic-bezier(0.32, 1, 0.23, 1);
-            display: flex; flex-direction: column;
-        }
-        .comment-drawer.active { transform: translateY(0); }
+        .mal-img { width: 60px; height: 100px; object-fit: cover; pointer-events: none; }
+        .mal-info { flex: 1; padding: 8px 12px; display: flex; flex-direction: column; justify-content: center; pointer-events: none; }
+        .mal-title { font-size: 14px; font-weight: 600; color: white; margin-bottom: 5px; line-height: 1.2; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+        .mal-meta { font-size: 11px; color: #aaa; display: flex; gap: 10px; align-items: center; }
 
-        /* BOTTOM NAV */
-        /* BOTTOM NAVIGATION CSS */
-/* OPTIMIZED BOTTOM NAVIGATION */
-/* FIXED UNIFORM BOTTOM NAV */
-/* FIXED UNIFORM BOTTOM NAV - CONSISTENT ACROSS ALL PAGES */
-.bottom-nav {
-    position: fixed;
-    bottom: 0;
-    left: 0;
-    width: 100%;
-    height: 70px;
-    display: flex;
-    justify-content: space-around;
-    align-items: center;
-    background: #1a1c22;
-    border-top: 1px solid rgba(255, 255, 255, 0.1);
-    padding-bottom: env(safe-area-inset-bottom);
-    z-index: 5000;
-}
+        .btn-rate { width: 30px; height: 30px; border-radius: 50%; border: 1px solid #333; background: #0f1014; color: #ffd700; display: flex; align-items: center; justify-content: center; cursor: pointer; z-index: 2; font-size: 12px; transition: 0.2s; }
+        
+        .controls-wrapper { display: flex; flex-direction: column; gap: 6px; align-items: flex-end; }
+        .ep-control-box { display: flex; align-items: center; background: #0f1014; border-radius: 6px; border: 1px solid #333; overflow: hidden; z-index: 2; height: 32px; }
+        .ctrl-btn { background: transparent; color: #ccc; border: none; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; cursor: pointer; }
+        .ctrl-btn:active { background: #333; color: white; }
+        
+        .ep-display, .sn-display { font-size: 11px; font-weight: bold; color: white; padding: 0 5px; min-width: 55px; text-align: center; cursor: pointer; }
+        .label-tiny { font-size: 11px; color: #ffff; text-transform: uppercase; margin-right: 2px; }
 
-.nav-item {
-    text-decoration: none;
-    color: #94a3b8;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    flex: 1;
-    gap: 4px;
-    transition: 0.2s ease;
-}
+        .edit-input { width: 40px; background: #1a1c22; color: white; border: 1px solid var(--primary); border-radius: 4px; text-align: center; font-size: 11px; font-weight: bold; outline: none; }
 
-.nav-item i {
-    font-size: 20px;
-}
+        .progress-line { position: absolute; bottom: 0; left: 0; height: 3px; background: var(--primary); width: 0%; transition: width 0.3s; }
 
-.nav-item span {
-    font-size: 10px;
-    font-weight: 600;
-}
+        /* --- MODALS --- */
+        .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.85); z-index: 2000; display: flex; justify-content: center; align-items: center; visibility: hidden; opacity: 0; transition: 0.2s; backdrop-filter: blur(5px); }
+        .modal-overlay.show { visibility: visible; opacity: 1; }
+        .modal-box { background: #1e1e24; width: 85%; max-width: 320px; border-radius: 15px; padding: 25px; text-align: center; transform: scale(0.9); transition: 0.2s; border: 1px solid #333; box-shadow: 0 10px 40px rgba(0,0,0,0.6); }
+        .modal-overlay.show .modal-box { transform: scale(1); }
 
-/* Polls page par active color purple rahega */
-.nav-item.active {
-    color: #5738B0;
-}
+        .rating-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; margin: 20px 0; }
+        .rating-item { background: #0f1014; border: 1px solid #333; padding: 10px 0; border-radius: 8px; font-size: 14px; font-weight: bold; color: #888; cursor: pointer; }
+        .rating-item.selected { background: #5738B0; color: white; border-color: #5738B0; }
 
-.nav-item:active {
-    transform: scale(0.9);
-}
+        .btn-primary-gold { background: #5738B0; color: white; font-weight: bold; border: none; padding: 12px; border-radius: 10px; cursor: pointer; transition: 0.2s; }
 
-/* Page content ko nav ke piche chhupne se rokne ke liye */
-.main-scroller {
-    flex: 1;
-    overflow-y: auto;
-    padding-bottom: 100px; /* Isse scroll bar last card tak dikhayega */
-}
-
-
-
-
+        .bottom-nav { position: fixed; bottom: 0; left: 0; width: 100%; height: 70px; display: flex; justify-content: space-around; align-items: center; background: #1a1c22; border-top: 1px solid rgba(255, 255, 255, 0.1); padding-bottom: env(safe-area-inset-bottom); z-index: 5000; }
+        .nav-item { text-decoration: none; color: #94a3b8; display: flex; flex-direction: column; align-items: center; justify-content: center; flex: 1; gap: 4px; transition: 0.2s ease; }
+        .nav-item i { font-size: 20px; }
+        .nav-item span { font-size: 10px; font-weight: 600; }
+        .nav-item.active { color: #5738B0; }
+        .hidden { display: none !important; }
     </style>
 </head>
 <body>
-<div id="commentActionPopup" class="comment-popup">
-    <div class="popup-item" id="deleteCommBtn"><i class="fa-solid fa-trash"></i> Delete</div>
-</div>
 
     <header class="app-header">
-        <div class="header-content">
-            <div class="brand-logo">AnimeExplorer</div>
-            <div id="xpStats" style="display:flex; flex-direction:column; align-items:flex-end;">
-                <div style="font-size:10px; font-weight:900; color:var(--primary); margin-bottom:4px;">LEVEL <span id="uLvl">1</span></div>
-                <div style="width:70px; height:5px; background:#222; border-radius:10px; overflow:hidden;">
-                    <div id="uXP" style="height:100%; background:var(--primary); width:20%;"></div>
-                </div>
-            </div>
-        </div>
-        
-
-        <div class="search-area">
-            <div class="search-wrapper">
-                <i class="fa-solid fa-magnifying-glass" style="color:#444"></i>
-                <input type="text" id="mainSearch" placeholder="Search for polls, topics or users...">
-            </div>
-        </div>
-
-        <div class="nav-chips">
-            <button class="chip-btn active" id="chip-all" onclick="filterFeed('all')"><i class="fa-solid fa-fire-pulse"></i> All Feed</button>
-            <button class="chip-btn" id="chip-polls" onclick="filterFeed('polls')"><i class="fa-solid fa-chart-pie"></i> Community Polls</button>
-            <button class="chip-btn" id="chip-images" onclick="filterFeed('images')"><i class="fa-solid fa-image"></i> Image Polls</button>
-        </div>
+        <div class="logo">My List</div>
     </header>
 
-    <main class="main-scroller">
-        <div class="feed-container" id="pollFeed">
-            <div class="poll-card" style="opacity:0.3;">
-                <div style="height:20px; width:40%; background:#222; border-radius:5px; margin-bottom:15px;"></div>
-                <div style="height:40px; width:90%; background:#222; border-radius:8px; margin-bottom:20px;"></div>
-                <div style="height:54px; width:100%; background:#1a1a1a; border-radius:14px;"></div>
-            </div>
+    <div class="container" style="padding-bottom: 90px;">
+        <div class="filter-container">
+            <button class="filter-btn active" data-filter="all" onclick="filterList('all', this)"><i class="fa-solid fa-layer-group"></i> All</button>
+            <button class="filter-btn" data-filter="watching" onclick="filterList('watching', this)"><i class="fa-solid fa-eye"></i> Watching</button>
+            <button class="filter-btn" data-filter="completed" onclick="filterList('completed', this)"><i class="fa-solid fa-check-circle"></i> Completed</button>
+            <button class="filter-btn" data-filter="plan" onclick="filterList('plan', this)"><i class="fa-solid fa-clock"></i> Plan</button>
         </div>
-    </main>
 
-    <button class="fab-btn" onclick="toggleModal('createPollModal', true)">
-        <i class="fa-solid fa-plus"></i>
-    </button>
+        <div id="loading" class="text-center" style="margin-top:50px;"><i class="fa-solid fa-circle-notch fa-spin" style="font-size:30px; color:#5738B0;"></i></div>
+        <div id="listContainer"></div>
+        <div id="emptyState" class="hidden text-center" style="margin-top:50px; color:#555;"><i class="fa-solid fa-box-open" style="font-size:40px; margin-bottom:10px;"></i><p>List is empty</p></div>
+    </div>
 
-<nav class="bottom-nav">
-    <a href="index.html" class="nav-item">
-        <i class="fa-solid fa-compass"></i>
-        <span>Home</span>
-    </a>
-    <a href="watchlist.html" class="nav-item">
-        <i class="fa-solid fa-bookmark"></i>
-        <span>List</span>
-    </a>
-    <a href="poll.html" class="nav-item active">
-        <i class="fa-solid fa-chart-simple"></i>
-        <span>Polls</span>
-    </a>
-    <a href="chat.html" class="nav-item">
-        <i class="fa-solid fa-comments"></i>
-        <span>Chat</span>
-    </a>
-    <a href="profile.html" class="nav-item">
-        <i class="fa-solid fa-user"></i>
-        <span>Profile</span>
-    </a>
-</nav>
-
-
-
-<script type="module">
-    /* ... (Baaki saara code same rahega) ... */
-
-    // FIX: Filter feed function ko stable banaya gaya hai
-    window.filterFeed = (type) => {
-        // Saare chips se active class hatana
-        document.querySelectorAll('.chip-btn').forEach(b => b.classList.remove('active'));
-        
-        // Sahi chip ko dhund kar active class lagana
-        const targetChip = document.getElementById('chip-' + type);
-        if(targetChip) targetChip.classList.add('active');
-        
-        // Data filter logic
-        if(type === 'all') {
-            renderUI(fullPollData);
-        } else if(type === 'polls') {
-            renderUI(fullPollData.filter(p => p.type === 'text'));
-        } else if(type === 'images') {
-            renderUI(fullPollData.filter(p => p.type === 'image'));
-        }
-    };
-
-    /* ... (Baaki saare functions jaise castVote, likePoll, sharePoll waise hi rahenge) ... */
-</script>
-
-
-    <div id="createPollModal" class="overlay">
-        <div class="modal-card">
-            <h2 style="margin:0 0 10px 0">Create Community Poll</h2>
-            <div style="display:flex; gap:10px; margin-bottom:20px; background:rgba(255,255,255,0.03); padding:5px; border-radius:12px;">
-                <button id="typeText" onclick="switchPollType('text')" style="flex:1; padding:10px; border-radius:8px; border:none; background:var(--primary); color:white; font-weight:700; cursor:pointer;">Text Poll</button>
-                <button id="typeImage" onclick="switchPollType('image')" style="flex:1; padding:10px; border-radius:8px; border:none; background:transparent; color:#777; font-weight:700; cursor:pointer;">Image Poll</button>
-            </div>
-
-            <textarea id="pollQ" class="custom-input" style="height:100px; resize:none;" placeholder="Ask the anime community..."></textarea>
-            
-            <div id="optionsMaster"></div>
-
-            <div style="display:flex; gap:12px; margin-top:20px;">
-                <button onclick="publishPoll()" style="flex:2; background:var(--primary); border:none; color:white; padding:15px; border-radius:16px; font-weight:800; cursor:pointer;">Publish Now</button>
-                <button onclick="toggleModal('createPollModal', false)" style="flex:1; background:transparent; border:1px solid #333; color:#777; border-radius:16px; font-weight:700; cursor:pointer;">Cancel</button>
+    <div id="rateModal" class="modal-overlay">
+        <div class="modal-box" style="border-top: 4px solid #5738B0;">
+            <div style="color: #ffd700; font-size: 30px; margin-bottom: 10px;"><i class="fa-solid fa-star"></i></div>
+            <h3 id="rateTitle" style="color:white; font-size:16px;">Title</h3>
+            <p style="color: #aaa; font-size: 12px;">Rate your experience</p>
+            <input type="hidden" id="rateId">
+            <div class="rating-grid" id="ratingOptions"></div>
+            <div style="display: flex; gap: 10px;">
+                <button class="btn-primary-gold" onclick="saveRating()" style="flex:2;">Save Rating</button>
+                <button onclick="closeModal('rateModal')" style="flex:1; background: transparent; color: #aaa; border: 1px solid #333; border-radius: 10px;">Close</button>
             </div>
         </div>
     </div>
 
-    <div id="commentSystem" class="comment-drawer">
-        <div style="padding:20px; border-bottom:1px solid #222; display:flex; justify-content:space-between; align-items:center;">
-            <h3 style="margin:0">Live Comments</h3>
-            <i class="fa-solid fa-circle-xmark" onclick="closeComments()" style="font-size:24px; color:#444; cursor:pointer;"></i>
-        </div>
-        <div id="commentList" style="flex:1; overflow-y:auto; padding:20px;"></div>
-        <div style="padding:20px; background:#111; display:flex; gap:10px;">
-            <input type="text" id="commInput" class="custom-input" style="margin:0" placeholder="Write a comment...">
-            <button onclick="sendComment()" style="width:50px; height:50px; background:var(--primary); border:none; border-radius:12px; color:white; cursor:pointer;"><i class="fa-solid fa-paper-plane"></i></button>
+    <div id="completedModal" class="modal-overlay">
+        <div class="modal-box">
+            <div style="width:60px; height:60px; background:rgba(0,230,118,0.1); border-radius:50%; display:flex; align-items:center; justify-content:center; margin:0 auto 15px; color:#00e676;"><i class="fa-solid fa-circle-check" style="font-size: 24px;"></i></div>
+            <h3 style="color: white; margin-bottom: 10px;">Finished Watching?</h3>
+            <p id="completedTitle" style="color: #aaa; font-size: 13px; margin-bottom: 25px;">Mark as Completed?</p>
+            <input type="hidden" id="pendingCompId">
+            <input type="hidden" id="pendingCompVal">
+            <div style="display: flex; gap: 10px;">
+                <button onclick="confirmCompletion()" style="flex:1; padding: 12px; border-radius: 8px; background: #00e676; color: black; border: none; font-weight: bold;">Yes, Done!</button>
+                <button onclick="closeModal('completedModal')" style="flex:1; background: transparent; color: #aaa; border: 1px solid #333; border-radius: 8px;">Not Yet</button>
+            </div>
         </div>
     </div>
+
+    <div id="deleteModal" class="modal-overlay">
+        <div class="modal-box">
+            <div style="width:60px; height:60px; background:rgba(255,82,82,0.1); border-radius:50%; display:flex; align-items:center; justify-content:center; margin:0 auto 15px; color:#ff5252;"><i class="fa-solid fa-trash" style="font-size: 24px;"></i></div>
+            <h3 style="color: white; margin-bottom: 10px;">Remove Anime?</h3>
+            <p id="deleteTitle" style="color: #aaa; font-size: 13px; margin-bottom: 25px;">Remove from your list?</p>
+            <input type="hidden" id="deleteId">
+            <div style="display: flex; gap: 10px;">
+                <button onclick="confirmDelete()" style="flex:1; padding: 12px; border-radius: 8px; background: #ff5252; color: white; border: none; font-weight: bold;">Delete</button>
+                <button onclick="closeModal('deleteModal')" style="flex:1; background: transparent; color: #aaa; border: 1px solid #333; border-radius: 8px;">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <nav class="bottom-nav">
+        <a href="index.html" class="nav-item"><i class="fa-solid fa-compass"></i><span>Home</span></a>
+        <a href="watchlist.html" class="nav-item active"><i class="fa-solid fa-bookmark"></i><span>List</span></a>
+        <a href="poll.html" class="nav-item"><i class="fa-solid fa-chart-simple"></i><span>Polls</span></a>
+        <a href="chat.html" class="nav-item"><i class="fa-solid fa-comments"></i><span>Chat</span></a>
+        <a href="profile.html" class="nav-item"><i class="fa-solid fa-user"></i><span>Profile</span></a>
+    </nav>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-        import { getFirestore, collection, addDoc, onSnapshot, doc, getDoc, deleteDoc, updateDoc, arrayUnion, arrayRemove, serverTimestamp, query, runTransaction, orderBy, increment, limit } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { getFirestore, collection, getDocs, doc, updateDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-        // FIREBASE CONFIG
-        const firebaseConfig = { 
-            apiKey: "AIzaSyDLd3TW-y89lwShUmcIHw3YGzDjo4cg3y4", 
-            authDomain: "animea2z.firebaseapp.com", 
-            projectId: "animea2z", 
-            storageBucket: "animea2z.firebasestorage.app", 
-            messagingSenderId: "673605765684", 
-            appId: "1:673605765684:web:a6f851e0d79836b79b1861" 
+        const firebaseConfig = {
+            apiKey: "AIzaSyDLd3TW-y89lwShUmcIHw3YGzDjo4cg3y4",
+            authDomain: "animea2z.firebaseapp.com",
+            projectId: "animea2z",
+            storageBucket: "animea2z.firebasestorage.app",
+            messagingSenderId: "673605765684",
+            appId: "1:673605765684:web:a6f851e0d79836b79b1861"
         };
 
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getFirestore(app);
 
-        let currentUser = null;
-        let activeType = 'text';
-        let fullPollData = [];
-        let activePollId = null;
-        const uCache = new Map();
+        let allAnime = [];
+        let tempSelectedScore = 0;
+        const container = document.getElementById('listContainer');
 
-        // 1. AUTH INITIALIZATION
-        onAuthStateChanged(auth, user => {
-            if (user) {
-                currentUser = user;
-                startEngine();
-                syncUserXP();
-            } else {
-                window.location.href = "login.html";
-            }
+        onAuthStateChanged(auth, async (user) => {
+            if (user) await fetchList(user.uid);
+            else window.location.href = "login.html";
         });
 
-        // 2. XP SYSTEM
-        async function syncUserXP() {
-            onSnapshot(doc(db, "users", currentUser.uid), (s) => {
-                if(s.exists()){
-                    const data = s.data();
-                    const xp = data.xp || 0;
-                    document.getElementById('uLvl').innerText = Math.floor(xp / 100) + 1;
-                    document.getElementById('uXP').style.width = (xp % 100) + '%';
-                }
-            });
-        }
-
-        async function rewardXP(amt) {
-            await updateDoc(doc(db, "users", currentUser.uid), { xp: increment(amt) });
-        }
-
-        // 3. MAIN ENGINE
-        function startEngine() {
-            const q = query(collection(db, "polls"), orderBy("createdAt", "desc"), limit(50));
-            onSnapshot(q, (snap) => {
-                fullPollData = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-                renderUI(fullPollData);
-            });
-        }
-
-        // 4. UI RENDERER (Polished Poll UI)
-        async function renderUI(data) {
-            const feed = document.getElementById('pollFeed');
-            feed.innerHTML = '';
-
-            for (const poll of data) {
-                const creator = await getCachedUser(poll.createdBy);
-                const hasVoted = poll.votedUsers?.includes(currentUser.uid);
-                const isLiked = poll.likes?.includes(currentUser.uid);
-                
-                const card = document.createElement('div');
-                card.className = 'poll-card';
-                
-                let bodyContent = '';
-                
-                // FEATURE 5: VOTERS VIEW (LOGIC)
-                if(hasVoted) {
-                    const max = Math.max(...poll.options.map(o => o.votes));
-                    bodyContent += `<span class="voter-count-badge"><i class="fa-solid fa-users"></i> ${poll.totalVotes || 0} community members voted</span>`;
-                    
-                    poll.options.forEach(opt => {
-                        const pct = poll.totalVotes > 0 ? Math.round((opt.votes / poll.totalVotes) * 100) : 0;
-                        bodyContent += `
-                            <div class="res-bar-wrap">
-                                <div class="res-fill" style="width:${pct}%"></div>
-                                <div class="res-content">
-                                    <span>${opt.text}</span>
-                                    <span style="color:${opt.votes === max && max > 0 ? 'var(--accent-green)' : 'white'}">${pct}%</span>
-                                </div>
-                            </div>`;
-                    });
-                } else {
-                    // FEATURE 2: IMAGE POLL (LOGIC)
-                    if(poll.type === 'image') {
-                        bodyContent = '<div class="image-poll-grid">';
-                        poll.options.forEach((opt, idx) => {
-                            bodyContent += `
-                                <div class="opt-image-card" onclick="castVote('${poll.id}', ${idx})">
-                                    <img src="${opt.image || 'https://via.placeholder.com/300'}" onerror="this.src='https://via.placeholder.com/300'">
-                                    <div class="opt-image-overlay">${opt.text}</div>
-                                </div>`;
-                        });
-                        bodyContent += '</div>';
-                    } else {
-                        poll.options.forEach((opt, idx) => {
-                            bodyContent += `
-                                <button class="opt-text-btn" onclick="castVote('${poll.id}', ${idx})">
-                                    ${opt.text} <i class="fa-regular fa-circle"></i>
-                                </button>`;
-                        });
-                    }
-                }
-
-                const canManage = poll.createdBy === currentUser.uid;
-
-                card.innerHTML = `
-                    <div class="creator-info">
-                        <img src="${creator?.avatar || 'https://via.placeholder.com/100'}" class="creator-img">
-                        <div style="flex:1">
-                            <div style="font-size:14px; font-weight:800;">${creator?.username || 'Hunter'}</div>
-                            <div style="font-size:10px; color:var(--text-dim)">${timeAgo(poll.createdAt)}</div>
-                        </div>
-                        ${canManage ? `<i class="fa-solid fa-trash-can delete-trigger" onclick="deletePoll('${poll.id}')"></i>` : ''}
-                    </div>
-                    <div class="poll-title">${poll.question}</div>
-                    <div class="poll-body">${bodyContent}</div>
-                    <div class="poll-actions">
-                        <div class="action-group">
-                            <button class="action-btn ${isLiked ? 'liked' : ''}" onclick="likePoll('${poll.id}')">
-                                <i class="${isLiked ? 'fa-solid' : 'fa-regular'} fa-heart"></i> ${poll.likes?.length || 0}
-                            </button>
-                            <button class="action-btn" onclick="openComments('${poll.id}')">
-                                <i class="fa-regular fa-comment"></i> Discuss
-                            </button>
-                        </div>
-                        <button class="action-btn" onclick="sharePoll('${poll.id}', '${poll.question.replace(/'/g, "")}')">
-                            <i class="fa-solid fa-share-nodes"></i> Share
-                        </button>
-                    </div>
-                `;
-                feed.appendChild(card);
-            }
-        }
-
-        // 5. FEATURE 1: SEARCH
-        document.getElementById('mainSearch').addEventListener('input', (e) => {
-            const term = e.target.value.toLowerCase();
-            const filtered = fullPollData.filter(p => p.question.toLowerCase().includes(term));
-            renderUI(filtered);
-        });
-
-        // 6. VOTING SYSTEM
-        window.castVote = async (pid, idx) => {
-            if (navigator.vibrate) navigator.vibrate(40);
-            const ref = doc(db, "polls", pid);
+        async function fetchList(uid) {
             try {
-                await runTransaction(db, async (t) => {
-                    const s = await t.get(ref);
-                    const d = s.data();
-                    if(d.votedUsers.includes(currentUser.uid)) return;
-                    const newOpts = [...d.options];
-                    newOpts[idx].votes += 1;
-                    t.update(ref, {
-                        options: newOpts,
-                        totalVotes: increment(1),
-                        votedUsers: arrayUnion(currentUser.uid)
-                    });
+                const snapshot = await getDocs(collection(db, "users", uid, "watchlist"));
+                allAnime = [];
+                snapshot.forEach(doc => allAnime.push(doc.data()));
+                document.getElementById('loading').classList.add('hidden');
+                renderList('all');
+            } catch (error) { 
+                console.error("Fetch error:", error);
+                document.getElementById('loading').classList.add('hidden');
+            }
+        }
+
+        window.renderList = function(filter) {
+            container.innerHTML = '';
+            allAnime.sort((a, b) => (b.addedAt?.seconds || 0) - (a.addedAt?.seconds || 0));
+            const filtered = filter === 'all' ? allAnime : allAnime.filter(a => a.status === filter);
+
+            if(filtered.length === 0) {
+                document.getElementById('emptyState').classList.remove('hidden');
+                return;
+            }
+            document.getElementById('emptyState').classList.add('hidden');
+
+            filtered.forEach(anime => {
+                const watched = anime.watchedEpisodes || 0;
+                const total = anime.totalEpisodes || anime.episodes || 0;
+                const score = anime.userScore || 0;
+                const season = anime.season || 1;
+                
+                let statusColor = '#2979ff';
+                if(anime.status === 'completed') statusColor = '#00e676';
+                if(anime.status === 'plan') statusColor = '#ffab00';
+                let progressWidth = (total > 0) ? (watched / total) * 100 : 0;
+
+                const div = document.createElement('div');
+                div.className = 'mal-card';
+                div.style.borderLeftColor = statusColor;
+                
+                let pressTimer;
+                let isMoving = false;
+
+                div.addEventListener('touchstart', (e) => {
+                    if (e.target.closest('button') || e.target.closest('.sn-display') || e.target.closest('.ep-display')) return;
+                    isMoving = false;
+                    pressTimer = setTimeout(() => {
+                        if (!isMoving) {
+                            if (navigator.vibrate) navigator.vibrate(50);
+                            openDeleteModal(anime.id, anime.title);
+                        }
+                    }, 800);
                 });
-                rewardXP(15);
-            } catch(e) { console.error(e); }
-        };
 
-        // 7. FEATURE 6: LIKE
-        window.likePoll = async (id) => {
-            const ref = doc(db, "polls", id);
-            const snap = await getDoc(ref);
-            if(!snap.exists()) return;
-            
-            const liked = snap.data().likes?.includes(currentUser.uid);
-            if(liked) {
-                await updateDoc(ref, { likes: arrayRemove(currentUser.uid) });
-            } else {
-                await updateDoc(ref, { likes: arrayUnion(currentUser.uid) });
-                rewardXP(5);
-                if (navigator.vibrate) navigator.vibrate(20);
-            }
-        };
+                div.addEventListener('touchmove', () => {
+                    isMoving = true;
+                    clearTimeout(pressTimer);
+                });
 
-        // 8. FEATURE 3: SHARE
-        window.sharePoll = async (id, text) => {
-            const shareData = {
-                title: 'AnimeExplorer Poll',
-                text: `Vote now on this anime poll: "${text}"`,
-                url: window.location.origin + '?poll=' + id
-            };
-            try {
-                if (navigator.share) {
-                    await navigator.share(shareData);
-                } else {
-                    await navigator.clipboard.writeText(shareData.url);
-                    alert("Poll Link Copied!");
-                }
-            } catch (err) { console.log(err); }
-        };
+                div.addEventListener('touchend', () => clearTimeout(pressTimer));
 
-        // 9. FEATURE 4: DELETE
-        window.deletePoll = async (id) => {
-            if(confirm("Permanently delete this poll?")) {
-                await deleteDoc(doc(db, "polls", id));
-            }
-        };
+                div.addEventListener('click', (e) => {
+                    if (e.target.closest('button') || e.target.closest('.sn-display') || e.target.closest('.ep-display')) return;
+                    if (!isMoving) window.location.href = `details.html?id=${anime.id}`;
+                });
 
-        // 10. FEATURE 7: ADVANCED COMMENT SYSTEM
-        let pressTimer;
-
-        window.openComments = (id) => {
-            activePollId = id;
-            document.getElementById('commentSystem').classList.add('active');
-            const qComm = query(collection(db, `polls/${id}/comments`), orderBy("createdAt", "asc"));
-            
-            onSnapshot(qComm, async (snap) => {
-                const list = document.getElementById('commentList');
-                list.innerHTML = '';
-                
-                for (const d of snap.docs) {
-                    const cData = d.data();
-                    const cUser = await getCachedUser(cData.uid);
-                    
-                    const div = document.createElement('div');
-                    div.style = "margin-bottom:15px; background:rgba(255,255,255,0.03); padding:12px; border-radius:12px; position:relative;";
-                    
-                    div.innerHTML = `
-                        <div class="comment-user-info" onclick="location.href='profile.html?uid=${cData.uid}'">
-                            <img src="${cUser?.avatar || 'https://via.placeholder.com/100'}" class="comment-avatar">
-                            <div style="font-size:11px; color:var(--primary); font-weight:900;">${cUser?.username || 'Hunter'}</div>
+                div.innerHTML = `
+                    <img src="${anime.image}" class="mal-img">
+                    <div class="mal-info">
+                        <div class="mal-title">${anime.title}</div>
+                        <div class="mal-meta">
+                            <span style="color:${statusColor}; text-transform:capitalize; font-weight:bold;">${anime.status}</span>
+                            <button class="btn-rate" onclick="event.stopPropagation(); openRateModal('${anime.id}')" style="${score > 0 ? 'border-color:#ffd700; color:#ffd700; background:rgba(255,215,0,0.1);' : ''}">
+                                ${score > 0 ? score : '<i class="fa-regular fa-star"></i>'}
+                            </button>
                         </div>
-                        <div style="font-size:13px; color:#eee; line-height:1.4;">${cData.text}</div>
-                    `;
+                    </div>
+                    <div class="controls-wrapper">
+                        <div class="ep-control-box" style="border-color: #444;">
+                            <button class="ctrl-btn" onclick="event.stopPropagation(); updateSeason('${anime.id}', -1)"><i class="fa-solid fa-minus"></i></button>
+                            <div class="sn-display" onclick="event.stopPropagation(); startEdit('${anime.id}', 'season', this)"><span class="label-tiny">S</span>${season}</div>
+                            <button class="ctrl-btn" onclick="event.stopPropagation(); updateSeason('${anime.id}', 1)"><i class="fa-solid fa-plus"></i></button>
+                        </div>
+                        <div class="ep-control-box">
+                            <button class="ctrl-btn" onclick="event.stopPropagation(); updateEp('${anime.id}', -1)"><i class="fa-solid fa-minus"></i></button>
+                            <div class="ep-display" onclick="event.stopPropagation(); startEdit('${anime.id}', 'watchedEpisodes', this)">${watched} <span style="font-size:10px; color:#aaa;">/ ${total > 0 ? total : '?'}</span></div>
+                            <button class="ctrl-btn" onclick="event.stopPropagation(); updateEp('${anime.id}', 1)"><i class="fa-solid fa-plus"></i></button>
+                        </div>
+                    </div>
+                    <div class="progress-line" style="width: ${progressWidth}%; background:${statusColor};"></div>
+                `;
+                container.appendChild(div);
+            });
+        };
 
-                    // Touch Events for Long Press
-                    if(cData.uid === currentUser.uid) {
-                        div.addEventListener('touchstart', (e) => {
-                            pressTimer = window.setTimeout(() => showDeletePopup(e, d.id), 700);
-                        });
-                        div.addEventListener('touchend', () => clearTimeout(pressTimer));
-                        div.addEventListener('touchmove', () => clearTimeout(pressTimer));
+        window.startEdit = function(id, field, element) {
+            const anime = allAnime.find(a => String(a.id) === String(id));
+            if (!anime) return;
+            const currentVal = field === 'season' ? (anime.season || 1) : (anime.watchedEpisodes || 0);
+            
+            const input = document.createElement('input');
+            input.type = 'number';
+            input.className = 'edit-input';
+            input.value = currentVal;
+            input.inputMode = 'numeric';
+
+            element.innerHTML = '';
+            element.appendChild(input);
+            input.focus();
+            input.select();
+
+            const saveEdit = async () => {
+                let newVal = parseInt(input.value);
+                const total = anime.totalEpisodes || anime.episodes || 0;
+                if (isNaN(newVal) || newVal < 0) newVal = currentVal;
+                if (field === 'watchedEpisodes' && total > 0 && newVal > total) newVal = total;
+                if (field === 'season' && newVal < 1) newVal = 1;
+
+                if (newVal !== currentVal) {
+                    const updateData = {};
+                    updateData[field] = newVal;
+                    if (field === 'watchedEpisodes' && total > 0 && newVal === total) {
+                        updateData.status = 'completed';
+                        anime.status = 'completed';
                     }
-                    list.appendChild(div);
+                    await updateDoc(doc(db, "users", auth.currentUser.uid, "watchlist", String(id)), updateData);
+                    anime[field] = newVal;
                 }
-                list.scrollTop = list.scrollHeight;
-            });
-        };
-
-        function showDeletePopup(e, commentId) {
-            if (navigator.vibrate) navigator.vibrate(50);
-            const popup = document.getElementById('commentActionPopup');
-            const touch = e.touches[0];
-            
-            popup.style.display = 'block';
-            popup.style.left = touch.clientX + 'px';
-            popup.style.top = (touch.clientY - 50) + 'px';
-            
-            document.getElementById('deleteCommBtn').onclick = async () => {
-                if(confirm("Delete this comment?")) {
-                    await deleteDoc(doc(db, `polls/${activePollId}/comments`, commentId));
-                    popup.style.display = 'none';
-                }
+                renderList(document.querySelector('.filter-btn.active').dataset.filter);
             };
-        }
 
-        // Click anywhere to hide popup
-        document.addEventListener('click', (ev) => {
-            const p = document.getElementById('commentActionPopup');
-            if(p && !ev.target.closest('.comment-popup')) p.style.display = 'none';
-        });
-
-        window.closeComments = () => {
-            document.getElementById('commentSystem').classList.remove('active');
-            activePollId = null;
+            input.onblur = saveEdit;
+            input.onkeydown = (e) => { if(e.key === 'Enter') input.blur(); };
         };
 
-        window.sendComment = async () => {
-            const val = document.getElementById('commInput').value.trim();
-            if(!val || !activePollId) return;
-            await addDoc(collection(db, `polls/${activePollId}/comments`), {
-                uid: currentUser.uid,
-                text: val,
-                createdAt: serverTimestamp()
-            });
-            document.getElementById('commInput').value = '';
-            rewardXP(5);
+        window.updateSeason = async function(id, change) {
+            const anime = allAnime.find(a => String(a.id) === String(id));
+            if(!anime) return;
+            let newVal = (anime.season || 1) + change;
+            if(newVal < 1) return;
+            if (navigator.vibrate) navigator.vibrate(40); 
+            await updateDoc(doc(db, "users", auth.currentUser.uid, "watchlist", String(id)), { season: newVal });
+            anime.season = newVal;
+            renderList(document.querySelector('.filter-btn.active').dataset.filter);
         };
 
-        // 11. POLL CREATION LOGIC
-        // --- Is function ko replace karein (Creation logic update) ---
-window.switchPollType = (type) => {
-    activeType = type;
-    document.getElementById('typeText').style.background = type === 'text' ? 'var(--primary)' : 'transparent';
-    document.getElementById('typeImage').style.background = type === 'image' ? 'var(--primary)' : 'transparent';
-    
-    const master = document.getElementById('optionsMaster');
-    master.innerHTML = '';
-    
-    if(type === 'text') {
-        // Text Poll ke liye 5 options
-        for(let i = 1; i <= 5; i++) {
-            master.innerHTML += `<input type="text" class="custom-input opt-val" placeholder="Option ${i} ${i > 2 ? '(Optional)' : ''}">`;
-        }
-    } else {
-        // Image Poll ke liye 4 options (Grid layout ke liye 4 best hai, par aap 5 bhi kar sakte hain)
-        for(let i = 1; i <= 4; i++) {
-            master.innerHTML += `
-                <div style="display:flex; gap:10px; margin-bottom:5px;">
-                    <input type="text" class="custom-input img-t" placeholder="Name ${i}" style="flex:1">
-                    <input type="text" class="custom-input img-u" placeholder="Image URL ${i}" style="flex:1">
-                </div>`;
-        }
-    }
-};
-
-// --- Publish function ko bhi update kiya gaya hai taaki wo khali options ko skip kare ---
-window.publishPoll = async () => {
-    const q = document.getElementById('pollQ').value.trim();
-    const finalOptions = [];
-    
-    if(activeType === 'text') {
-        document.querySelectorAll('.opt-val').forEach(el => {
-            const val = el.value.trim();
-            if(val) finalOptions.push({ text: val, votes: 0 });
-        });
-    } else {
-        const ts = document.querySelectorAll('.img-t');
-        const us = document.querySelectorAll('.img-u');
-        ts.forEach((t, i) => {
-            const title = t.value.trim();
-            const url = us[i].value.trim();
-            if(title && url) finalOptions.push({ text: title, image: url, votes: 0 });
-        });
-    }
-
-    if(!q || finalOptions.length < 2) return alert("Please fill the question and at least 2 options!");
-
-    try {
-        await addDoc(collection(db, "polls"), {
-            question: q,
-            type: activeType,
-            options: finalOptions,
-            totalVotes: 0,
-            votedUsers: [],
-            likes: [],
-            createdBy: currentUser.uid,
-            createdAt: serverTimestamp()
-        });
-
-        rewardXP(50);
-        toggleModal('createPollModal', false);
-        document.getElementById('pollQ').value = '';
-        alert("Poll Published!");
-    } catch(e) {
-        console.error("Error publishing poll: ", e);
-    }
-};
-
-
-        // 12. UTILS
-        window.toggleModal = (id, show) => {
-            document.getElementById(id).classList.toggle('show', show);
-            if(show) switchPollType('text');
-        };
-
-        window.filterFeed = (type) => {
-            document.querySelectorAll('.chip-btn').forEach(b => b.classList.remove('active'));
-            document.getElementById('chip-' + type).classList.add('active');
+        window.updateEp = async function(id, change) {
+            const anime = allAnime.find(a => String(a.id) === String(id));
+            if(!anime) return;
+            let current = anime.watchedEpisodes || 0;
+            const total = anime.totalEpisodes || anime.episodes || 0;
+            let newVal = current + change;
+            if(newVal < 0 || (total > 0 && newVal > total)) return;
+            if (navigator.vibrate) navigator.vibrate(40);
             
-            if(type === 'all') renderUI(fullPollData);
-            else if(type === 'polls') renderUI(fullPollData.filter(p => p.type === 'text'));
-            else if(type === 'images') renderUI(fullPollData.filter(p => p.type === 'image'));
+            if (total > 0 && newVal === total && anime.status !== 'completed') {
+                document.getElementById('pendingCompId').value = id;
+                document.getElementById('pendingCompVal').value = newVal;
+                document.getElementById('completedTitle').innerText = `Mark "${anime.title}" as Completed?`;
+                document.getElementById('completedModal').classList.add('show');
+                return;
+            }
+            await updateDoc(doc(db, "users", auth.currentUser.uid, "watchlist", String(id)), { watchedEpisodes: newVal });
+            anime.watchedEpisodes = newVal;
+            renderList(document.querySelector('.filter-btn.active').dataset.filter);
         };
 
-        async function getCachedUser(uid) {
-            if(uCache.has(uid)) return uCache.get(uid);
-            const s = await getDoc(doc(db, "users", uid));
-            const data = s.exists() ? s.data() : { username: 'Otaku', avatar: '' };
-            uCache.set(uid, data);
-            return data;
-        }
+        window.confirmCompletion = async () => {
+            const id = document.getElementById('pendingCompId').value;
+            const newVal = parseInt(document.getElementById('pendingCompVal').value);
+            const anime = allAnime.find(a => String(a.id) === String(id));
+            await updateDoc(doc(db, "users", auth.currentUser.uid, "watchlist", String(id)), { watchedEpisodes: newVal, status: 'completed' });
+            anime.watchedEpisodes = newVal;
+            anime.status = 'completed';
+            closeModal('completedModal');
+            renderList(document.querySelector('.filter-btn.active').dataset.filter);
+        };
 
-        function timeAgo(ts) {
-            if(!ts) return 'Just now';
-            const seconds = Math.floor((new Date() - ts.toDate()) / 1000);
-            if(seconds < 60) return 'Just now';
-            const mins = Math.floor(seconds / 60);
-            if(mins < 60) return mins + 'm';
-            const hrs = Math.floor(mins / 60);
-            if(hrs < 24) return hrs + 'h';
-            return Math.floor(hrs / 24) + 'd';
-        }
+        window.openRateModal = (id) => {
+            const anime = allAnime.find(a => String(a.id) === String(id));
+            document.getElementById('rateId').value = id;
+            document.getElementById('rateTitle').innerText = anime.title;
+            tempSelectedScore = anime.userScore || 0;
+            const grid = document.getElementById('ratingOptions');
+            grid.innerHTML = '';
+            for(let i=1; i<=10; i++) {
+                const item = document.createElement('div');
+                item.className = `rating-item ${i === tempSelectedScore ? 'selected' : ''}`;
+                item.innerText = i;
+                item.onclick = () => {
+                    tempSelectedScore = i;
+                    document.querySelectorAll('.rating-item').forEach(el => el.classList.remove('selected'));
+                    item.classList.add('selected');
+                };
+                grid.appendChild(item);
+            }
+            document.getElementById('rateModal').classList.add('show');
+        };
 
-        // Init Default State
-        switchPollType('text');
+        window.saveRating = async () => {
+            const id = document.getElementById('rateId').value;
+            await updateDoc(doc(db, "users", auth.currentUser.uid, "watchlist", String(id)), { userScore: tempSelectedScore });
+            const anime = allAnime.find(a => String(a.id) === String(id));
+            if(anime) anime.userScore = tempSelectedScore;
+            closeModal('rateModal');
+            renderList(document.querySelector('.filter-btn.active').dataset.filter);
+        };
 
+        window.openDeleteModal = (id, title) => {
+            document.getElementById('deleteId').value = id;
+            document.getElementById('deleteTitle').innerText = `Remove "${title}"?`;
+            document.getElementById('deleteModal').classList.add('show');
+        };
+
+        window.confirmDelete = async () => {
+            const id = document.getElementById('deleteId').value;
+            await deleteDoc(doc(db, "users", auth.currentUser.uid, "watchlist", String(id)));
+            allAnime = allAnime.filter(a => String(a.id) !== String(id));
+            closeModal('deleteModal');
+            renderList('all');
+        };
+
+        window.closeModal = (id) => document.getElementById(id).classList.remove('show');
+        window.filterList = (status, btn) => {
+            document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            renderList(status);
+        };
     </script>
 </body>
 </html>
