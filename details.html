@@ -5,105 +5,93 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Anime Details</title>
     
-    <!-- Icons & CSS -->
-    <link rel="stylesheet" href="main.css"> <!-- Global Styles -->
+    <link rel="stylesheet" href="main.css"> 
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
     <style>
-        /* --- PAGE SPECIFIC CSS --- */
-        body { padding-bottom: 20px; }
+    /* --- PAGE SPECIFIC CSS --- */
+    body { 
+        padding-bottom: 40px; 
+        overflow-y: auto; 
+        min-height: 100vh; 
+        display: block;
+        background: #0f1014;
+        color: white;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
 
-        /* Banner & Header */
-        .banner-container {
-            position: relative; width: 100%; height: 260px;
-        }
-        .banner-img {
-            width: 100%; height: 100%; object-fit: cover; opacity: 0.4;
-            mask-image: linear-gradient(to bottom, black 40%, transparent 100%);
-            -webkit-mask-image: linear-gradient(to bottom, black 40%, transparent 100%);
-        }
-        
-        .content-container {
-            padding: 20px; margin-top: -120px; position: relative; z-index: 10;
-        }
+    #content { display: block; min-height: 100vh; }
 
-        .header-flex { display: flex; gap: 15px; align-items: flex-end; }
-        
-        .poster-img { 
-            width: 110px; border-radius: 8px; 
-            box-shadow: 0 5px 20px rgba(0,0,0,0.6); 
-            border: 2px solid #2a2a2a; background: #111;
-        }
+    .banner-container { position: relative; width: 100%; height: 260px; background: #000; }
+    .banner-img {
+        width: 100%; height: 100%; object-fit: cover; opacity: 0.4;
+        mask-image: linear-gradient(to bottom, black 40%, transparent 100%);
+        -webkit-mask-image: linear-gradient(to bottom, black 40%, transparent 100%);
+    }
+    
+    .content-container { padding: 20px; margin-top: -120px; position: relative; z-index: 10; margin-bottom: 60px; }
+    .header-flex { display: flex; gap: 15px; align-items: flex-end; }
+    .poster-img { width: 110px; border-radius: 8px; box-shadow: 0 5px 20px rgba(0,0,0,0.6); border: 2px solid #2a2a2a; background: #111; }
+    .title { font-size: 18px; font-weight: 700; line-height: 1.3; color: white; text-shadow: 2px 2px 10px rgba(0,0,0,0.8); margin-bottom: 5px; }
+    .genres { font-size: 11px; color: #ccc; display: flex; flex-wrap: wrap; gap: 5px; }
+    .genre-tag { background: rgba(255,255,255,0.1); padding: 2px 8px; border-radius: 4px; backdrop-filter: blur(5px); }
 
-        .title { 
-            font-size: 18px; font-weight: 700; line-height: 1.3; 
-            color: white; text-shadow: 2px 2px 10px rgba(0,0,0,0.8);
-            margin-bottom: 5px;
-        }
+    .stats-box {
+        display: flex; justify-content: space-between;
+        background: rgba(255,255,255,0.05); padding: 15px;
+        border-radius: 12px; margin-top: 20px; border: 1px solid #333;
+    }
+    .stat-item { text-align: center; }
+    .stat-val { font-size: 16px; font-weight: bold; color: white; display: block; }
+    .stat-label { font-size: 11px; color: #888; text-transform: uppercase; }
 
-        .genres { font-size: 11px; color: #ccc; display: flex; flex-wrap: wrap; gap: 5px; }
-        .genre-tag { background: rgba(255,255,255,0.1); padding: 2px 8px; border-radius: 4px; backdrop-filter: blur(5px); }
+    /* RATING BUTTON STYLE */
+    .btn-user-rate {
+        background: rgba(87, 56, 176, 0.1); border: 1px solid #5738B0;
+        color: #fff; padding: 6px 12px; border-radius: 20px;
+        font-size: 13px; font-weight: bold; cursor: pointer; transition: 0.3s;
+        display: inline-flex; align-items: center; gap: 5px; margin-top: 8px;
+    }
+    .btn-user-rate i { color: #ffd700; }
+    .btn-user-rate:active { transform: scale(0.9); }
 
-        /* Stats Row */
-        .stats-box {
-            display: flex; justify-content: space-between;
-            background: rgba(255,255,255,0.05); padding: 15px;
-            border-radius: 12px; margin-top: 20px; border: 1px solid #333;
-        }
-        .stat-item { text-align: center; }
-        .stat-val { font-size: 16px; font-weight: bold; color: white; display: block; }
-        .stat-label { font-size: 11px; color: #888; text-transform: uppercase; }
+    .action-card { background: #1a1c22; padding: 15px; border-radius: 12px; margin-top: 20px; border: 1px solid #333; }
+    .form-group { display: flex; gap: 10px; margin-top: 10px; }
+    select { background: #0f1014; color: white; border: 1px solid #444; padding: 12px; border-radius: 8px; flex: 1; outline: none; font-size: 14px; }
 
-        /* Action Bar */
-        .action-card {
-            background: var(--bg-card); padding: 15px; border-radius: 12px;
-            margin-top: 20px; border: 1px solid #333;
-        }
-        .form-group { display: flex; gap: 10px; margin-top: 10px; }
-        
-        select {
-            background: #0f1014; color: white; border: 1px solid #444; 
-            padding: 12px; border-radius: 8px; flex: 1; outline: none;
-            font-size: 14px;
-        }
+    button.add-btn { background: #5738B0; color: white; border: none; padding: 0 25px; border-radius: 8px; font-weight: bold; display: flex; align-items: center; gap: 8px; cursor: pointer; transition: 0.2s; }
+    .synopsis-area { margin-top: 25px; }
+    .section-title { font-size: 15px; color: #5738B0; margin-bottom: 10px; font-weight: 600; }
+    .synopsis-text { font-size: 14px; line-height: 1.6; color: #ddd; }
 
-        button.add-btn {
-            background: var(--primary); color: white; border: none;
-            padding: 0 25px; border-radius: 8px; font-weight: bold;
-            display: flex; align-items: center; gap: 8px; cursor: pointer;
-            transition: 0.2s;
-        }
-        button.add-btn:active { transform: scale(0.95); opacity: 0.8; }
+    #loading { height: 100vh; display: flex; justify-content: center; align-items: center; }
+    .hidden { display: none !important; }
+    .back-btn { position: fixed; top: 15px; left: 15px; z-index: 100; background: rgba(0,0,0,0.6); width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; backdrop-filter: blur(5px); }
 
-        /* Synopsis */
-        .synopsis-area { margin-top: 25px; }
-        .section-title { font-size: 15px; color: var(--primary); margin-bottom: 10px; font-weight: 600; }
-        .synopsis-text { font-size: 14px; line-height: 1.6; color: #ddd; }
+    /* MODERN RATING MODAL UI */
+    .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.85); z-index: 2000; display: flex; justify-content: center; align-items: center; visibility: hidden; opacity: 0; transition: 0.3s; backdrop-filter: blur(8px); }
+    .modal-overlay.show { visibility: visible; opacity: 1; }
+    .modal-box { background: #1a1c22; width: 90%; max-width: 340px; border-radius: 20px; padding: 30px 20px; text-align: center; border: 1px solid #333; transform: scale(0.8); transition: 0.3s; }
+    .modal-overlay.show .modal-box { transform: scale(1); }
 
-        /* Loading */
-        #loading { height: 100vh; display: flex; justify-content: center; align-items: center; }
-        .hidden { display: none !important; }
+    .rating-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; margin: 25px 0; }
+    .rating-item { background: #0f1014; border: 1px solid #333; padding: 12px 5px; border-radius: 12px; font-size: 14px; font-weight: bold; color: #888; cursor: pointer; transition: 0.2s; }
+    .rating-item.selected { background: #5738B0; color: white; border-color: #5738B0; transform: scale(1.1); box-shadow: 0 0 15px rgba(87, 56, 176, 0.4); }
 
-        /* Back Btn */
-        .back-btn {
-            position: fixed; top: 15px; left: 15px; z-index: 100;
-            background: rgba(0,0,0,0.6); width: 40px; height: 40px;
-            border-radius: 50%; display: flex; align-items: center; justify-content: center;
-            color: white; backdrop-filter: blur(5px);
-        }
+    .btn-save-rate { background: #5738B0; color: white; font-weight: bold; border: none; padding: 14px; border-radius: 12px; width: 100%; font-size: 15px; cursor: pointer; }
+    .btn-cancel-rate { margin-top: 15px; background: transparent; color: #666; border: none; font-size: 13px; font-weight: 600; cursor: pointer; width: 100%; }
+
+    .char-row { display: flex; justify-content: space-between; align-items: center; background: rgba(255,255,255,0.03); padding: 8px; border-radius: 8px; border: 1px solid #222; }
     </style>
 </head>
 <body>
 
-    <!-- Back Button -->
     <a href="index.html" class="back-btn"><i class="fa-solid fa-arrow-left"></i></a>
 
-    <!-- LOADING STATE -->
     <div id="loading">
-        <i class="fa-solid fa-circle-notch fa-spin" style="font-size: 40px; color: var(--primary);"></i>
+        <i class="fa-solid fa-circle-notch fa-spin" style="font-size: 40px; color: #5738B0;"></i>
     </div>
 
-    <!-- MAIN CONTENT -->
     <div id="content" class="hidden">
         <div class="banner-container">
             <img id="banner" class="banner-img" src="">
@@ -115,14 +103,16 @@
                 <div style="flex: 1;">
                     <div id="title" class="title">Anime Title</div>
                     <div id="genres" class="genres"></div>
+                    <button id="userRateBtn" class="btn-user-rate">
+                        <i class="fa-regular fa-star"></i> <span id="userScoreText">Rate Anime</span>
+                    </button>
                 </div>
             </div>
 
-            <!-- Stats -->
             <div class="stats-box">
                 <div class="stat-item">
                     <span class="stat-val"><i class="fa-solid fa-star" style="color:gold; font-size:12px;"></i> <span id="score">0.0</span></span>
-                    <span class="stat-label">Score</span>
+                    <span class="stat-label">MAL Score</span>
                 </div>
                 <div class="stat-item">
                     <span class="stat-val"><span id="episodes">?</span></span>
@@ -138,9 +128,8 @@
                 </div>
             </div>
 
-            <!-- Add to List Section -->
             <div class="action-card">
-                <div style="font-size: 13px; color: #aaa; margin-bottom: 5px;">Add to Watchlist</div>
+                <div style="font-size: 13px; color: #aaa; margin-bottom: 5px;">Set Status & Add</div>
                 <div class="form-group">
                     <select id="statusSelect">
                         <option value="watching">Watching</option>
@@ -154,21 +143,38 @@
                 </div>
             </div>
 
-            <!-- Synopsis -->
             <div class="synopsis-area">
                 <div class="section-title">Synopsis</div>
                 <p id="synopsis" class="synopsis-text">Description loading...</p>
             </div>
+
+            <div class="synopsis-area" style="margin-top: 30px;">
+                <div class="section-title">Characters & Voice Actors</div>
+                <div id="characters-list" style="display: flex; flex-direction: column; gap: 12px; margin-top: 10px;">
+                    <p style="color: #888; font-size: 13px;">Loading characters...</p>
+                </div>
+            </div>
         </div>
     </div>
 
-    <!-- DIRECT SCRIPT -->
+    <div id="rateModal" class="modal-overlay">
+        <div class="modal-box">
+            <div style="color: #5738B0; font-size: 32px; margin-bottom: 10px;"><i class="fa-solid fa-star"></i></div>
+            <h3 style="color:white; font-size:18px; margin-bottom: 5px;">Rate this Anime</h3>
+            <p style="color: #777; font-size: 12px;">Your rating helps us recommend better.</p>
+            
+            <div class="rating-grid" id="ratingOptions"></div>
+
+            <button class="btn-save-rate" id="saveRateBtn">Save Rating</button>
+            <button class="btn-cancel-rate" id="closeModalBtn">Maybe Later</button>
+        </div>
+    </div>
+
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-        import { getFirestore, doc, setDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { getFirestore, doc, setDoc, getDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-        // 1. FIREBASE CONFIG
         const firebaseConfig = {
             apiKey: "AIzaSyDLd3TW-y89lwShUmcIHw3YGzDjo4cg3y4",
             authDomain: "animea2z.firebaseapp.com",
@@ -182,17 +188,18 @@
         const auth = getAuth(app);
         const db = getFirestore(app);
 
-        // 2. LOGIC
         const params = new URLSearchParams(window.location.search);
         const animeId = params.get('id');
         let currentAnime = null;
+        let isAlreadyAdded = false;
+        let currentUserScore = 0;
+        let selectedRating = 0;
 
-        // Fetch on Load
-        if(animeId) {
-            fetchAnimeDetails(animeId);
-        } else {
-            alert("No ID provided");
-            window.location.href = "index.html";
+        if(animeId) { fetchAnimeDetails(animeId); }
+
+        function detectSeason(title) {
+            const match = title.match(/season\s*(\d+)|(\d+)(st|nd|rd|th)\s*season|part\s*(\d+)/i);
+            return match ? parseInt(match[1] || match[2] || match[4]) : 1;
         }
 
         async function fetchAnimeDetails(id) {
@@ -200,85 +207,140 @@
                 const res = await fetch(`https://api.jikan.moe/v4/anime/${id}`);
                 const json = await res.json();
                 currentAnime = json.data;
-
-                // Update UI
+                
                 document.getElementById('loading').classList.add('hidden');
                 document.getElementById('content').classList.remove('hidden');
 
-                const title = currentAnime.title_english || currentAnime.title;
-                document.getElementById('title').innerText = title;
+                const displayTitle = currentAnime.title_english || currentAnime.title;
+                document.getElementById('title').innerText = displayTitle;
                 document.getElementById('banner').src = currentAnime.images.jpg.large_image_url;
                 document.getElementById('poster').src = currentAnime.images.jpg.image_url;
-                
-                document.getElementById('score').innerText = currentAnime.score || 'N/A';
+                document.getElementById('score').innerText = currentAnime.score || '0.0';
                 document.getElementById('episodes').innerText = currentAnime.episodes || '?';
                 document.getElementById('year').innerText = currentAnime.year || 'N/A';
                 document.getElementById('type').innerText = currentAnime.type || 'TV';
+                document.getElementById('synopsis').innerText = currentAnime.synopsis || "No description.";
                 
-                document.getElementById('synopsis').innerText = currentAnime.synopsis || "No description available.";
-                
-                // Genres
                 if(currentAnime.genres) {
                     document.getElementById('genres').innerHTML = currentAnime.genres
-                        .map(g => `<span class="genre-tag">${g.name}</span>`)
-                        .join('');
+                        .map(g => `<span class="genre-tag">${g.name}</span>`).join('');
                 }
 
-            } catch (error) {
-                console.error(error);
-                alert("Error loading anime details.");
+                onAuthStateChanged(auth, async (user) => {
+                    if (user) {
+                        const docSnap = await getDoc(doc(db, "users", user.uid, "watchlist", String(id)));
+                        if (docSnap.exists()) {
+                            isAlreadyAdded = true;
+                            const data = docSnap.data();
+                            updateAddBtnUI(data.status);
+                            if(data.userScore > 0) {
+                                currentUserScore = data.userScore;
+                                updateRateBtnUI(data.userScore);
+                            }
+                        }
+                    }
+                });
+
+                fetchCharacters(id);
+            } catch (error) { console.error(error); }
+        }
+
+        // --- RATING LOGIC ---
+        function updateRateBtnUI(score) {
+            document.getElementById('userRateBtn').innerHTML = `<i class="fa-solid fa-star"></i> Rated ${score}`;
+            document.getElementById('userRateBtn').style.background = "rgba(87, 56, 176, 0.2)";
+        }
+
+        function setupRatingGrid() {
+            const grid = document.getElementById('ratingOptions');
+            grid.innerHTML = '';
+            for(let i=1; i<=10; i++) {
+                const div = document.createElement('div');
+                div.className = `rating-item ${i === currentUserScore ? 'selected' : ''}`;
+                div.innerText = i;
+                div.onclick = () => {
+                    selectedRating = i;
+                    document.querySelectorAll('.rating-item').forEach(el => el.classList.remove('selected'));
+                    div.classList.add('selected');
+                    if (navigator.vibrate) navigator.vibrate(30);
+                };
+                grid.appendChild(div);
             }
         }
 
-        // 3. ADD BUTTON LOGIC (FIXED FOR WATCHLIST)
-        document.getElementById('addBtn').addEventListener('click', async () => {
-            const user = auth.currentUser;
-            if (!user) {
-                alert("Please Login First!");
-                window.location.href = "login.html";
-                return;
-            }
+        document.getElementById('userRateBtn').onclick = () => {
+            if(!isAlreadyAdded) { alert("Add to list first!"); return; }
+            selectedRating = currentUserScore;
+            setupRatingGrid();
+            document.getElementById('rateModal').classList.add('show');
+        };
 
+        document.getElementById('closeModalBtn').onclick = () => document.getElementById('rateModal').classList.remove('show');
+
+        document.getElementById('saveRateBtn').onclick = async () => {
+            const user = auth.currentUser;
+            if(!user || selectedRating === 0) return;
+            try {
+                await updateDoc(doc(db, "users", user.uid, "watchlist", String(animeId)), { userScore: selectedRating });
+                currentUserScore = selectedRating;
+                updateRateBtnUI(selectedRating);
+                document.getElementById('rateModal').classList.remove('show');
+                if (navigator.vibrate) navigator.vibrate([40, 40]);
+            } catch(e) { console.error(e); }
+        };
+
+        // --- ADD LOGIC ---
+        function updateAddBtnUI(status) {
             const btn = document.getElementById('addBtn');
+            btn.innerHTML = '<i class="fa-solid fa-check"></i> Added';
+            btn.style.background = "#00e676";
+            btn.disabled = true;
+            document.getElementById('statusSelect').value = status;
+        }
+
+        document.getElementById('addBtn').onclick = async () => {
+            const user = auth.currentUser;
+            if(!user) { window.location.href="login.html"; return; }
             const status = document.getElementById('statusSelect').value;
             
-            // Visual Feedback
-            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i>';
-            btn.style.opacity = "0.7";
-
             try {
-                // IMPORTANT: Save data structure for Watchlist
-                const watchlistRef = doc(db, "users", user.uid, "watchlist", String(currentAnime.mal_id));
-                
-                await setDoc(watchlistRef, {
-                    id: currentAnime.mal_id,
+                await setDoc(doc(db, "users", user.uid, "watchlist", String(animeId)), {
+                    id: parseInt(animeId),
                     title: currentAnime.title_english || currentAnime.title,
                     image: currentAnime.images.jpg.image_url,
-                    
-                    // Critical for Watchlist page:
-                    totalEpisodes: currentAnime.episodes || 0, 
-                    watchedEpisodes: 0, // Starts at 0
-                    userScore: 0, // Default score
-                    
+                    totalEpisodes: currentAnime.episodes || 0,
+                    watchedEpisodes: status === 'completed' ? (currentAnime.episodes || 0) : 0,
+                    userScore: 0,
                     status: status,
+                    season: detectSeason(currentAnime.title),
                     addedAt: new Date()
-                }, { merge: true }); // Merge taaki agar pehle se ho to overwrite na ho (optional)
+                });
+                isAlreadyAdded = true;
+                updateAddBtnUI(status);
+                if (navigator.vibrate) navigator.vibrate(60);
+            } catch(e) { console.error(e); }
+        };
 
-                // Success State
-                btn.innerHTML = '<i class="fa-solid fa-check"></i> Added';
-                btn.style.background = "#00e676"; 
-                
-                setTimeout(() => {
-                    btn.innerHTML = '<i class="fa-solid fa-plus"></i> Add';
-                    btn.style.background = "var(--primary)";
-                    btn.style.opacity = "1";
-                }, 3000);
-
-            } catch (e) {
-                alert("Error: " + e.message);
-                btn.innerText = "Try Again";
-            }
-        });
+        async function fetchCharacters(id) {
+            try {
+                const res = await fetch(`https://api.jikan.moe/v4/anime/${id}/characters`);
+                const json = await res.json();
+                document.getElementById('characters-list').innerHTML = json.data.slice(0, 10).map(item => {
+                    const va = item.voice_actors.find(v => v.language === 'Japanese');
+                    return `
+                        <div class="char-row">
+                            <div style="display:flex; align-items:center; gap:10px;">
+                                <img src="${item.character.images.jpg.image_url}" style="width:45px; height:60px; border-radius:4px; object-fit:cover;">
+                                <div><div style="font-size:13px; font-weight:600;">${item.character.name}</div><div style="color:#888; font-size:11px;">${item.role}</div></div>
+                            </div>
+                            <div style="display:flex; align-items:center; gap:10px; text-align:right;">
+                                <div><div style="font-size:13px; font-weight:600;">${va ? va.person.name : 'N/A'}</div><div style="color:#888; font-size:11px;">Japanese</div></div>
+                                <img src="${va ? va.person.images.jpg.image_url : 'https://via.placeholder.com/45x60'}" style="width:45px; height:60px; border-radius:4px; object-fit:cover;">
+                            </div>
+                        </div>`;
+                }).join('');
+            } catch(e) { console.error(e); }
+        }
     </script>
 </body>
 </html>
