@@ -24,24 +24,27 @@
             display: flex; align-items: center; background: var(--bg-card);
             margin-bottom: 12px; border-radius: 6px; border-left: 4px solid var(--primary);
             box-shadow: 0 2px 8px rgba(0,0,0,0.3); position: relative; overflow: hidden;
-            padding-right: 10px;
-            transition: transform 0.1s linear;
-            user-select: none;
-            -webkit-user-select: none;
-            touch-action: pan-y;
+            padding-right: 10px; transition: transform 0.1s linear;
+            user-select: none; -webkit-user-select: none; touch-action: pan-y;
         }
         
-        .mal-img { width: 60px; height: 90px; object-fit: cover; pointer-events: none; }
+        .mal-img { width: 60px; height: 100px; object-fit: cover; pointer-events: none; }
         .mal-info { flex: 1; padding: 8px 12px; display: flex; flex-direction: column; justify-content: center; pointer-events: none; }
         .mal-title { font-size: 14px; font-weight: 600; color: white; margin-bottom: 5px; line-height: 1.2; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
         .mal-meta { font-size: 11px; color: #aaa; display: flex; gap: 10px; align-items: center; }
 
-        .btn-rate { width: 30px; height: 30px; border-radius: 50%; border: 1px solid #333; background: #0f1014; color: #ffd700; display: flex; align-items: center; justify-content: center; cursor: pointer; z-index: 2; }
-        .ep-control-box { display: flex; align-items: center; background: #0f1014; border-radius: 6px; border: 1px solid #333; overflow: hidden; z-index: 2; }
+        .btn-rate { width: 30px; height: 30px; border-radius: 50%; border: 1px solid #333; background: #0f1014; color: #ffd700; display: flex; align-items: center; justify-content: center; cursor: pointer; z-index: 2; font-size: 12px; transition: 0.2s; }
+        
+        .controls-wrapper { display: flex; flex-direction: column; gap: 6px; align-items: flex-end; }
+        .ep-control-box { display: flex; align-items: center; background: #0f1014; border-radius: 6px; border: 1px solid #333; overflow: hidden; z-index: 2; height: 32px; }
         .ctrl-btn { background: transparent; color: #ccc; border: none; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; cursor: pointer; }
         .ctrl-btn:active { background: #333; color: white; }
         
-        .ep-display { font-size: 12px; font-weight: bold; color: white; padding: 0 5px; min-width: 55px; text-align: center; }
+        .ep-display, .sn-display { font-size: 11px; font-weight: bold; color: white; padding: 0 5px; min-width: 55px; text-align: center; cursor: pointer; }
+        .label-tiny { font-size: 11px; color: #ffff; text-transform: uppercase; margin-right: 2px; }
+
+        .edit-input { width: 40px; background: #1a1c22; color: white; border: 1px solid var(--primary); border-radius: 4px; text-align: center; font-size: 11px; font-weight: bold; outline: none; }
+
         .progress-line { position: absolute; bottom: 0; left: 0; height: 3px; background: var(--primary); width: 0%; transition: width 0.3s; }
 
         /* --- MODALS --- */
@@ -50,53 +53,18 @@
         .modal-box { background: #1e1e24; width: 85%; max-width: 320px; border-radius: 15px; padding: 25px; text-align: center; transform: scale(0.9); transition: 0.2s; border: 1px solid #333; box-shadow: 0 10px 40px rgba(0,0,0,0.6); }
         .modal-overlay.show .modal-box { transform: scale(1); }
 
-        select#scoreSelector { width: 100%; padding: 12px; margin: 20px 0; background: #0f1014; color: white; border: 1px solid #444; border-radius: 8px; font-size: 16px; outline: none; }
-        /* BOTTOM NAVIGATION CSS - Yahan Paste Karein */
-.bottom-nav {
-    position: fixed;
-    bottom: 0;
-    left: 0;
-    width: 100%;
-    height: 70px;
-    display: flex;
-    justify-content: space-around;
-    align-items: center;
-    background: #1a1c22;
-    border-top: 1px solid rgba(255, 255, 255, 0.1);
-    padding-bottom: env(safe-area-inset-bottom);
-    z-index: 5000;
-}
+        .rating-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; margin: 20px 0; }
+        .rating-item { background: #0f1014; border: 1px solid #333; padding: 10px 0; border-radius: 8px; font-size: 14px; font-weight: bold; color: #888; cursor: pointer; }
+        .rating-item.selected { background: #5738B0; color: white; border-color: #5738B0; }
 
-.nav-item {
-    text-decoration: none;
-    color: #94a3b8;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    flex: 1;
-    gap: 4px;
-    transition: 0.2s ease;
-}
+        .btn-primary-gold { background: #5738B0; color: white; font-weight: bold; border: none; padding: 12px; border-radius: 10px; cursor: pointer; transition: 0.2s; }
 
-.nav-item i {
-    font-size: 20px;
-}
-
-.nav-item span {
-    font-size: 10px;
-    font-weight: 600;
-}
-
-.nav-item.active {
-    color: #5738B0; /* List page active purple */
-}
-
-.nav-item:active {
-    transform: scale(0.9);
-}
-
-        .delete-icon-circle { width: 60px; height: 60px; background: rgba(255, 82, 82, 0.1); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 15px auto; color: #ff5252; }
+        .bottom-nav { position: fixed; bottom: 0; left: 0; width: 100%; height: 70px; display: flex; justify-content: space-around; align-items: center; background: #1a1c22; border-top: 1px solid rgba(255, 255, 255, 0.1); padding-bottom: env(safe-area-inset-bottom); z-index: 5000; }
+        .nav-item { text-decoration: none; color: #94a3b8; display: flex; flex-direction: column; align-items: center; justify-content: center; flex: 1; gap: 4px; transition: 0.2s ease; }
+        .nav-item i { font-size: 20px; }
+        .nav-item span { font-size: 10px; font-weight: 600; }
+        .nav-item.active { color: #5738B0; }
+        .hidden { display: none !important; }
     </style>
 </head>
 <body>
@@ -105,43 +73,50 @@
         <div class="logo">My List</div>
     </header>
 
-    <div class="container" style="padding-bottom: 80px;">
+    <div class="container" style="padding-bottom: 90px;">
         <div class="filter-container">
             <button class="filter-btn active" data-filter="all" onclick="filterList('all', this)"><i class="fa-solid fa-layer-group"></i> All</button>
             <button class="filter-btn" data-filter="watching" onclick="filterList('watching', this)"><i class="fa-solid fa-eye"></i> Watching</button>
-            <button class="filter-btn" data-filter="completed" onclick="filterList('completed', this)"><i class="fa-solid fa-check-circle"></i> Done</button>
+            <button class="filter-btn" data-filter="completed" onclick="filterList('completed', this)"><i class="fa-solid fa-check-circle"></i> Completed</button>
             <button class="filter-btn" data-filter="plan" onclick="filterList('plan', this)"><i class="fa-solid fa-clock"></i> Plan</button>
         </div>
 
-        <div id="loading" class="text-center" style="margin-top:50px;"><i class="fa-solid fa-circle-notch fa-spin" style="font-size:30px; color:var(--primary);"></i></div>
+        <div id="loading" class="text-center" style="margin-top:50px;"><i class="fa-solid fa-circle-notch fa-spin" style="font-size:30px; color:#5738B0;"></i></div>
         <div id="listContainer"></div>
         <div id="emptyState" class="hidden text-center" style="margin-top:50px; color:#555;"><i class="fa-solid fa-box-open" style="font-size:40px; margin-bottom:10px;"></i><p>List is empty</p></div>
     </div>
 
     <div id="rateModal" class="modal-overlay">
-        <div class="modal-box">
-            <h3 style="color: white; margin-bottom: 5px;">Rate Anime</h3>
-            <p id="rateTitle" style="color: #aaa; font-size: 12px; margin-bottom:10px;">Title</p>
+        <div class="modal-box" style="border-top: 4px solid #5738B0;">
+            <div style="color: #ffd700; font-size: 30px; margin-bottom: 10px;"><i class="fa-solid fa-star"></i></div>
+            <h3 id="rateTitle" style="color:white; font-size:16px;">Title</h3>
+            <p style="color: #aaa; font-size: 12px;">Rate your experience</p>
             <input type="hidden" id="rateId">
-            <select id="scoreSelector">
-                <option value="0">No Score</option>
-                <option value="10">(10) Masterpiece</option>
-                <option value="9">(9) Great</option>
-                <option value="8">(8) Very Good</option>
-                <option value="7">(7) Good</option>
-                <option value="6">(6) Fine</option>
-                <option value="5">(5) Average</option>
-            </select>
+            <div class="rating-grid" id="ratingOptions"></div>
             <div style="display: flex; gap: 10px;">
-                <button class="btn-primary" onclick="saveRating()" style="flex:1; padding: 12px; border-radius: 8px;">Save</button>
-                <button onclick="closeModal('rateModal')" style="flex:1; background: transparent; color: #aaa; border: 1px solid #333; border-radius: 8px;">Cancel</button>
+                <button class="btn-primary-gold" onclick="saveRating()" style="flex:2;">Save Rating</button>
+                <button onclick="closeModal('rateModal')" style="flex:1; background: transparent; color: #aaa; border: 1px solid #333; border-radius: 10px;">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="completedModal" class="modal-overlay">
+        <div class="modal-box">
+            <div style="width:60px; height:60px; background:rgba(0,230,118,0.1); border-radius:50%; display:flex; align-items:center; justify-content:center; margin:0 auto 15px; color:#00e676;"><i class="fa-solid fa-circle-check" style="font-size: 24px;"></i></div>
+            <h3 style="color: white; margin-bottom: 10px;">Finished Watching?</h3>
+            <p id="completedTitle" style="color: #aaa; font-size: 13px; margin-bottom: 25px;">Mark as Completed?</p>
+            <input type="hidden" id="pendingCompId">
+            <input type="hidden" id="pendingCompVal">
+            <div style="display: flex; gap: 10px;">
+                <button onclick="confirmCompletion()" style="flex:1; padding: 12px; border-radius: 8px; background: #00e676; color: black; border: none; font-weight: bold;">Yes, Done!</button>
+                <button onclick="closeModal('completedModal')" style="flex:1; background: transparent; color: #aaa; border: 1px solid #333; border-radius: 8px;">Not Yet</button>
             </div>
         </div>
     </div>
 
     <div id="deleteModal" class="modal-overlay">
         <div class="modal-box">
-            <div class="delete-icon-circle"><i class="fa-solid fa-trash" style="font-size: 24px;"></i></div>
+            <div style="width:60px; height:60px; background:rgba(255,82,82,0.1); border-radius:50%; display:flex; align-items:center; justify-content:center; margin:0 auto 15px; color:#ff5252;"><i class="fa-solid fa-trash" style="font-size: 24px;"></i></div>
             <h3 style="color: white; margin-bottom: 10px;">Remove Anime?</h3>
             <p id="deleteTitle" style="color: #aaa; font-size: 13px; margin-bottom: 25px;">Remove from your list?</p>
             <input type="hidden" id="deleteId">
@@ -152,29 +127,13 @@
         </div>
     </div>
 
-   <nav class="bottom-nav">
-    <a href="index.html" class="nav-item">
-        <i class="fa-solid fa-compass"></i>
-        <span>Home</span>
-    </a>
-    <a href="watchlist.html" class="nav-item active">
-        <i class="fa-solid fa-bookmark"></i>
-        <span>List</span>
-    </a>
-    <a href="poll.html" class="nav-item">
-        <i class="fa-solid fa-chart-simple"></i>
-        <span>Polls</span>
-    </a>
-    <a href="chat.html" class="nav-item">
-        <i class="fa-solid fa-comments"></i>
-        <span>Chat</span>
-    </a>
-    <a href="profile.html" class="nav-item">
-        <i class="fa-solid fa-user"></i>
-        <span>Profile</span>
-    </a>
-</nav>
-
+    <nav class="bottom-nav">
+        <a href="index.html" class="nav-item"><i class="fa-solid fa-compass"></i><span>Home</span></a>
+        <a href="watchlist.html" class="nav-item active"><i class="fa-solid fa-bookmark"></i><span>List</span></a>
+        <a href="poll.html" class="nav-item"><i class="fa-solid fa-chart-simple"></i><span>Polls</span></a>
+        <a href="chat.html" class="nav-item"><i class="fa-solid fa-comments"></i><span>Chat</span></a>
+        <a href="profile.html" class="nav-item"><i class="fa-solid fa-user"></i><span>Profile</span></a>
+    </nav>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
@@ -195,9 +154,8 @@
         const db = getFirestore(app);
 
         let allAnime = [];
+        let tempSelectedScore = 0;
         const container = document.getElementById('listContainer');
-        const loading = document.getElementById('loading');
-        const emptyState = document.getElementById('emptyState');
 
         onAuthStateChanged(auth, async (user) => {
             if (user) await fetchList(user.uid);
@@ -209,9 +167,12 @@
                 const snapshot = await getDocs(collection(db, "users", uid, "watchlist"));
                 allAnime = [];
                 snapshot.forEach(doc => allAnime.push(doc.data()));
-                loading.classList.add('hidden');
+                document.getElementById('loading').classList.add('hidden');
                 renderList('all');
-            } catch (error) { console.error(error); }
+            } catch (error) { 
+                console.error("Fetch error:", error);
+                document.getElementById('loading').classList.add('hidden');
+            }
         }
 
         window.renderList = function(filter) {
@@ -220,15 +181,17 @@
             const filtered = filter === 'all' ? allAnime : allAnime.filter(a => a.status === filter);
 
             if(filtered.length === 0) {
-                emptyState.classList.remove('hidden');
+                document.getElementById('emptyState').classList.remove('hidden');
                 return;
             }
-            emptyState.classList.add('hidden');
+            document.getElementById('emptyState').classList.add('hidden');
 
             filtered.forEach(anime => {
                 const watched = anime.watchedEpisodes || 0;
                 const total = anime.totalEpisodes || anime.episodes || 0;
                 const score = anime.userScore || 0;
+                const season = anime.season || 1;
+                
                 let statusColor = '#2979ff';
                 if(anime.status === 'completed') statusColor = '#00e676';
                 if(anime.status === 'plan') statusColor = '#ffab00';
@@ -239,33 +202,29 @@
                 div.style.borderLeftColor = statusColor;
                 
                 let pressTimer;
-                let isTouchingButton = false;
+                let isMoving = false;
 
                 div.addEventListener('touchstart', (e) => {
-                    if (e.target.closest('button')) {
-                        isTouchingButton = true;
-                        return; 
-                    }
-                    isTouchingButton = false;
-                    div.style.transform = "scale(0.96)";
+                    if (e.target.closest('button') || e.target.closest('.sn-display') || e.target.closest('.ep-display')) return;
+                    isMoving = false;
                     pressTimer = setTimeout(() => {
-                        div.style.transform = "scale(1)";
-                        if (navigator.vibrate) navigator.vibrate(50);
-                        openDeleteModal(anime.id, anime.title);
-                    }, 600);
+                        if (!isMoving) {
+                            if (navigator.vibrate) navigator.vibrate(50);
+                            openDeleteModal(anime.id, anime.title);
+                        }
+                    }, 800);
                 });
 
-                div.addEventListener('touchend', (e) => {
-                    if (isTouchingButton) return;
+                div.addEventListener('touchmove', () => {
+                    isMoving = true;
                     clearTimeout(pressTimer);
-                    div.style.transform = "scale(1)";
                 });
-                
+
+                div.addEventListener('touchend', () => clearTimeout(pressTimer));
+
                 div.addEventListener('click', (e) => {
-                    if (e.target.closest('button')) return;
-                    if (!document.getElementById('deleteModal').classList.contains('show')) {
-                         window.location.href = `details.html?id=${anime.id}`;
-                    }
+                    if (e.target.closest('button') || e.target.closest('.sn-display') || e.target.closest('.ep-display')) return;
+                    if (!isMoving) window.location.href = `details.html?id=${anime.id}`;
                 });
 
                 div.innerHTML = `
@@ -273,101 +232,159 @@
                     <div class="mal-info">
                         <div class="mal-title">${anime.title}</div>
                         <div class="mal-meta">
-                            <span style="color:${statusColor}; text-transform:capitalize;">${anime.status}</span>
+                            <span style="color:${statusColor}; text-transform:capitalize; font-weight:bold;">${anime.status}</span>
+                            <button class="btn-rate" onclick="event.stopPropagation(); openRateModal('${anime.id}')" style="${score > 0 ? 'border-color:#ffd700; color:#ffd700; background:rgba(255,215,0,0.1);' : ''}">
+                                ${score > 0 ? score : '<i class="fa-regular fa-star"></i>'}
+                            </button>
                         </div>
                     </div>
-                    
-                    <div class="controls-row" style="display:flex; gap:8px; align-items:center;">
-                        <button class="btn-rate" onclick="event.stopPropagation(); openRateModal('${anime.id}')">
-                            ${score > 0 ? score : '<i class="fa-regular fa-star"></i>'}
-                        </button>
-                        
+                    <div class="controls-wrapper">
+                        <div class="ep-control-box" style="border-color: #444;">
+                            <button class="ctrl-btn" onclick="event.stopPropagation(); updateSeason('${anime.id}', -1)"><i class="fa-solid fa-minus"></i></button>
+                            <div class="sn-display" onclick="event.stopPropagation(); startEdit('${anime.id}', 'season', this)"><span class="label-tiny">S</span>${season}</div>
+                            <button class="ctrl-btn" onclick="event.stopPropagation(); updateSeason('${anime.id}', 1)"><i class="fa-solid fa-plus"></i></button>
+                        </div>
                         <div class="ep-control-box">
-                            <button class="ctrl-btn" onclick="event.stopPropagation(); updateEp('${anime.id}', -1)">
-                                <i class="fa-solid fa-minus"></i>
-                            </button>
-                            <div class="ep-display">${watched} <span class="ep-total">/ ${total > 0 ? total : '?'}</span></div>
-                            <button class="ctrl-btn" onclick="event.stopPropagation(); updateEp('${anime.id}', 1)">
-                                <i class="fa-solid fa-plus"></i>
-                            </button>
+                            <button class="ctrl-btn" onclick="event.stopPropagation(); updateEp('${anime.id}', -1)"><i class="fa-solid fa-minus"></i></button>
+                            <div class="ep-display" onclick="event.stopPropagation(); startEdit('${anime.id}', 'watchedEpisodes', this)">${watched} <span style="font-size:10px; color:#aaa;">/ ${total > 0 ? total : '?'}</span></div>
+                            <button class="ctrl-btn" onclick="event.stopPropagation(); updateEp('${anime.id}', 1)"><i class="fa-solid fa-plus"></i></button>
                         </div>
                     </div>
-                    
                     <div class="progress-line" style="width: ${progressWidth}%; background:${statusColor};"></div>
                 `;
                 container.appendChild(div);
             });
         };
-        
-        window.openDeleteModal = function(id, title) {
-            document.getElementById('deleteId').value = id;
-            document.getElementById('deleteTitle').innerText = `Remove "${title}"?`;
-            document.getElementById('deleteModal').classList.add('show');
-        }
 
-        window.confirmDelete = async function() {
-            const user = auth.currentUser;
-            const id = document.getElementById('deleteId').value;
-            const btn = document.querySelector('#deleteModal button[onclick="confirmDelete()"]');
-            btn.innerText = "Deleting...";
-            try {
-                await deleteDoc(doc(db, "users", user.uid, "watchlist", String(id)));
-                allAnime = allAnime.filter(a => String(a.id) !== String(id));
-                const activeTab = document.querySelector('.filter-btn.active').getAttribute('data-filter');
-                renderList(activeTab);
-                closeModal('deleteModal');
-            } catch (error) { alert("Error"); }
-            finally { btn.innerText = "Delete"; }
-        }
-
-        window.openRateModal = function(id) {
+        window.startEdit = function(id, field, element) {
             const anime = allAnime.find(a => String(a.id) === String(id));
-            if(!anime) return;
-            document.getElementById('rateId').value = id;
-            document.getElementById('rateTitle').innerText = anime.title;
-            document.getElementById('scoreSelector').value = anime.userScore || 0;
-            document.getElementById('rateModal').classList.add('show');
+            if (!anime) return;
+            const currentVal = field === 'season' ? (anime.season || 1) : (anime.watchedEpisodes || 0);
+            
+            const input = document.createElement('input');
+            input.type = 'number';
+            input.className = 'edit-input';
+            input.value = currentVal;
+            input.inputMode = 'numeric';
+
+            element.innerHTML = '';
+            element.appendChild(input);
+            input.focus();
+            input.select();
+
+            const saveEdit = async () => {
+                let newVal = parseInt(input.value);
+                const total = anime.totalEpisodes || anime.episodes || 0;
+                if (isNaN(newVal) || newVal < 0) newVal = currentVal;
+                if (field === 'watchedEpisodes' && total > 0 && newVal > total) newVal = total;
+                if (field === 'season' && newVal < 1) newVal = 1;
+
+                if (newVal !== currentVal) {
+                    const updateData = {};
+                    updateData[field] = newVal;
+                    if (field === 'watchedEpisodes' && total > 0 && newVal === total) {
+                        updateData.status = 'completed';
+                        anime.status = 'completed';
+                    }
+                    await updateDoc(doc(db, "users", auth.currentUser.uid, "watchlist", String(id)), updateData);
+                    anime[field] = newVal;
+                }
+                renderList(document.querySelector('.filter-btn.active').dataset.filter);
+            };
+
+            input.onblur = saveEdit;
+            input.onkeydown = (e) => { if(e.key === 'Enter') input.blur(); };
         };
 
-        window.saveRating = async function() {
-            const user = auth.currentUser;
-            const id = document.getElementById('rateId').value;
-            const newScore = parseInt(document.getElementById('scoreSelector').value);
-            try {
-                await updateDoc(doc(db, "users", user.uid, "watchlist", String(id)), { userScore: newScore });
-                const index = allAnime.findIndex(a => String(a.id) === String(id));
-                if(index !== -1) allAnime[index].userScore = newScore;
-                closeModal('rateModal');
-                const activeTab = document.querySelector('.filter-btn.active').getAttribute('data-filter');
-                renderList(activeTab);
-            } catch (e) { alert("Error"); }
+        window.updateSeason = async function(id, change) {
+            const anime = allAnime.find(a => String(a.id) === String(id));
+            if(!anime) return;
+            let newVal = (anime.season || 1) + change;
+            if(newVal < 1) return;
+            if (navigator.vibrate) navigator.vibrate(40); 
+            await updateDoc(doc(db, "users", auth.currentUser.uid, "watchlist", String(id)), { season: newVal });
+            anime.season = newVal;
+            renderList(document.querySelector('.filter-btn.active').dataset.filter);
         };
 
         window.updateEp = async function(id, change) {
-            const user = auth.currentUser;
-            const index = allAnime.findIndex(a => String(a.id) === String(id));
-            if(index === -1) return;
-            let anime = allAnime[index];
+            const anime = allAnime.find(a => String(a.id) === String(id));
+            if(!anime) return;
             let current = anime.watchedEpisodes || 0;
             const total = anime.totalEpisodes || anime.episodes || 0;
             let newVal = current + change;
-            if(newVal < 0) return;
-            if(total > 0 && newVal > total) return;
-            let newStatus = anime.status;
+            if(newVal < 0 || (total > 0 && newVal > total)) return;
+            if (navigator.vibrate) navigator.vibrate(40);
+            
             if (total > 0 && newVal === total && anime.status !== 'completed') {
-                if(confirm("Completed?")) newStatus = 'completed';
+                document.getElementById('pendingCompId').value = id;
+                document.getElementById('pendingCompVal').value = newVal;
+                document.getElementById('completedTitle').innerText = `Mark "${anime.title}" as Completed?`;
+                document.getElementById('completedModal').classList.add('show');
+                return;
             }
-            try {
-                await updateDoc(doc(db, "users", user.uid, "watchlist", String(id)), { watchedEpisodes: newVal, status: newStatus });
-                anime.watchedEpisodes = newVal;
-                anime.status = newStatus;
-                const activeTab = document.querySelector('.filter-btn.active').getAttribute('data-filter');
-                renderList(activeTab);
-            } catch (e) { console.error(e); }
+            await updateDoc(doc(db, "users", auth.currentUser.uid, "watchlist", String(id)), { watchedEpisodes: newVal });
+            anime.watchedEpisodes = newVal;
+            renderList(document.querySelector('.filter-btn.active').dataset.filter);
         };
 
-        window.closeModal = function(id) { document.getElementById(id).classList.remove('show'); };
-        window.filterList = function(status, btn) {
+        window.confirmCompletion = async () => {
+            const id = document.getElementById('pendingCompId').value;
+            const newVal = parseInt(document.getElementById('pendingCompVal').value);
+            const anime = allAnime.find(a => String(a.id) === String(id));
+            await updateDoc(doc(db, "users", auth.currentUser.uid, "watchlist", String(id)), { watchedEpisodes: newVal, status: 'completed' });
+            anime.watchedEpisodes = newVal;
+            anime.status = 'completed';
+            closeModal('completedModal');
+            renderList(document.querySelector('.filter-btn.active').dataset.filter);
+        };
+
+        window.openRateModal = (id) => {
+            const anime = allAnime.find(a => String(a.id) === String(id));
+            document.getElementById('rateId').value = id;
+            document.getElementById('rateTitle').innerText = anime.title;
+            tempSelectedScore = anime.userScore || 0;
+            const grid = document.getElementById('ratingOptions');
+            grid.innerHTML = '';
+            for(let i=1; i<=10; i++) {
+                const item = document.createElement('div');
+                item.className = `rating-item ${i === tempSelectedScore ? 'selected' : ''}`;
+                item.innerText = i;
+                item.onclick = () => {
+                    tempSelectedScore = i;
+                    document.querySelectorAll('.rating-item').forEach(el => el.classList.remove('selected'));
+                    item.classList.add('selected');
+                };
+                grid.appendChild(item);
+            }
+            document.getElementById('rateModal').classList.add('show');
+        };
+
+        window.saveRating = async () => {
+            const id = document.getElementById('rateId').value;
+            await updateDoc(doc(db, "users", auth.currentUser.uid, "watchlist", String(id)), { userScore: tempSelectedScore });
+            const anime = allAnime.find(a => String(a.id) === String(id));
+            if(anime) anime.userScore = tempSelectedScore;
+            closeModal('rateModal');
+            renderList(document.querySelector('.filter-btn.active').dataset.filter);
+        };
+
+        window.openDeleteModal = (id, title) => {
+            document.getElementById('deleteId').value = id;
+            document.getElementById('deleteTitle').innerText = `Remove "${title}"?`;
+            document.getElementById('deleteModal').classList.add('show');
+        };
+
+        window.confirmDelete = async () => {
+            const id = document.getElementById('deleteId').value;
+            await deleteDoc(doc(db, "users", auth.currentUser.uid, "watchlist", String(id)));
+            allAnime = allAnime.filter(a => String(a.id) !== String(id));
+            closeModal('deleteModal');
+            renderList('all');
+        };
+
+        window.closeModal = (id) => document.getElementById(id).classList.remove('show');
+        window.filterList = (status, btn) => {
             document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
             btn.classList.add('active');
             renderList(status);
