@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Login - AnimeExplorer</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    
     <style>
         :root {
             --primary: #7c4dff;
@@ -24,12 +23,9 @@
             background-color: var(--bg-dark);
             color: white;
             overflow: hidden;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            display: flex; align-items: center; justify-content: center;
         }
 
-        /* --- Animated Mesh Background --- */
         .bg-container {
             position: fixed; inset: 0; z-index: -1;
             background: radial-gradient(circle at 50% 50%, #12121c 0%, #050507 100%);
@@ -48,7 +44,6 @@
             100% { transform: translate(150px, 100px) scale(1.3); }
         }
 
-        /* --- Login Card Design --- */
         .login-card {
             background: var(--glass-bg);
             backdrop-filter: blur(30px);
@@ -56,8 +51,7 @@
             border: 1px solid var(--glass-border);
             border-radius: 35px;
             padding: 50px 40px;
-            width: 90%;
-            max-width: 420px;
+            width: 90%; max-width: 420px;
             text-align: center;
             position: relative;
             box-shadow: 0 40px 100px rgba(0, 0, 0, 0.5);
@@ -71,21 +65,20 @@
 
         .brand-logo {
             font-size: 36px; font-weight: 800;
-            background: linear-gradient(135deg, #fff 0%, var(--primary-light) 100%);
+            background: linear-gradient(135deg, #fff 0%, #b39dff 100%);
             -webkit-background-clip: text; -webkit-text-fill-color: transparent;
             margin-bottom: 8px; letter-spacing: -1.5px;
         }
 
         .subtitle { color: rgba(255,255,255,0.5); font-size: 14px; margin-bottom: 35px; }
 
-        /* --- Stylish Inputs --- */
         .auth-form { display: flex; flex-direction: column; gap: 18px; }
         
         .input-group { position: relative; text-align: left; }
-        .input-group i { 
+        .input-group .field-icon { 
             position: absolute; left: 18px; top: 50%; 
             transform: translateY(-50%); color: rgba(255,255,255,0.3);
-            transition: 0.3s;
+            transition: 0.3s; pointer-events: none;
         }
 
         .input-group input {
@@ -93,52 +86,75 @@
             background: rgba(255,255,255,0.04);
             border: 1px solid transparent; border-radius: 18px;
             color: white; font-size: 15px; transition: 0.4s;
-            outline: none;
+            outline: none; font-family: inherit;
         }
-
+        .input-group input::placeholder { color: rgba(255,255,255,0.25); }
         .input-group input:focus {
             background: rgba(255,255,255,0.08);
             border-color: var(--primary);
             box-shadow: 0 0 20px rgba(124, 77, 255, 0.2);
         }
 
-        .input-group input:focus + i { color: var(--primary); }
+        .eye-btn {
+            position: absolute; right: 16px; top: 50%;
+            transform: translateY(-50%);
+            background: none; border: none;
+            color: rgba(255,255,255,0.3);
+            cursor: pointer; font-size: 14px; padding: 4px;
+            transition: color 0.2s;
+        }
+        .eye-btn:hover { color: var(--primary); }
 
-        /* --- Buttons --- */
         .login-btn {
             background: var(--primary);
             color: white; border: none; padding: 16px;
             border-radius: 18px; font-weight: 700; font-size: 16px;
             cursor: pointer; transition: 0.3s;
             box-shadow: 0 10px 25px var(--primary-glow);
-            margin-top: 10px;
+            margin-top: 10px; font-family: inherit; width: 100%;
+            display: flex; align-items: center; justify-content: center; gap: 8px;
         }
+        .login-btn:hover { transform: translateY(-3px); box-shadow: 0 15px 35px var(--primary-glow); }
+        .login-btn:active { transform: scale(0.98); }
+        .login-btn:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
 
-        .login-btn:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 15px 35px var(--primary-glow);
+        .btn-spinner {
+            display: none; width: 16px; height: 16px;
+            border: 2px solid rgba(255,255,255,0.3);
+            border-top-color: white; border-radius: 50%;
+            animation: spin 0.7s linear infinite;
         }
-
-        .divider {
-            display: flex; align-items: center; margin: 30px 0;
-            color: rgba(255,255,255,0.2); font-size: 12px; font-weight: 600;
-        }
-        .divider::before, .divider::after { content: ""; flex: 1; height: 1px; background: rgba(255,255,255,0.1); margin: 0 15px; }
-
-        .google-btn {
-            background: white; color: #000;
-            width: 100%; padding: 16px; border-radius: 18px;
-            font-weight: 700; display: flex; align-items: center;
-            justify-content: center; gap: 12px; border: none;
-            cursor: pointer; transition: 0.3s;
-        }
-
-        .google-btn:hover { background: #f0f0f0; transform: scale(1.02); }
+        @keyframes spin { to { transform: rotate(360deg); } }
 
         #status {
-            margin-top: 20px; font-size: 13px; font-weight: 500;
-            min-height: 20px; color: var(--primary-light);
+            margin-top: 20px; font-size: 13px; font-weight: 600; min-height: 20px;
         }
+        #status.error   { color: #ff6b6b; }
+        #status.info    { color: #b39dff; }
+        #status.success { color: #4caf50; }
+
+        /* Verify warning box */
+        .verify-warning {
+            display: none;
+            background: rgba(255,152,0,0.1);
+            border: 1px solid rgba(255,152,0,0.3);
+            border-radius: 14px; padding: 14px 16px;
+            margin-top: 16px; text-align: left;
+        }
+        .verify-warning.show { display: block; }
+        .verify-warning p {
+            font-size: 13px; color: #ffb74d; line-height: 1.5;
+        }
+        .resend-verify-btn {
+            margin-top: 10px;
+            background: transparent;
+            border: 1px solid rgba(255,152,0,0.4);
+            color: #ffb74d; padding: 8px 16px;
+            border-radius: 10px; font-size: 12px; font-weight: 700;
+            cursor: pointer; font-family: inherit; transition: 0.2s;
+        }
+        .resend-verify-btn:active { background: rgba(255,152,0,0.1); }
+        .resend-verify-btn:disabled { opacity: 0.4; cursor: not-allowed; }
 
         .footer-link {
             margin-top: 30px; font-size: 14px; color: rgba(255,255,255,0.4);
@@ -160,23 +176,30 @@
 
         <div class="auth-form">
             <div class="input-group">
-                <i class="fas fa-envelope"></i>
-                <input type="email" id="email" placeholder="Email Address">
+                <input type="email" id="email" placeholder="Email Address" autocomplete="email">
+                <i class="fas fa-envelope field-icon"></i>
             </div>
             <div class="input-group">
-                <i class="fas fa-lock"></i>
-                <input type="password" id="password" placeholder="Password">
+                <input type="password" id="password" placeholder="Password" autocomplete="current-password">
+                <i class="fas fa-lock field-icon"></i>
+                <button class="eye-btn" id="eyeBtn" type="button" tabindex="-1">
+                    <i class="fa-regular fa-eye" id="eyeIcon"></i>
+                </button>
             </div>
-            <button id="emailLoginBtn" class="login-btn">Sign In</button>
+            <button id="loginBtn" class="login-btn">
+                <span id="btnText">Sign In</span>
+                <div class="btn-spinner" id="btnSpinner"></div>
+            </button>
         </div>
 
-        <div class="divider">OR CONTINUE WITH</div>
+        <!-- Email not verified warning -->
+        <div class="verify-warning" id="verifyWarning">
+            <p>⚠️ Your email is not verified yet. Please check your inbox and click the verification link.</p>
+            <button class="resend-verify-btn" id="resendVerifyBtn" onclick="resendVerification()">
+                Resend Verification Email
+            </button>
+        </div>
 
-        <button id="loginBtn" class="google-btn">
-            <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" width="22">
-            <span>Google Account</span>
-        </button>
-        
         <p id="status"></p>
 
         <div class="footer-link">
@@ -186,8 +209,8 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getAuth, GoogleAuthProvider, signInWithRedirect, getRedirectResult, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-        import { getFirestore, doc, setDoc, getDoc, updateDoc, runTransaction } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { getAuth, signInWithEmailAndPassword, sendEmailVerification, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+        import { getFirestore, doc, setDoc, getDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyDLd3TW-y89lwShUmcIHw3YGzDjo4cg3y4",
@@ -198,74 +221,133 @@
             appId: "1:673605765684:web:a6f851e0d79836b79b1861"
         };
 
-        const app = initializeApp(firebaseConfig);
+        const app  = initializeApp(firebaseConfig);
         const auth = getAuth(app);
-        const db = getFirestore(app);
-        const provider = new GoogleAuthProvider();
-        
-        const status = document.getElementById('status');
+        const db   = getFirestore(app);
 
-        // 1. Email Login logic
-        document.getElementById('emailLoginBtn').addEventListener('click', async () => {
-            const email = document.getElementById('email').value;
-            const password = document.getElementById('password').value;
-            if(!email || !password) return status.innerText = "Please fill all fields";
-            
-            status.innerText = "Authenticating...";
-            try {
-                const userCredential = await signInWithEmailAndPassword(auth, email, password);
-                await saveUser(userCredential.user);
-                window.location.href = "index.html";
-            } catch (e) { status.innerText = "Error: " + e.message; }
+        const loginBtn        = document.getElementById('loginBtn');
+        const btnText         = document.getElementById('btnText');
+        const btnSpinner      = document.getElementById('btnSpinner');
+        const status          = document.getElementById('status');
+        const eyeBtn          = document.getElementById('eyeBtn');
+        const eyeIcon         = document.getElementById('eyeIcon');
+        const pwdInput        = document.getElementById('password');
+        const verifyWarning   = document.getElementById('verifyWarning');
+        const resendVerifyBtn = document.getElementById('resendVerifyBtn');
+
+        let unverifiedUser = null;
+
+        // Password show/hide
+        eyeBtn.onclick = () => {
+            const show = pwdInput.type === 'password';
+            pwdInput.type = show ? 'text' : 'password';
+            eyeIcon.className = show ? 'fa-regular fa-eye-slash' : 'fa-regular fa-eye';
+        };
+
+        // Enter key
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') loginBtn.click();
         });
 
-        // 2. Google Redirect Result
-        getRedirectResult(auth).then(async (result) => {
-            if (result) {
-                status.innerText = "Synchronizing data...";
-                await saveUser(result.user);
-                window.location.href = "index.html";
+        function setLoading(on) {
+            loginBtn.disabled = on;
+            btnText.style.display = on ? 'none' : 'inline';
+            btnSpinner.style.display = on ? 'block' : 'none';
+        }
+
+        function setStatus(msg, type) {
+            status.textContent = msg;
+            status.className = type;
+        }
+
+        loginBtn.addEventListener('click', async () => {
+            const email = document.getElementById('email').value.trim();
+            const pwd   = pwdInput.value;
+
+            if (!email || !pwd) {
+                setStatus('Please fill in all fields.', 'error'); return;
+            }
+
+            setLoading(true);
+            setStatus('Authenticating...', 'info');
+            verifyWarning.classList.remove('show');
+
+            try {
+                const cred = await signInWithEmailAndPassword(auth, email, pwd);
+                const user = cred.user;
+
+                // ── EMAIL VERIFIED CHECK ──
+                if (!user.emailVerified) {
+                    unverifiedUser = user;
+                    await signOut(auth); // logout kar do
+                    setLoading(false);
+                    setStatus('', '');
+                    verifyWarning.classList.add('show');
+                    return;
+                }
+
+                // Verified — profile update karo
+                await saveUser(user);
+                setStatus('Welcome back! Redirecting...', 'info');
+                setTimeout(() => window.location.href = 'index.html', 600);
+
+            } catch (e) {
+                setLoading(false);
+                const msg =
+                    e.code === 'auth/invalid-credential' || e.code === 'auth/wrong-password'
+                        ? 'Incorrect email or password.' :
+                    e.code === 'auth/user-not-found'
+                        ? 'No account found with this email.' :
+                    e.code === 'auth/too-many-requests'
+                        ? 'Too many attempts. Try again later.' :
+                    'Something went wrong. Please try again.';
+                setStatus(msg, 'error');
             }
         });
 
-        document.getElementById('loginBtn').addEventListener('click', () => {
-            signInWithRedirect(auth, provider);
-        });
-
-        // 3. User Sync Logic with Sequential ID
         async function saveUser(user) {
             const userRef = doc(db, "users", user.uid);
             const snap = await getDoc(userRef);
-
             if (snap.exists()) {
                 await updateDoc(userRef, { isOnline: true });
-            } else {
-                let customId = "1000001";
-                try {
-                    customId = await runTransaction(db, async (transaction) => {
-                        const counterRef = doc(db, "settings", "userCounter");
-                        const counterDoc = await transaction.get(counterRef);
-                        let nextId = 1000001;
-                        if (counterDoc.exists()) {
-                            nextId = counterDoc.data().lastId + 1;
-                        }
-                        transaction.set(counterRef, { lastId: nextId });
-                        return String(nextId);
-                    });
-                } catch (e) { customId = Date.now().toString().slice(-7); }
-
-                await setDoc(userRef, {
-                    uid: user.uid,
-                    customId: customId,
-                    username: user.displayName || user.email.split('@')[0],
-                    email: user.email,
-                    avatar: user.photoURL || `https://ui-avatars.com/api/?name=${user.email}&background=7c4dff&color=fff`,
-                    isOnline: true,
-                    xp: 0,
-                    joinedAt: new Date().toLocaleDateString()
-                });
             }
         }
+
+        // Resend verification
+        let resendCooldown = false;
+        window.resendVerification = async () => {
+            if (resendCooldown) return;
+
+            // Re-login karke verification bhejo
+            const email = document.getElementById('email').value.trim();
+            const pwd   = pwdInput.value;
+
+            resendVerifyBtn.disabled = true;
+            resendCooldown = true;
+
+            try {
+                const cred = await signInWithEmailAndPassword(auth, email, pwd);
+                await sendEmailVerification(cred.user);
+                await signOut(auth);
+                setStatus('Verification email sent! Check your inbox.', 'success');
+            } catch(e) {
+                setStatus('Could not resend. Try again later.', 'error');
+            }
+
+            // 60 second cooldown
+            let secs = 60;
+            resendVerifyBtn.innerText = `Resend (${secs}s)`;
+            const timer = setInterval(() => {
+                secs--;
+                resendVerifyBtn.innerText = `Resend (${secs}s)`;
+                if (secs <= 0) {
+                    clearInterval(timer);
+                    resendVerifyBtn.disabled = false;
+                    resendVerifyBtn.innerText = "Resend Verification Email";
+                    resendCooldown = false;
+                }
+            }, 1000);
+        };
     </script>
 </body>
 </html>
