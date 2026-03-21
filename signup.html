@@ -131,7 +131,6 @@
         }
         #status.error { color: #ff6b6b; }
         #status.info  { color: #b39dff; }
-        #status.success { color: #4caf50; }
 
         /* Verification sent screen */
         .verify-screen {
@@ -179,7 +178,6 @@
         <div class="brand-logo">AnimeExplorer</div>
         <p class="subtitle">Create an account to start exploring</p>
 
-        <!-- Signup Form -->
         <div id="signupForm">
             <div class="auth-form">
                 <div class="input-group">
@@ -210,7 +208,6 @@
             </div>
         </div>
 
-        <!-- Verification Sent Screen -->
         <div class="verify-screen" id="verifyScreen">
             <div class="verify-icon">📧</div>
             <h3>Check your email!</h3>
@@ -233,7 +230,13 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getAuth, createUserWithEmailAndPassword, sendEmailVerification } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+        import { 
+            getAuth, 
+            createUserWithEmailAndPassword, 
+            sendEmailVerification, 
+            updateProfile,
+            signOut 
+        } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
         import { getFirestore, doc, setDoc, runTransaction } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
         const firebaseConfig = {
@@ -253,34 +256,16 @@
         const signupBtn  = document.getElementById('signupBtn');
         const btnText    = document.getElementById('btnText');
         const btnSpinner = document.getElementById('btnSpinner');
-        const eyeBtn     = document.getElementById('eyeBtn');
-        const eyeIcon    = document.getElementById('eyeIcon');
         const pwdInput   = document.getElementById('password');
 
-        let createdUser = null;
+        let lastRegisteredUser = null;
 
-        // Password show/hide
-        eyeBtn.onclick = () => {
-            const show = pwdInput.type === 'password';
-            pwdInput.type = show ? 'text' : 'password';
-            eyeIcon.className = show ? 'fa-regular fa-eye-slash' : 'fa-regular fa-eye';
+        // Password hide/show toggle
+        document.getElementById('eyeBtn').onclick = () => {
+            const isPwd = pwdInput.type === 'password';
+            pwdInput.type = isPwd ? 'text' : 'password';
+            document.getElementById('eyeIcon').className = isPwd ? 'fa-regular fa-eye-slash' : 'fa-regular fa-eye';
         };
-
-        // Enter key
-        document.addEventListener('keydown', (e) => {
-            if (e.key === 'Enter') signupBtn.click();
-        });
-
-        function setLoading(on) {
-            signupBtn.disabled = on;
-            btnText.style.display = on ? 'none' : 'inline';
-            btnSpinner.style.display = on ? 'block' : 'none';
-        }
-
-        function setStatus(msg, type) {
-            status.textContent = msg;
-            status.className = type;
-        }
 
         signupBtn.addEventListener('click', async () => {
             const username = document.getElementById('username').value.trim();
@@ -288,102 +273,91 @@
             const password = pwdInput.value;
 
             if (!username || !email || !password) {
-                setStatus("Please fill all fields", "error"); return;
-            }
-            if (password.length < 6) {
-                setStatus("Password must be at least 6 characters", "error"); return;
+                alert("Please fill all fields!"); return;
             }
 
-            setLoading(true);
-            setStatus("Creating account...", "info");
+            signupBtn.disabled = true;
+            btnText.style.display = 'none';
+            btnSpinner.style.display = 'block';
+            status.innerText = "Processing...";
 
             try {
-                // 1. Firebase Auth
-                const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-                const user = userCredential.user;
-                createdUser = user;
+                // 1. Account Creation
+                const cred = await createUserWithEmailAndPassword(auth, email, password);
+                const user = cred.user;
+                lastRegisteredUser = user;
+                alert("Step 1: Account Created!");
 
-                // 2. Sequential ID
-                let customId = Date.now().toString().slice(-7);
+                // 2. Set Name
+                await updateProfile(user, { displayName: username });
+                alert("Step 2: Profile Name Set!");
+
+                // 3. Firestore ID Generation
+                let customId = "1000000001";
                 try {
                     customId = await runTransaction(db, async (transaction) => {
                         const counterRef = doc(db, "userCounter", "counter");
-                        const counterDoc = await transaction.get(counterRef);
+                        const counterSnap = await transaction.get(counterRef);
                         let nextId = 1000000001;
-                        if (counterDoc.exists()) {
-                            nextId = (counterDoc.data().count || 1000000000) + 1;
+                        if (counterSnap.exists()) {
+                            nextId = counterSnap.data().count + 1;
                         }
                         transaction.set(counterRef, { count: nextId });
                         return String(nextId);
                     });
-                } catch(e) { console.error("Counter error:", e); }
+                    alert("Step 3: Unique ID Generated: " + customId);
+                } catch(e) { 
+                    customId = "ID-" + Date.now().toString().slice(-6); 
+                }
 
-                // 3. Firestore Profile
+                // 4. Save to Firestore
                 await setDoc(doc(db, "users", user.uid), {
                     uid: user.uid,
-                    customId,
-                    username,
-                    email,
+                    customId: customId,
+                    username: username,
+                    email: email,
                     avatar: `https://ui-avatars.com/api/?name=${encodeURIComponent(username)}&background=7c4dff&color=fff`,
-                    xp: 0,
-                    coins: 0,
-                    isOnline: false,
                     joinedAt: new Date().toLocaleDateString(),
-                    bio: "Anime fan on AnimeExplorer!",
-                    isBanned: false,
-                    isVerified: false,
-                    activeBorder: "",
-                    banner: "",
-                    lastClaim: ""
+                    xp: 0,
+                    isOnline: false
                 });
+                alert("Step 4: Profile Data Saved!");
 
-                // 4. Email Verification bhejo
+                // 5. Send Verification
                 await sendEmailVerification(user);
+                alert("Step 5: Verification Email Sent Successfully!");
 
-                // 5. Verify screen dikhao
+                // 6. Logout (security) and Show Screen
+                await signOut(auth);
                 document.getElementById('signupForm').style.display = 'none';
                 document.getElementById('sentEmailText').innerText = email;
                 document.getElementById('verifyScreen').style.display = 'block';
 
             } catch (error) {
-                setLoading(false);
-                const msg =
-                    error.code === 'auth/email-already-in-use' ? 'This email is already registered.' :
-                    error.code === 'auth/invalid-email'        ? 'Invalid email address.' :
-                    error.code === 'auth/weak-password'        ? 'Password is too weak.' :
-                    error.message;
-                setStatus(msg, "error");
+                signupBtn.disabled = false;
+                btnText.style.display = 'inline';
+                btnSpinner.style.display = 'none';
+                
+                // --- ASLI ERROR YAHAN DIKHEGA ---
+                alert("FIREBASE ERROR: " + error.code + "\n" + error.message);
+                status.innerText = error.message;
             }
         });
 
-        // Resend email
-        let resendCooldown = false;
+        // Resend logic
         window.resendEmail = async () => {
-            if (resendCooldown || !createdUser) return;
-            const resendBtn    = document.getElementById('resendBtn');
-            const resendStatus = document.getElementById('resendStatus');
-            resendBtn.disabled = true;
-            resendCooldown = true;
-            try {
-                await sendEmailVerification(createdUser);
-                resendStatus.innerText = "Email resent! Check your inbox.";
-            } catch(e) {
-                resendStatus.innerText = "Please wait before resending.";
+            if (!lastRegisteredUser) {
+                alert("No user found. Please refresh and try again.");
+                return;
             }
-            // 60 second cooldown
-            let secs = 60;
-            resendBtn.innerText = `Resend (${secs}s)`;
-            const timer = setInterval(() => {
-                secs--;
-                resendBtn.innerText = `Resend (${secs}s)`;
-                if (secs <= 0) {
-                    clearInterval(timer);
-                    resendBtn.disabled = false;
-                    resendBtn.innerText = "Resend Email";
-                    resendCooldown = false;
-                    resendStatus.innerText = "";
-                }
-            }, 1000);
+            try {
+                // NOTE: Resend ke liye user signed in hona chahiye
+                // Agar bina sign in ke resend na ho, toh login page par alert dena hoga
+                await sendEmailVerification(lastRegisteredUser);
+                alert("Verification email resent!");
+            } catch(e) {
+                alert("Resend failed: " + e.message);
+            }
         };
     </script>
 </body>
