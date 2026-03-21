@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Join - AnimeExplorer</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    
     <style>
         :root {
             --primary: #7c4dff;
@@ -27,7 +26,6 @@
             display: flex; align-items: center; justify-content: center;
         }
 
-        /* --- Animated Mesh Background --- */
         .bg-container {
             position: fixed; inset: 0; z-index: -1;
             background: radial-gradient(circle at 50% 50%, #12121c 0%, #050507 100%);
@@ -46,7 +44,6 @@
             100% { transform: translate(-100px, 150px) scale(1.2); }
         }
 
-        /* --- Signup Card Design --- */
         .card {
             background: var(--glass-bg);
             backdrop-filter: blur(30px);
@@ -68,21 +65,20 @@
 
         .brand-logo {
             font-size: 32px; font-weight: 800;
-            background: linear-gradient(135deg, #fff 0%, var(--primary-light) 100%);
+            background: linear-gradient(135deg, #fff 0%, #b39dff 100%);
             -webkit-background-clip: text; -webkit-text-fill-color: transparent;
             margin-bottom: 5px;
         }
 
         .subtitle { color: rgba(255,255,255,0.4); font-size: 14px; margin-bottom: 30px; }
 
-        /* --- Stylish Inputs --- */
         .auth-form { display: flex; flex-direction: column; gap: 16px; }
         
         .input-group { position: relative; text-align: left; }
-        .input-group i { 
+        .input-group i.field-icon { 
             position: absolute; left: 18px; top: 50%; 
             transform: translateY(-50%); color: rgba(255,255,255,0.3);
-            font-size: 14px;
+            font-size: 14px; pointer-events: none;
         }
 
         .input-group input {
@@ -90,37 +86,81 @@
             background: rgba(255,255,255,0.04);
             border: 1px solid transparent; border-radius: 16px;
             color: white; font-size: 14px; transition: 0.4s;
-            outline: none;
+            outline: none; font-family: inherit;
         }
-
+        .input-group input::placeholder { color: rgba(255,255,255,0.25); }
         .input-group input:focus {
             background: rgba(255,255,255,0.08);
             border-color: var(--primary);
             box-shadow: 0 0 15px rgba(124, 77, 255, 0.2);
         }
 
-        .input-group input:focus + i { color: var(--primary); }
+        .eye-btn {
+            position: absolute; right: 16px; top: 50%;
+            transform: translateY(-50%);
+            background: none; border: none;
+            color: rgba(255,255,255,0.3);
+            cursor: pointer; font-size: 14px; padding: 4px;
+            transition: color 0.2s;
+        }
+        .eye-btn:hover { color: var(--primary); }
 
-        /* --- Signup Button --- */
         .signup-btn {
             background: var(--primary);
             color: white; border: none; padding: 16px;
             border-radius: 16px; font-weight: 700; font-size: 16px;
             cursor: pointer; transition: 0.3s;
             box-shadow: 0 10px 20px var(--primary-glow);
-            margin-top: 10px;
+            margin-top: 10px; font-family: inherit; width: 100%;
+            display: flex; align-items: center; justify-content: center; gap: 8px;
         }
+        .signup-btn:hover { transform: translateY(-2px); filter: brightness(1.1); }
+        .signup-btn:active { transform: scale(0.98); }
+        .signup-btn:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
 
-        .signup-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 15px 30px var(--primary-glow);
-            filter: brightness(1.1);
+        .btn-spinner {
+            display: none; width: 16px; height: 16px;
+            border: 2px solid rgba(255,255,255,0.3);
+            border-top-color: white; border-radius: 50%;
+            animation: spin 0.7s linear infinite;
         }
+        @keyframes spin { to { transform: rotate(360deg); } }
 
         #status {
-            margin-top: 18px; font-size: 13px; font-weight: 500;
-            min-height: 20px;
+            margin-top: 18px; font-size: 13px; font-weight: 500; min-height: 20px;
         }
+        #status.error { color: #ff6b6b; }
+        #status.info  { color: #b39dff; }
+        #status.success { color: #4caf50; }
+
+        /* Verification sent screen */
+        .verify-screen {
+            display: none;
+            text-align: center;
+            padding: 10px 0;
+        }
+        .verify-icon {
+            width: 70px; height: 70px;
+            background: rgba(76,175,80,0.15);
+            border: 1px solid rgba(76,175,80,0.3);
+            border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 30px; margin: 0 auto 20px;
+        }
+        .verify-screen h3 { font-size: 20px; margin-bottom: 10px; }
+        .verify-screen p { color: rgba(255,255,255,0.5); font-size: 13px; line-height: 1.6; }
+        .verify-email-text { color: var(--primary); font-weight: 700; }
+
+        .resend-btn {
+            margin-top: 20px;
+            background: transparent;
+            border: 1px solid rgba(124,77,255,0.4);
+            color: var(--primary); padding: 10px 20px;
+            border-radius: 12px; font-size: 13px; font-weight: 700;
+            cursor: pointer; font-family: inherit; transition: 0.2s;
+        }
+        .resend-btn:active { background: rgba(124,77,255,0.1); }
+        .resend-btn:disabled { opacity: 0.4; cursor: not-allowed; }
 
         .footer-link {
             margin-top: 25px; font-size: 14px; color: rgba(255,255,255,0.4);
@@ -139,32 +179,61 @@
         <div class="brand-logo">AnimeExplorer</div>
         <p class="subtitle">Create an account to start exploring</p>
 
-        <div class="auth-form">
-            <div class="input-group">
-                <i class="fas fa-user"></i>
-                <input type="text" id="username" placeholder="Your Name">
+        <!-- Signup Form -->
+        <div id="signupForm">
+            <div class="auth-form">
+                <div class="input-group">
+                    <input type="text" id="username" placeholder="Your Name">
+                    <i class="fas fa-user field-icon"></i>
+                </div>
+                <div class="input-group">
+                    <input type="email" id="email" placeholder="Email Address">
+                    <i class="fas fa-envelope field-icon"></i>
+                </div>
+                <div class="input-group">
+                    <input type="password" id="password" placeholder="Password (Min 6 chars)">
+                    <i class="fas fa-lock field-icon"></i>
+                    <button class="eye-btn" id="eyeBtn" type="button">
+                        <i class="fa-regular fa-eye" id="eyeIcon"></i>
+                    </button>
+                </div>
+                <button id="signupBtn" class="signup-btn">
+                    <span id="btnText">Get Started</span>
+                    <div class="btn-spinner" id="btnSpinner"></div>
+                </button>
             </div>
-            <div class="input-group">
-                <i class="fas fa-envelope"></i>
-                <input type="email" id="email" placeholder="Email Address">
-            </div>
-            <div class="input-group">
-                <i class="fas fa-lock"></i>
-                <input type="password" id="password" placeholder="Password (Min 6 chars)">
-            </div>
-            <button id="signupBtn" class="signup-btn">Get Started</button>
-        </div>
-        
-        <p id="status"></p>
 
-        <div class="footer-link">
-            Already have an account? <a href="login.html">Sign In</a>
+            <p id="status"></p>
+
+            <div class="footer-link">
+                Already have an account? <a href="login.html">Sign In</a>
+            </div>
+        </div>
+
+        <!-- Verification Sent Screen -->
+        <div class="verify-screen" id="verifyScreen">
+            <div class="verify-icon">📧</div>
+            <h3>Check your email!</h3>
+            <p>
+                We sent a verification link to<br>
+                <span class="verify-email-text" id="sentEmailText"></span>
+            </p>
+            <p style="margin-top: 12px;">
+                Click the link in the email to verify your account, then come back and sign in.
+            </p>
+            <button class="resend-btn" id="resendBtn" onclick="resendEmail()">
+                Resend Email
+            </button>
+            <p id="resendStatus" style="font-size:12px; margin-top:10px; color:#b39dff;"></p>
+            <div class="footer-link">
+                <a href="login.html">Go to Sign In →</a>
+            </div>
         </div>
     </div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getAuth, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+        import { getAuth, createUserWithEmailAndPassword, sendEmailVerification } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
         import { getFirestore, doc, setDoc, runTransaction } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
         const firebaseConfig = {
@@ -176,74 +245,146 @@
             appId: "1:673605765684:web:a6f851e0d79836b79b1861"
         };
 
-        const app = initializeApp(firebaseConfig);
+        const app  = initializeApp(firebaseConfig);
         const auth = getAuth(app);
-        const db = getFirestore(app);
+        const db   = getFirestore(app);
 
-        const status = document.getElementById('status');
-        const signupBtn = document.getElementById('signupBtn');
+        const status     = document.getElementById('status');
+        const signupBtn  = document.getElementById('signupBtn');
+        const btnText    = document.getElementById('btnText');
+        const btnSpinner = document.getElementById('btnSpinner');
+        const eyeBtn     = document.getElementById('eyeBtn');
+        const eyeIcon    = document.getElementById('eyeIcon');
+        const pwdInput   = document.getElementById('password');
+
+        let createdUser = null;
+
+        // Password show/hide
+        eyeBtn.onclick = () => {
+            const show = pwdInput.type === 'password';
+            pwdInput.type = show ? 'text' : 'password';
+            eyeIcon.className = show ? 'fa-regular fa-eye-slash' : 'fa-regular fa-eye';
+        };
+
+        // Enter key
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') signupBtn.click();
+        });
+
+        function setLoading(on) {
+            signupBtn.disabled = on;
+            btnText.style.display = on ? 'none' : 'inline';
+            btnSpinner.style.display = on ? 'block' : 'none';
+        }
+
+        function setStatus(msg, type) {
+            status.textContent = msg;
+            status.className = type;
+        }
 
         signupBtn.addEventListener('click', async () => {
             const username = document.getElementById('username').value.trim();
-            const email = document.getElementById('email').value.trim();
-            const password = document.getElementById('password').value.trim();
+            const email    = document.getElementById('email').value.trim();
+            const password = pwdInput.value;
 
-            if(!username || !email || !password) {
-                updateStatus("Please fill all fields", "#ff5252");
-                return;
+            if (!username || !email || !password) {
+                setStatus("Please fill all fields", "error"); return;
+            }
+            if (password.length < 6) {
+                setStatus("Password must be at least 6 characters", "error"); return;
             }
 
-            try {
-                signupBtn.disabled = true;
-                signupBtn.innerText = "Creating Account...";
-                updateStatus("Processing...", "#fff");
+            setLoading(true);
+            setStatus("Creating account...", "info");
 
-                // 1. Auth Creation
+            try {
+                // 1. Firebase Auth
                 const userCredential = await createUserWithEmailAndPassword(auth, email, password);
                 const user = userCredential.user;
+                createdUser = user;
 
-                // 2. Sequential ID Logic (1000001+)
-                let customId = "1000001";
+                // 2. Sequential ID
+                let customId = Date.now().toString().slice(-7);
                 try {
                     customId = await runTransaction(db, async (transaction) => {
-                        const counterRef = doc(db, "settings", "userCounter");
+                        const counterRef = doc(db, "userCounter", "counter");
                         const counterDoc = await transaction.get(counterRef);
-                        let nextId = 1000001;
+                        let nextId = 1000000001;
                         if (counterDoc.exists()) {
-                            nextId = counterDoc.data().lastId + 1;
+                            nextId = (counterDoc.data().count || 1000000000) + 1;
                         }
-                        transaction.set(counterRef, { lastId: nextId });
+                        transaction.set(counterRef, { count: nextId });
                         return String(nextId);
                     });
-                } catch (e) { customId = Date.now().toString().slice(-7); }
+                } catch(e) { console.error("Counter error:", e); }
 
                 // 3. Firestore Profile
                 await setDoc(doc(db, "users", user.uid), {
                     uid: user.uid,
-                    customId: customId,
-                    username: username,
-                    email: email,
-                    avatar: `https://ui-avatars.com/api/?name=${username}&background=7c4dff&color=fff`,
+                    customId,
+                    username,
+                    email,
+                    avatar: `https://ui-avatars.com/api/?name=${encodeURIComponent(username)}&background=7c4dff&color=fff`,
                     xp: 0,
-                    isOnline: true,
+                    coins: 0,
+                    isOnline: false,
                     joinedAt: new Date().toLocaleDateString(),
-                    bio: "Anime fan on AnimeExplorer!"
+                    bio: "Anime fan on AnimeExplorer!",
+                    isBanned: false,
+                    isVerified: false,
+                    activeBorder: "",
+                    banner: "",
+                    lastClaim: ""
                 });
 
-                updateStatus("Welcome! Redirecting...", "#4caf50");
-                setTimeout(() => window.location.href = "index.html", 1500);
+                // 4. Email Verification bhejo
+                await sendEmailVerification(user);
+
+                // 5. Verify screen dikhao
+                document.getElementById('signupForm').style.display = 'none';
+                document.getElementById('sentEmailText').innerText = email;
+                document.getElementById('verifyScreen').style.display = 'block';
 
             } catch (error) {
-                signupBtn.disabled = false;
-                signupBtn.innerText = "Get Started";
-                updateStatus(error.message, "#ff5252");
+                setLoading(false);
+                const msg =
+                    error.code === 'auth/email-already-in-use' ? 'This email is already registered.' :
+                    error.code === 'auth/invalid-email'        ? 'Invalid email address.' :
+                    error.code === 'auth/weak-password'        ? 'Password is too weak.' :
+                    error.message;
+                setStatus(msg, "error");
             }
         });
 
-        function updateStatus(msg, color) {
-            status.style.color = color;
-            status.innerText = msg;
-        }
+        // Resend email
+        let resendCooldown = false;
+        window.resendEmail = async () => {
+            if (resendCooldown || !createdUser) return;
+            const resendBtn    = document.getElementById('resendBtn');
+            const resendStatus = document.getElementById('resendStatus');
+            resendBtn.disabled = true;
+            resendCooldown = true;
+            try {
+                await sendEmailVerification(createdUser);
+                resendStatus.innerText = "Email resent! Check your inbox.";
+            } catch(e) {
+                resendStatus.innerText = "Please wait before resending.";
+            }
+            // 60 second cooldown
+            let secs = 60;
+            resendBtn.innerText = `Resend (${secs}s)`;
+            const timer = setInterval(() => {
+                secs--;
+                resendBtn.innerText = `Resend (${secs}s)`;
+                if (secs <= 0) {
+                    clearInterval(timer);
+                    resendBtn.disabled = false;
+                    resendBtn.innerText = "Resend Email";
+                    resendCooldown = false;
+                    resendStatus.innerText = "";
+                }
+            }, 1000);
+        };
     </script>
 </body>
 </html>
