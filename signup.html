@@ -179,15 +179,21 @@
     const generateCode = () => Math.floor(100000 + Math.random() * 900000).toString();
 
     async function sendOTPEmail(email, username, code) {
-        try {
-            const res = await fetch("/.netlify/functions/send-otp", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ email, username, code })
-            });
-            return res.ok;
-        } catch (e) { return false; }
+    try {
+        const response = await fetch("https://animeexplorer09.netlify.app/.netlify/functions/send-otp", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ email, username, code })
+        });
+        const result = await response.json();
+        console.log("API Response:", result); // Debugging ke liye
+        return result.success;
+    } catch (e) { 
+        console.error("Fetch Error:", e);
+        return false; 
     }
+}
+
 
     // --- SIGNUP LOGIC ---
     document.getElementById('signupBtn').onclick = async () => {
