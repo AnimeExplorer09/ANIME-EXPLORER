@@ -254,13 +254,11 @@
         appId: "1:673605765684:web:a6f851e0d79836b79b1861"
     };
 
-    // ── RESEND API KEY ──
-    const RESEND_API_KEY = "re_3ddgYL8v_DyeM8fzSyNPLTwMbWoiVWDdh";
-
     const app  = initializeApp(firebaseConfig);
     const auth = getAuth(app);
     const db   = getFirestore(app);
 
+    // --- UI ELEMENTS ---
     const signupBtn  = document.getElementById('signupBtn');
     const btnText    = document.getElementById('btnText');
     const btnSpinner = document.getElementById('btnSpinner');
@@ -268,74 +266,59 @@
     const eyeBtn     = document.getElementById('eyeBtn');
     const eyeIcon    = document.getElementById('eyeIcon');
     const pwdInput   = document.getElementById('password');
+    const otpInput   = document.getElementById('otpInput');
+    const otpScreen  = document.getElementById('otpScreen');
+    const signupForm = document.getElementById('signupForm');
 
     let currentEmail = '';
     let currentUID   = '';
     let resendCooldown = false;
 
-    // Eye toggle
-    eyeBtn.onclick = () => {
-        const show = pwdInput.type === 'password';
-        pwdInput.type = show ? 'text' : 'password';
-        eyeIcon.className = show ? 'fa-regular fa-eye-slash' : 'fa-regular fa-eye';
-    };
-
-    // Enter key
-    document.addEventListener('keydown', (e) => {
-        if (e.key === 'Enter') signupBtn.click();
-    });
-
-    function setLoading(on) {
+    // --- 1. UTILITY FUNCTIONS ---
+    const setLoading = (on) => {
         signupBtn.disabled = on;
         btnText.style.display = on ? 'none' : 'inline';
         btnSpinner.style.display = on ? 'block' : 'none';
-    }
+    };
 
-    function setStatus(msg, type) {
+    const setStatus = (msg, type) => {
         status.textContent = msg;
         status.className = type;
-    }
+    };
 
-    function setOtpStatus(msg, color) {
+    const setOtpStatus = (msg, color) => {
         const el = document.getElementById('otpStatus');
         el.textContent = msg;
         el.style.color = color;
-    }
+    };
 
-    // Generate 6-digit code
-    function generateCode() {
-        return Math.floor(100000 + Math.random() * 900000).toString();
-    }
+    const generateCode = () => Math.floor(100000 + Math.random() * 900000).toString();
 
-    // Resend se email bhejo
+    // Eye toggle logic
+    eyeBtn.onclick = () => {
+        const isPwd = pwdInput.type === 'password';
+        pwdInput.type = isPwd ? 'text' : 'password';
+        eyeIcon.className = isPwd ? 'fa-regular fa-eye-slash' : 'fa-regular fa-eye';
+    };
+
+    // --- 2. EMAIL SENDER (Via Netlify Backend) ---
     async function sendOTPEmail(email, username, code) {
-        const res = await fetch("https://api.resend.com/emails", {
-            method: "POST",
-            headers: {
-                "Authorization": `Bearer ${RESEND_API_KEY}`,
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify({
-                from: "onboarding@resend.dev",
-                to: email,
-                subject: "Your AnimeExplorer Verification Code",
-                html: `
-                    <div style="font-family:sans-serif; max-width:400px; margin:auto; padding:30px; background:#0f1014; border-radius:16px; color:white;">
-                        <h2 style="color:#7c4dff; margin-bottom:8px;">AnimeExplorer</h2>
-                        <p style="color:#aaa;">Hi <b style="color:white;">${username}</b>, welcome!</p>
-                        <p style="color:#aaa; margin-top:12px;">Your verification code is:</p>
-                        <div style="font-size:36px; font-weight:900; letter-spacing:10px; color:#7c4dff; margin:20px 0; text-align:center; background:rgba(124,77,255,0.1); padding:16px; border-radius:12px;">
-                            ${code}
-                        </div>
-                        <p style="color:#666; font-size:12px;">This code expires in 10 minutes. If you didn't sign up, ignore this email.</p>
-                    </div>
-                `
-            })
-        });
-        return res.ok;
+        try {
+            // Hum direct Resend API call nahi karenge (CORS issue), Netlify function ko call karenge
+            const response = await fetch("/.netlify/functions/send-otp", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ email, username, code })
+            });
+            const result = await response.json();
+            return result.success;
+        } catch (error) {
+            console.error("Mail Error:", error);
+            return false;
+        }
     }
 
-    // Signup button
+    // --- 3. MAIN SIGNUP PROCESS ---
     signupBtn.addEventListener('click', async () => {
         const username = document.getElementById('username').value.trim();
         const email    = document.getElementById('email').value.trim();
@@ -352,13 +335,13 @@
         setStatus("Creating account...", "info");
 
         try {
-            // 1. Firebase Auth
+            // A. Firebase Auth
             const userCredential = await createUserWithEmailAndPassword(auth, email, password);
             const user = userCredential.user;
             currentUID   = user.uid;
             currentEmail = email;
 
-            // 2. Sequential ID
+            // B. Generate Sequential ID
             let customId = Date.now().toString().slice(-7);
             try {
                 customId = await runTransaction(db, async (transaction) => {
@@ -371,9 +354,9 @@
                     transaction.set(counterRef, { count: nextId });
                     return String(nextId);
                 });
-            } catch(e) { console.error("Counter:", e); }
+            } catch(e) { console.warn("Counter error, using fallback ID"); }
 
-            // 3. Firestore profile — isVerified: false
+            // C. Create User Profile
             await setDoc(doc(db, "users", user.uid), {
                 uid: user.uid,
                 customId,
@@ -389,130 +372,107 @@
                 activeBorder: "", banner: "", lastClaim: ""
             });
 
-            // 4. OTP generate + Firestore mein save karo
+            // D. Generate OTP & Save to Firestore
             const code = generateCode();
             await setDoc(doc(db, "verificationCodes", user.uid), {
                 code,
                 email,
                 createdAt: new Date(),
-                expiresAt: new Date(Date.now() + 10 * 60 * 1000), // 10 min
+                expiresAt: new Date(Date.now() + 10 * 60 * 1000), // 10 Min Expiry
                 verified: false
             });
 
-            // 5. Email bhejo
+            // E. Send Email
             setStatus("Sending verification code...", "info");
             const sent = await sendOTPEmail(email, username, code);
 
-            if (!sent) {
-                setStatus("Failed to send email. Try again.", "error");
+            if (sent) {
+                signupForm.style.display = 'none';
+                document.getElementById('otpEmailText').innerText = email;
+                otpScreen.style.display = 'block';
+            } else {
+                setStatus("Email service error. Try resending.", "error");
                 setLoading(false);
-                return;
             }
-
-            // 6. OTP screen dikhao
-            document.getElementById('signupForm').style.display = 'none';
-            document.getElementById('otpEmailText').innerText = email;
-            document.getElementById('otpScreen').style.display = 'block';
 
         } catch (error) {
             setLoading(false);
-            const msg =
-                error.code === 'auth/email-already-in-use' ? 'This email is already registered.' :
-                error.code === 'auth/invalid-email'        ? 'Invalid email address.' :
-                error.code === 'auth/weak-password'        ? 'Password is too weak.' :
-                error.message;
+            const msg = error.code === 'auth/email-already-in-use' ? 'Email already registered.' : error.message;
             setStatus(msg, "error");
         }
     });
 
-    // OTP Verify
+    // --- 4. VERIFY OTP ---
     window.verifyOTP = async () => {
-        const code = document.getElementById('otpInput').value.trim();
+        const code = otpInput.value.trim();
         if (code.length !== 6) {
             setOtpStatus("Enter 6-digit code", "#ff6b6b"); return;
         }
 
-        const verifyBtn     = document.getElementById('verifyBtnText');
-        const verifySpinner = document.getElementById('verifySpinner');
-        verifyBtn.style.display    = 'none';
-        verifySpinner.style.display = 'block';
+        const vBtnText = document.getElementById('verifyBtnText');
+        const vSpinner = document.getElementById('verifySpinner');
+        vBtnText.style.display = 'none';
+        vSpinner.style.display = 'block';
 
         try {
             const snap = await getDoc(doc(db, "verificationCodes", currentUID));
-            if (!snap.exists()) {
-                setOtpStatus("Code expired. Resend karo.", "#ff6b6b");
-                verifyBtn.style.display    = 'inline';
-                verifySpinner.style.display = 'none';
-                return;
-            }
+            if (!snap.exists()) throw new Error("Code not found");
 
             const data = snap.data();
-
-            // Expiry check
             if (new Date() > data.expiresAt.toDate()) {
-                setOtpStatus("Code expired. Resend karo.", "#ff6b6b");
-                verifyBtn.style.display    = 'inline';
-                verifySpinner.style.display = 'none';
-                return;
-            }
-
-            if (data.code === code) {
-                // Verified!
-                await updateDoc(doc(db, "verificationCodes", currentUID), { verified: true });
+                setOtpStatus("Code expired. Resend it.", "#ff6b6b");
+            } else if (data.code === code) {
+                // SUCCESS: Mark Verified
                 await updateDoc(doc(db, "users", currentUID), { isVerified: true, isOnline: true });
+                await updateDoc(doc(db, "verificationCodes", currentUID), { verified: true });
                 setOtpStatus("✓ Verified! Redirecting...", "#4caf50");
-                setTimeout(() => window.location.href = "index.html", 1000);
+                setTimeout(() => window.location.href = "index.html", 1200);
             } else {
                 setOtpStatus("❌ Wrong code. Try again.", "#ff6b6b");
-                verifyBtn.style.display    = 'inline';
-                verifySpinner.style.display = 'none';
             }
         } catch(e) {
-            setOtpStatus("Error. Try again.", "#ff6b6b");
-            verifyBtn.style.display    = 'inline';
-            verifySpinner.style.display = 'none';
+            setOtpStatus("Verification failed.", "#ff6b6b");
+        } finally {
+            vBtnText.style.display = 'inline';
+            vSpinner.style.display = 'none';
         }
     };
 
-    // Resend code
+    // --- 5. RESEND CODE ---
     window.resendCode = async () => {
         if (resendCooldown) return;
         resendCooldown = true;
 
         const resendBtn = document.getElementById('resendBtn');
-        resendBtn.classList.add('disabled');
-
-        const username = document.getElementById('username')?.value || currentEmail.split('@')[0];
         const code = generateCode();
 
         try {
             await setDoc(doc(db, "verificationCodes", currentUID), {
-                code,
-                email: currentEmail,
+                code, email: currentEmail,
                 createdAt: new Date(),
                 expiresAt: new Date(Date.now() + 10 * 60 * 1000),
                 verified: false
             });
-            await sendOTPEmail(currentEmail, username, code);
-            setOtpStatus("New code sent! Check inbox.", "#4caf50");
-        } catch(e) {
-            setOtpStatus("Failed to resend. Try again.", "#ff6b6b");
+            await sendOTPEmail(currentEmail, "Explorer", code);
+            setOtpStatus("New code sent!", "#4caf50");
+            
+            let timer = 60;
+            const interval = setInterval(() => {
+                timer--;
+                resendBtn.innerText = `Wait (${timer}s)`;
+                resendBtn.style.opacity = "0.5";
+                if (timer <= 0) {
+                    clearInterval(interval);
+                    resendBtn.innerText = "Resend Code";
+                    resendBtn.style.opacity = "1";
+                    resendCooldown = false;
+                }
+            }, 1000);
+        } catch (e) {
+            resendCooldown = false;
         }
-
-        // 60 second cooldown
-        let secs = 60;
-        resendBtn.textContent = `Resend (${secs}s)`;
-        const timer = setInterval(() => {
-            secs--;
-            resendBtn.textContent = `Resend (${secs}s)`;
-            if (secs <= 0) {
-                clearInterval(timer);
-                resendBtn.textContent = 'Resend Code';
-                resendBtn.classList.remove('disabled');
-                resendCooldown = false;
-            }
-        }, 1000);
     };
 </script>
+
 </body>
 </html>
