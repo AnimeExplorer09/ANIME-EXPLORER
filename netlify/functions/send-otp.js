@@ -1,8 +1,7 @@
 const { Resend } = require('resend');
 
 // Aapki API Key yahan safe rahegi, browser ko nahi dikhegi
-const resend = new Resend('re_3ddgYL8v_DyeM8fzSyNPLTwMbWoiVWDdh');
-
+const resend = new Resend(process.env.RESEND_API_KEY);
 exports.handler = async (event) => {
     // Sirf POST request allow karni hai
     if (event.httpMethod !== "POST") {
