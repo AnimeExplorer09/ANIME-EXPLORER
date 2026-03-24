@@ -27,7 +27,7 @@ exports.handler = async (event) => {
         // --- TESTING CONFIG ---
         // Jab tak domain verify nahi hota, Resend sirf aapke login email par mail bhejega.
         // Niche wale email ko apne Resend login email se badal dein.
-        const myVerifiedEmail = "aayyaann1715@gmail.com"; 
+        const myVerifiedEmail = "ffnweinstalled@gmail.com"; 
 
         const { data, error } = await resend.emails.send({
             from: 'AnimeExplorer <onboarding@resend.dev>',
