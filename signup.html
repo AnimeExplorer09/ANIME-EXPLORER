@@ -73,10 +73,10 @@
         .subtitle { color: rgba(255,255,255,0.4); font-size: 14px; margin-bottom: 30px; }
 
         .auth-form { display: flex; flex-direction: column; gap: 16px; }
-        
+
         .input-group { position: relative; text-align: left; }
-        .input-group i.field-icon { 
-            position: absolute; left: 18px; top: 50%; 
+        .input-group i.field-icon {
+            position: absolute; left: 18px; top: 50%;
             transform: translateY(-50%); color: rgba(255,255,255,0.3);
             font-size: 14px; pointer-events: none;
         }
@@ -101,9 +101,7 @@
             background: none; border: none;
             color: rgba(255,255,255,0.3);
             cursor: pointer; font-size: 14px; padding: 4px;
-            transition: color 0.2s;
         }
-        .eye-btn:hover { color: var(--primary); }
 
         .signup-btn {
             background: var(--primary);
@@ -114,9 +112,8 @@
             margin-top: 10px; font-family: inherit; width: 100%;
             display: flex; align-items: center; justify-content: center; gap: 8px;
         }
-        .signup-btn:hover { transform: translateY(-2px); filter: brightness(1.1); }
         .signup-btn:active { transform: scale(0.98); }
-        .signup-btn:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+        .signup-btn:disabled { opacity: 0.6; cursor: not-allowed; }
 
         .btn-spinner {
             display: none; width: 16px; height: 16px;
@@ -129,37 +126,46 @@
         #status {
             margin-top: 18px; font-size: 13px; font-weight: 500; min-height: 20px;
         }
-        #status.error { color: #ff6b6b; }
-        #status.info  { color: #b39dff; }
+        #status.error   { color: #ff6b6b; }
+        #status.info    { color: #b39dff; }
+        #status.success { color: #4caf50; }
 
-        /* Verification sent screen */
-        .verify-screen {
-            display: none;
-            text-align: center;
-            padding: 10px 0;
-        }
-        .verify-icon {
-            width: 70px; height: 70px;
-            background: rgba(76,175,80,0.15);
-            border: 1px solid rgba(76,175,80,0.3);
-            border-radius: 50%;
-            display: flex; align-items: center; justify-content: center;
-            font-size: 30px; margin: 0 auto 20px;
-        }
-        .verify-screen h3 { font-size: 20px; margin-bottom: 10px; }
-        .verify-screen p { color: rgba(255,255,255,0.5); font-size: 13px; line-height: 1.6; }
-        .verify-email-text { color: var(--primary); font-weight: 700; }
+        /* OTP Screen */
+        .otp-screen { display: none; text-align: center; }
+        .otp-icon { font-size: 50px; margin-bottom: 16px; }
+        .otp-screen h3 { font-size: 20px; font-weight: 800; margin-bottom: 8px; }
+        .otp-screen p { color: rgba(255,255,255,0.5); font-size: 13px; line-height: 1.6; margin-bottom: 20px; }
+        .otp-email { color: var(--primary); font-weight: 700; }
 
-        .resend-btn {
-            margin-top: 20px;
-            background: transparent;
+        .otp-input {
+            width: 100%; padding: 18px;
+            background: rgba(255,255,255,0.06);
             border: 1px solid rgba(124,77,255,0.4);
-            color: var(--primary); padding: 10px 20px;
-            border-radius: 12px; font-size: 13px; font-weight: 700;
-            cursor: pointer; font-family: inherit; transition: 0.2s;
+            border-radius: 16px; color: white;
+            font-size: 24px; font-weight: 800;
+            text-align: center; letter-spacing: 10px;
+            outline: none; font-family: inherit;
+            transition: 0.3s;
         }
-        .resend-btn:active { background: rgba(124,77,255,0.1); }
-        .resend-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+        .otp-input:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 20px rgba(124,77,255,0.25);
+            background: rgba(255,255,255,0.09);
+        }
+
+        .resend-link {
+            margin-top: 14px; font-size: 13px;
+            color: rgba(255,255,255,0.3);
+        }
+        .resend-link span {
+            color: var(--primary); cursor: pointer;
+            font-weight: 700;
+        }
+        .resend-link span.disabled { color: rgba(255,255,255,0.2); cursor: not-allowed; }
+
+        #otpStatus {
+            margin-top: 12px; font-size: 13px; font-weight: 600; min-height: 18px;
+        }
 
         .footer-link {
             margin-top: 25px; font-size: 14px; color: rgba(255,255,255,0.4);
@@ -169,196 +175,344 @@
 </head>
 <body>
 
-    <div class="bg-container">
-        <div class="blob"></div>
-        <div class="blob blob-2"></div>
-    </div>
+<div class="bg-container">
+    <div class="blob"></div>
+    <div class="blob blob-2"></div>
+</div>
 
-    <div class="card">
-        <div class="brand-logo">AnimeExplorer</div>
-        <p class="subtitle">Create an account to start exploring</p>
+<div class="card">
+    <div class="brand-logo">AnimeExplorer</div>
+    <p class="subtitle">Create an account to start exploring</p>
 
-        <div id="signupForm">
-            <div class="auth-form">
-                <div class="input-group">
-                    <input type="text" id="username" placeholder="Your Name">
-                    <i class="fas fa-user field-icon"></i>
-                </div>
-                <div class="input-group">
-                    <input type="email" id="email" placeholder="Email Address">
-                    <i class="fas fa-envelope field-icon"></i>
-                </div>
-                <div class="input-group">
-                    <input type="password" id="password" placeholder="Password (Min 6 chars)">
-                    <i class="fas fa-lock field-icon"></i>
-                    <button class="eye-btn" id="eyeBtn" type="button">
-                        <i class="fa-regular fa-eye" id="eyeIcon"></i>
-                    </button>
-                </div>
-                <button id="signupBtn" class="signup-btn">
-                    <span id="btnText">Get Started</span>
-                    <div class="btn-spinner" id="btnSpinner"></div>
+    <!-- ── SIGNUP FORM ── -->
+    <div id="signupForm">
+        <div class="auth-form">
+            <div class="input-group">
+                <input type="text" id="username" placeholder="Your Name">
+                <i class="fas fa-user field-icon"></i>
+            </div>
+            <div class="input-group">
+                <input type="email" id="email" placeholder="Email Address">
+                <i class="fas fa-envelope field-icon"></i>
+            </div>
+            <div class="input-group">
+                <input type="password" id="password" placeholder="Password (Min 6 chars)">
+                <i class="fas fa-lock field-icon"></i>
+                <button class="eye-btn" id="eyeBtn" type="button">
+                    <i class="fa-regular fa-eye" id="eyeIcon"></i>
                 </button>
             </div>
-
-            <p id="status"></p>
-
-            <div class="footer-link">
-                Already have an account? <a href="login.html">Sign In</a>
-            </div>
+            <button id="signupBtn" class="signup-btn">
+                <span id="btnText">Get Started</span>
+                <div class="btn-spinner" id="btnSpinner"></div>
+            </button>
         </div>
 
-        <div class="verify-screen" id="verifyScreen">
-            <div class="verify-icon">📧</div>
-            <h3>Check your email!</h3>
-            <p>
-                We sent a verification link to<br>
-                <span class="verify-email-text" id="sentEmailText"></span>
-            </p>
-            <p style="margin-top: 12px;">
-                Click the link in the email to verify your account, then come back and sign in.
-            </p>
-            <button class="resend-btn" id="resendBtn" onclick="resendEmail()">
-                Resend Email
-            </button>
-            <p id="resendStatus" style="font-size:12px; margin-top:10px; color:#b39dff;"></p>
-            <div class="footer-link">
-                <a href="login.html">Go to Sign In →</a>
-            </div>
+        <p id="status"></p>
+
+        <div class="footer-link">
+            Already have an account? <a href="login.html">Sign In</a>
         </div>
     </div>
 
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { 
-            getAuth, 
-            createUserWithEmailAndPassword, 
-            sendEmailVerification, 
-            updateProfile,
-            signOut 
-        } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-        import { getFirestore, doc, setDoc, runTransaction } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+    <!-- ── OTP VERIFY SCREEN ── -->
+    <div class="otp-screen" id="otpScreen">
+        <div class="otp-icon">📧</div>
+        <h3>Check your email!</h3>
+        <p>
+            We sent a 6-digit code to<br>
+            <span class="otp-email" id="otpEmailText"></span>
+        </p>
+        <input type="text" class="otp-input" id="otpInput"
+               maxlength="6" placeholder="------"
+               oninput="this.value = this.value.toUpperCase()">
+        <button class="signup-btn" style="margin-top:16px;" onclick="verifyOTP()">
+            <span id="verifyBtnText">Verify Account</span>
+            <div class="btn-spinner" id="verifySpinner"></div>
+        </button>
+        <p id="otpStatus"></p>
+        <div class="resend-link">
+            Didn't receive? <span id="resendBtn" onclick="resendCode()">Resend Code</span>
+        </div>
+        <div class="footer-link" style="margin-top:16px;">
+            <a href="login.html">← Back to Login</a>
+        </div>
+    </div>
+</div>
 
-        const firebaseConfig = {
-            apiKey: "AIzaSyDLd3TW-y89lwShUmcIHw3YGzDjo4cg3y4",
-            authDomain: "animea2z.firebaseapp.com",
-            projectId: "animea2z",
-            storageBucket: "animea2z.firebasestorage.app",
-            messagingSenderId: "673605765684",
-            appId: "1:673605765684:web:a6f851e0d79836b79b1861"
-        };
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+    import { getAuth, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+    import { getFirestore, doc, setDoc, getDoc, updateDoc, runTransaction } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-        const app  = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
-        const db   = getFirestore(app);
+    const firebaseConfig = {
+        apiKey: "AIzaSyDLd3TW-y89lwShUmcIHw3YGzDjo4cg3y4",
+        authDomain: "animea2z.firebaseapp.com",
+        projectId: "animea2z",
+        storageBucket: "animea2z.firebasestorage.app",
+        messagingSenderId: "673605765684",
+        appId: "1:673605765684:web:a6f851e0d79836b79b1861"
+    };
 
-        const status     = document.getElementById('status');
-        const signupBtn  = document.getElementById('signupBtn');
-        const btnText    = document.getElementById('btnText');
-        const btnSpinner = document.getElementById('btnSpinner');
-        const pwdInput   = document.getElementById('password');
+ ‎// ⚠️ RESEND API - Fallback REMOVE KARO (Sensitive!)
+‎const RESEND_API_KEY = import.meta.env?.VITE_RESEND_API_KEY || "";
 
-        let lastRegisteredUser = null;
+    const app  = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db   = getFirestore(app);
 
-        // Password hide/show toggle
-        document.getElementById('eyeBtn').onclick = () => {
-            const isPwd = pwdInput.type === 'password';
-            pwdInput.type = isPwd ? 'text' : 'password';
-            document.getElementById('eyeIcon').className = isPwd ? 'fa-regular fa-eye-slash' : 'fa-regular fa-eye';
-        };
+    const signupBtn  = document.getElementById('signupBtn');
+    const btnText    = document.getElementById('btnText');
+    const btnSpinner = document.getElementById('btnSpinner');
+    const status     = document.getElementById('status');
+    const eyeBtn     = document.getElementById('eyeBtn');
+    const eyeIcon    = document.getElementById('eyeIcon');
+    const pwdInput   = document.getElementById('password');
 
-        signupBtn.addEventListener('click', async () => {
-            const username = document.getElementById('username').value.trim();
-            const email    = document.getElementById('email').value.trim();
-            const password = pwdInput.value;
+    let currentEmail = '';
+    let currentUID   = '';
+    let resendCooldown = false;
 
-            if (!username || !email || !password) {
-                alert("Please fill all fields!"); return;
-            }
+    // Eye toggle
+    eyeBtn.onclick = () => {
+        const show = pwdInput.type === 'password';
+        pwdInput.type = show ? 'text' : 'password';
+        eyeIcon.className = show ? 'fa-regular fa-eye-slash' : 'fa-regular fa-eye';
+    };
 
-            signupBtn.disabled = true;
-            btnText.style.display = 'none';
-            btnSpinner.style.display = 'block';
-            status.innerText = "Processing...";
+    // Enter key
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') signupBtn.click();
+    });
 
-            try {
-                // 1. Account Creation
-                const cred = await createUserWithEmailAndPassword(auth, email, password);
-                const user = cred.user;
-                lastRegisteredUser = user;
-                alert("Step 1: Account Created!");
+    function setLoading(on) {
+        signupBtn.disabled = on;
+        btnText.style.display = on ? 'none' : 'inline';
+        btnSpinner.style.display = on ? 'block' : 'none';
+    }
 
-                // 2. Set Name
-                await updateProfile(user, { displayName: username });
-                alert("Step 2: Profile Name Set!");
+    function setStatus(msg, type) {
+        status.textContent = msg;
+        status.className = type;
+    }
 
-                // 3. Firestore ID Generation
-                let customId = "1000000001";
-                try {
-                    customId = await runTransaction(db, async (transaction) => {
-                        const counterRef = doc(db, "userCounter", "counter");
-                        const counterSnap = await transaction.get(counterRef);
-                        let nextId = 1000000001;
-                        if (counterSnap.exists()) {
-                            nextId = counterSnap.data().count + 1;
-                        }
-                        transaction.set(counterRef, { count: nextId });
-                        return String(nextId);
-                    });
-                    alert("Step 3: Unique ID Generated: " + customId);
-                } catch(e) { 
-                    customId = "ID-" + Date.now().toString().slice(-6); 
-                }
+    function setOtpStatus(msg, color) {
+        const el = document.getElementById('otpStatus');
+        el.textContent = msg;
+        el.style.color = color;
+    }
 
-                // 4. Save to Firestore
-                await setDoc(doc(db, "users", user.uid), {
-                    uid: user.uid,
-                    customId: customId,
-                    username: username,
-                    email: email,
-                    avatar: `https://ui-avatars.com/api/?name=${encodeURIComponent(username)}&background=7c4dff&color=fff`,
-                    joinedAt: new Date().toLocaleDateString(),
-                    xp: 0,
-                    isOnline: false
-                });
-                alert("Step 4: Profile Data Saved!");
+    // Generate 6-digit code
+    function generateCode() {
+        return Math.floor(100000 + Math.random() * 900000).toString();
+    }
 
-                // 5. Send Verification
-                await sendEmailVerification(user);
-                alert("Step 5: Verification Email Sent Successfully!");
-
-                // 6. Logout (security) and Show Screen
-                await signOut(auth);
-                document.getElementById('signupForm').style.display = 'none';
-                document.getElementById('sentEmailText').innerText = email;
-                document.getElementById('verifyScreen').style.display = 'block';
-
-            } catch (error) {
-                signupBtn.disabled = false;
-                btnText.style.display = 'inline';
-                btnSpinner.style.display = 'none';
-                
-                // --- ASLI ERROR YAHAN DIKHEGA ---
-                alert("FIREBASE ERROR: " + error.code + "\n" + error.message);
-                status.innerText = error.message;
-            }
+    // Resend se email bhejo
+    async function sendOTPEmail(email, username, code) {
+        const res = await fetch("https://api.resend.com/emails", {
+            method: "POST",
+            headers: {
+                "Authorization": `Bearer ${RESEND_API_KEY}`,
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                from: "onboarding@resend.dev",
+                to: email,
+                subject: "Your AnimeExplorer Verification Code",
+                html: `
+                    <div style="font-family:sans-serif; max-width:400px; margin:auto; padding:30px; background:#0f1014; border-radius:16px; color:white;">
+                        <h2 style="color:#7c4dff; margin-bottom:8px;">AnimeExplorer</h2>
+                        <p style="color:#aaa;">Hi <b style="color:white;">${username}</b>, welcome!</p>
+                        <p style="color:#aaa; margin-top:12px;">Your verification code is:</p>
+                        <div style="font-size:36px; font-weight:900; letter-spacing:10px; color:#7c4dff; margin:20px 0; text-align:center; background:rgba(124,77,255,0.1); padding:16px; border-radius:12px;">
+                            ${code}
+                        </div>
+                        <p style="color:#666; font-size:12px;">This code expires in 10 minutes. If you didn't sign up, ignore this email.</p>
+                    </div>
+                `
+            })
         });
+        return res.ok;
+    }
 
-        // Resend logic
-        window.resendEmail = async () => {
-            if (!lastRegisteredUser) {
-                alert("No user found. Please refresh and try again.");
+    // Signup button
+    signupBtn.addEventListener('click', async () => {
+        const username = document.getElementById('username').value.trim();
+        const email    = document.getElementById('email').value.trim();
+        const password = pwdInput.value;
+
+        if (!username || !email || !password) {
+            setStatus("Please fill all fields", "error"); return;
+        }
+        if (password.length < 6) {
+            setStatus("Password must be at least 6 characters", "error"); return;
+        }
+
+        setLoading(true);
+        setStatus("Creating account...", "info");
+
+        try {
+            // 1. Firebase Auth
+            const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+            const user = userCredential.user;
+            currentUID   = user.uid;
+            currentEmail = email;
+
+            // 2. Sequential ID
+            let customId = Date.now().toString().slice(-7);
+            try {
+                customId = await runTransaction(db, async (transaction) => {
+                    const counterRef = doc(db, "userCounter", "counter");
+                    const counterDoc = await transaction.get(counterRef);
+                    let nextId = 1000000001;
+                    if (counterDoc.exists()) {
+                        nextId = (counterDoc.data().count || 1000000000) + 1;
+                    }
+                    transaction.set(counterRef, { count: nextId });
+                    return String(nextId);
+                });
+            } catch(e) { console.error("Counter:", e); }
+
+            // 3. Firestore profile — isVerified: false
+            await setDoc(doc(db, "users", user.uid), {
+                uid: user.uid,
+                customId,
+                username,
+                email,
+                avatar: `https://ui-avatars.com/api/?name=${encodeURIComponent(username)}&background=7c4dff&color=fff`,
+                xp: 0, coins: 0,
+                isOnline: false,
+                isVerified: false,
+                isBanned: false,
+                joinedAt: new Date().toLocaleDateString(),
+                bio: "Anime fan on AnimeExplorer!",
+                activeBorder: "", banner: "", lastClaim: ""
+            });
+
+            // 4. OTP generate + Firestore mein save karo
+            const code = generateCode();
+            await setDoc(doc(db, "verificationCodes", user.uid), {
+                code,
+                email,
+                createdAt: new Date(),
+                expiresAt: new Date(Date.now() + 10 * 60 * 1000), // 10 min
+                verified: false
+            });
+
+            // 5. Email bhejo
+            setStatus("Sending verification code...", "info");
+            const sent = await sendOTPEmail(email, username, code);
+
+            if (!sent) {
+                setStatus("Failed to send email. Try again.", "error");
+                setLoading(false);
                 return;
             }
-            try {
-                // NOTE: Resend ke liye user signed in hona chahiye
-                // Agar bina sign in ke resend na ho, toh login page par alert dena hoga
-                await sendEmailVerification(lastRegisteredUser);
-                alert("Verification email resent!");
-            } catch(e) {
-                alert("Resend failed: " + e.message);
+
+            // 6. OTP screen dikhao
+            document.getElementById('signupForm').style.display = 'none';
+            document.getElementById('otpEmailText').innerText = email;
+            document.getElementById('otpScreen').style.display = 'block';
+
+        } catch (error) {
+            setLoading(false);
+            const msg =
+                error.code === 'auth/email-already-in-use' ? 'This email is already registered.' :
+                error.code === 'auth/invalid-email'        ? 'Invalid email address.' :
+                error.code === 'auth/weak-password'        ? 'Password is too weak.' :
+                error.message;
+            setStatus(msg, "error");
+        }
+    });
+
+    // OTP Verify
+    window.verifyOTP = async () => {
+        const code = document.getElementById('otpInput').value.trim();
+        if (code.length !== 6) {
+            setOtpStatus("Enter 6-digit code", "#ff6b6b"); return;
+        }
+
+        const verifyBtn     = document.getElementById('verifyBtnText');
+        const verifySpinner = document.getElementById('verifySpinner');
+        verifyBtn.style.display    = 'none';
+        verifySpinner.style.display = 'block';
+
+        try {
+            const snap = await getDoc(doc(db, "verificationCodes", currentUID));
+            if (!snap.exists()) {
+                setOtpStatus("Code expired. Resend karo.", "#ff6b6b");
+                verifyBtn.style.display    = 'inline';
+                verifySpinner.style.display = 'none';
+                return;
             }
-        };
-    </script>
+
+            const data = snap.data();
+
+            // Expiry check
+            if (new Date() > data.expiresAt.toDate()) {
+                setOtpStatus("Code expired. Resend karo.", "#ff6b6b");
+                verifyBtn.style.display    = 'inline';
+                verifySpinner.style.display = 'none';
+                return;
+            }
+
+            if (data.code === code) {
+                // Verified!
+                await updateDoc(doc(db, "verificationCodes", currentUID), { verified: true });
+                await updateDoc(doc(db, "users", currentUID), { isVerified: true, isOnline: true });
+                setOtpStatus("✓ Verified! Redirecting...", "#4caf50");
+                setTimeout(() => window.location.href = "index.html", 1000);
+            } else {
+                setOtpStatus("❌ Wrong code. Try again.", "#ff6b6b");
+                verifyBtn.style.display    = 'inline';
+                verifySpinner.style.display = 'none';
+            }
+        } catch(e) {
+            setOtpStatus("Error. Try again.", "#ff6b6b");
+            verifyBtn.style.display    = 'inline';
+            verifySpinner.style.display = 'none';
+        }
+    };
+
+    // Resend code
+    window.resendCode = async () => {
+        if (resendCooldown) return;
+        resendCooldown = true;
+
+        const resendBtn = document.getElementById('resendBtn');
+        resendBtn.classList.add('disabled');
+
+        const username = document.getElementById('username')?.value || currentEmail.split('@')[0];
+        const code = generateCode();
+
+        try {
+            await setDoc(doc(db, "verificationCodes", currentUID), {
+                code,
+                email: currentEmail,
+                createdAt: new Date(),
+                expiresAt: new Date(Date.now() + 10 * 60 * 1000),
+                verified: false
+            });
+            await sendOTPEmail(currentEmail, username, code);
+            setOtpStatus("New code sent! Check inbox.", "#4caf50");
+        } catch(e) {
+            setOtpStatus("Failed to resend. Try again.", "#ff6b6b");
+        }
+
+        // 60 second cooldown
+        let secs = 60;
+        resendBtn.textContent = `Resend (${secs}s)`;
+        const timer = setInterval(() => {
+            secs--;
+            resendBtn.textContent = `Resend (${secs}s)`;
+            if (secs <= 0) {
+                clearInterval(timer);
+                resendBtn.textContent = 'Resend Code';
+                resendBtn.classList.remove('disabled');
+                resendCooldown = false;
+            }
+        }, 1000);
+    };
+</script>
 </body>
 </html>
