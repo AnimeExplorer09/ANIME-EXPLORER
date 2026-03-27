@@ -71,6 +71,7 @@
         .input-group input:focus { border-color: var(--primary); background: rgba(255,255,255,0.08); }
 
         .signup-btn {
+            width: 100%;
             background: var(--primary); color: white; border: none; padding: 16px;
             border-radius: 16px; font-weight: 700; cursor: pointer;
             box-shadow: 0 10px 20px var(--primary-glow); margin-top: 10px;
@@ -88,14 +89,14 @@
         #status, #otpStatus { margin-top: 15px; font-size: 13px; }
         .error { color: #ff6b6b; } .info { color: #b39dff; } .success { color: #4caf50; }
 
-        /* OTP Screen */
         .otp-screen { display: none; }
         .otp-input {
             width: 100%; padding: 15px; background: rgba(255,255,255,0.05);
             border: 1px solid var(--primary); border-radius: 15px;
             color: white; font-size: 24px; text-align: center; letter-spacing: 8px; margin: 20px 0;
+            outline: none;
         }
-        .resend-link { color: rgba(255,255,255,0.4); font-size: 13px; cursor: pointer; }
+        .resend-link { color: rgba(255,255,255,0.4); font-size: 13px; cursor: pointer; margin-top: 15px; }
         .resend-link span { color: var(--primary); font-weight: bold; }
         .resend-link.disabled { pointer-events: none; opacity: 0.5; }
     </style>
@@ -131,7 +132,7 @@
         </div>
         <p id="status"></p>
         <div style="margin-top:20px; font-size:14px; color:#888;">
-            Already have an account? <a href="login.html" style="color:var(--primary);">Login</a>
+            Already have an account? <a href="login.html" style="color:var(--primary); text-decoration: none;">Login</a>
         </div>
     </div>
 
@@ -141,7 +142,7 @@
         
         <input type="text" id="otpInput" class="otp-input" maxlength="6" placeholder="000000">
         
-        <button id="verifyBtn" class="signup-btn" style="width:100%;" onclick="verifyOTP()">
+        <button id="verifyBtn" class="signup-btn" onclick="verifyOTP()">
             <span id="vBtnText">Verify & Finish</span>
             <div class="btn-spinner" id="vBtnSpinner"></div>
         </button>
@@ -173,29 +174,23 @@
 
     let currentUID = '';
     let currentEmail = '';
+    let currentName = '';
     let resendCooldown = false;
 
-    // --- HELPER FUNCTIONS ---
     const generateCode = () => Math.floor(100000 + Math.random() * 900000).toString();
 
     async function sendOTPEmail(email, username, code) {
-    try {
-        const response = await fetch("https://animeexplorer09.netlify.app/.netlify/functions/send-otp", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ email, username, code })
-        });
-        const result = await response.json();
-        console.log("API Response:", result); // Debugging ke liye
-        return result.success;
-    } catch (e) { 
-        console.error("Fetch Error:", e);
-        return false; 
+        try {
+            const response = await fetch("/.netlify/functions/send-otp", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ email, username, code })
+            });
+            const result = await response.json();
+            return result.success;
+        } catch (e) { return false; }
     }
-}
 
-
-    // --- SIGNUP LOGIC ---
     document.getElementById('signupBtn').onclick = async () => {
         const name = document.getElementById('username').value.trim();
         const email = document.getElementById('email').value.trim();
@@ -214,12 +209,13 @@
         document.getElementById('btnSpinner').style.display = 'block';
 
         try {
-            // 1. Create Auth User
+            // 1. Create User
             const cred = await createUserWithEmailAndPassword(auth, email, pass);
             currentUID = cred.user.uid;
             currentEmail = email;
+            currentName = name;
 
-            // 2. Generate UNIQUE SEQUENTIAL ID
+            // 2. Sequential ID Generation
             let customId = Date.now().toString().slice(-7); 
             try {
                 customId = await runTransaction(db, async (transaction) => {
@@ -230,12 +226,12 @@
                     transaction.set(counterRef, { count: next });
                     return String(next);
                 });
-            } catch(e) { console.warn("Counter failed"); }
+            } catch(e) { console.warn("Counter fallback used"); }
 
-            // 3. Save Profile to Firestore
+            // 3. Create Full Profile
             await setDoc(doc(db, "users", currentUID), {
                 uid: currentUID,
-                customId: customId, // Unique ID saved here
+                customId: customId,
                 username: name,
                 email: email,
                 avatar: `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=7c4dff&color=fff`,
@@ -244,18 +240,15 @@
                 joinedAt: new Date().toLocaleDateString()
             });
 
-            // 4. Generate & Save OTP
+            // 4. Send OTP
             const code = generateCode();
             await setDoc(doc(db, "verificationCodes", currentUID), {
                 code,
-                email,
                 expiresAt: new Date(Date.now() + 10 * 60 * 1000)
             });
 
-            // 5. Trigger Netlify API
             await sendOTPEmail(email, name, code);
 
-            // Switch to OTP Screen
             document.getElementById('signupForm').style.display = 'none';
             document.getElementById('displayEmail').innerText = email;
             document.getElementById('otpScreen').style.display = 'block';
@@ -269,61 +262,63 @@
         }
     };
 
-    // --- VERIFY OTP LOGIC ---
     window.verifyOTP = async () => {
         const input = document.getElementById('otpInput').value.trim();
         const otpStatus = document.getElementById('otpStatus');
+        const vBtn = document.getElementById('verifyBtn');
         
         if(input.length !== 6) return;
+
+        vBtn.disabled = true;
+        document.getElementById('vBtnText').style.display = 'none';
+        document.getElementById('vBtnSpinner').style.display = 'block';
 
         try {
             const snap = await getDoc(doc(db, "verificationCodes", currentUID));
             const data = snap.data();
+            const now = new Date();
 
-            if(data && data.code === input && new Date() < data.expiresAt.toDate()) {
+            if(data && data.code === input && now < data.expiresAt.toDate()) {
                 await updateDoc(doc(db, "users", currentUID), { isVerified: true });
-                otpStatus.innerText = "Verified! Redirecting...";
+                otpStatus.innerText = "Verified Successfully!";
                 otpStatus.className = "success";
                 setTimeout(() => window.location.href = "index.html", 1500);
             } else {
-                otpStatus.innerText = "Invalid or expired code.";
-                otpStatus.className = "error";
+                throw new Error("Invalid or Expired Code");
             }
-        } catch(e) { otpStatus.innerText = "Verification failed."; }
+        } catch(e) {
+            vBtn.disabled = false;
+            document.getElementById('vBtnText').style.display = 'inline';
+            document.getElementById('vBtnSpinner').style.display = 'none';
+            otpStatus.innerText = e.message;
+            otpStatus.className = "error";
+        }
     };
 
-    // --- RESEND LOGIC ---
     window.resendCode = async () => {
         if(resendCooldown) return;
         resendCooldown = true;
-        
         const code = generateCode();
-        const resendBox = document.getElementById('resendBox');
         const resendBtn = document.getElementById('resendBtn');
-
+        
         try {
             await setDoc(doc(db, "verificationCodes", currentUID), {
-                code, email: currentEmail,
-                expiresAt: new Date(Date.now() + 10 * 60 * 1000)
+                code, expiresAt: new Date(Date.now() + 10 * 60 * 1000)
             });
-            await sendOTPEmail(currentEmail, "Explorer", code);
+            await sendOTPEmail(currentEmail, currentName, code);
             
-            // Cooldown timer
             let timeLeft = 60;
-            resendBox.classList.add('disabled');
             const timer = setInterval(() => {
                 timeLeft--;
                 resendBtn.innerText = `Wait (${timeLeft}s)`;
                 if(timeLeft <= 0) {
                     clearInterval(timer);
                     resendBtn.innerText = "Resend";
-                    resendBox.classList.remove('disabled');
                     resendCooldown = false;
                 }
             }, 1000);
         } catch(e) { resendCooldown = false; }
     };
 </script>
-
 </body>
 </html>
