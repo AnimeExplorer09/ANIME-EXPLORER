@@ -1,48 +1,49 @@
 const nodemailer = require('nodemailer');
 
 exports.handler = async (event) => {
-    // Sirf POST request allow karein
+    console.log("Function triggered with method:", event.httpMethod);
+
     if (event.httpMethod !== "POST") {
         return { statusCode: 405, body: "Method Not Allowed" };
     }
 
     try {
-        // Frontend (signup.html) se aane wala data
         const { email, username, code } = JSON.parse(event.body);
+        console.log("Sending OTP to:", email);
+
+        // Check if variables exist
+        if (!process.env.GMAIL_USER || !process.env.GMAIL_APP_PASS) {
+            console.error("Missing Environment Variables!");
+            return { statusCode: 500, body: JSON.stringify({ error: "Server Configuration Error" }) };
+        }
 
         const transporter = nodemailer.createTransport({
             service: 'gmail',
+            secure: true,
             auth: {
-                user: process.env.GMAIL_USER,      // Netlify dashboard se aayega
-                pass: process.env.GMAIL_APP_PASS   // Netlify dashboard se aayega
+                user: process.env.GMAIL_USER,
+                pass: process.env.GMAIL_APP_PASS // Spaces nahi hone chahiye isme
             }
         });
 
-        const mailOptions = {
+        await transporter.sendMail({
             from: `"AnimeExplorer" <${process.env.GMAIL_USER}>`,
-            to: email, // <--- Ab ye us user ko jayega jo signup kar raha hai
+            to: email,
             subject: `Verification Code: ${code}`,
-            html: `
-                <div style="font-family: sans-serif; padding: 20px; border: 2px solid #7c4dff; border-radius: 12px; text-align: center;">
-                    <h2 style="color: #7c4dff;">Welcome to AnimeExplorer</h2>
-                    <p>Hi <b>${username}</b>, use this code to verify your account:</p>
-                    <h1 style="background: #f0f0f0; display: inline-block; padding: 10px 20px; letter-spacing: 5px;">${code}</h1>
-                    <p>This code expires in 10 minutes.</p>
-                </div>
-            `
-        };
+            text: `Hello ${username}, your OTP is ${code}. It is valid for 10 minutes.`
+        });
 
-        await transporter.sendMail(mailOptions);
-
+        console.log("Email sent successfully!");
         return {
             statusCode: 200,
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ success: true })
         };
-
     } catch (error) {
+        console.error("Nodemailer Error:", error.message);
         return {
             statusCode: 500,
+            headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ success: false, error: error.message })
         };
     }
