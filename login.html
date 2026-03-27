@@ -208,146 +208,108 @@
     </div>
 
     <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getAuth, signInWithEmailAndPassword, sendEmailVerification, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-        import { getFirestore, doc, setDoc, getDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+    import { getAuth, signInWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+    import { getFirestore, doc, getDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-        const firebaseConfig = {
-            apiKey: "AIzaSyDLd3TW-y89lwShUmcIHw3YGzDjo4cg3y4",
-            authDomain: "animea2z.firebaseapp.com",
-            projectId: "animea2z",
-            storageBucket: "animea2z.firebasestorage.app",
-            messagingSenderId: "673605765684",
-            appId: "1:673605765684:web:a6f851e0d79836b79b1861"
-        };
+    const firebaseConfig = {
+        apiKey: "AIzaSyDLd3TW-y89lwShUmcIHw3YGzDjo4cg3y4",
+        authDomain: "animea2z.firebaseapp.com",
+        projectId: "animea2z",
+        storageBucket: "animea2z.firebasestorage.app",
+        messagingSenderId: "673605765684",
+        appId: "1:673605765684:web:a6f851e0d79836b79b1861"
+    };
 
-        const app  = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
-        const db   = getFirestore(app);
+    const app  = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db   = getFirestore(app);
 
-        const loginBtn        = document.getElementById('loginBtn');
-        const btnText         = document.getElementById('btnText');
-        const btnSpinner      = document.getElementById('btnSpinner');
-        const status          = document.getElementById('status');
-        const eyeBtn          = document.getElementById('eyeBtn');
-        const eyeIcon         = document.getElementById('eyeIcon');
-        const pwdInput        = document.getElementById('password');
-        const verifyWarning   = document.getElementById('verifyWarning');
-        const resendVerifyBtn = document.getElementById('resendVerifyBtn');
+    const loginBtn      = document.getElementById('loginBtn');
+    const btnText       = document.getElementById('btnText');
+    const btnSpinner    = document.getElementById('btnSpinner');
+    const status        = document.getElementById('status');
+    const pwdInput      = document.getElementById('password');
+    const verifyWarning = document.getElementById('verifyWarning');
 
-        let unverifiedUser = null;
+    // ── LOADING HELPER ──
+    function setLoading(on) {
+        loginBtn.disabled = on;
+        btnText.style.display = on ? 'none' : 'inline';
+        btnSpinner.style.display = on ? 'block' : 'none';
+    }
 
-        // Password show/hide
-        eyeBtn.onclick = () => {
-            const show = pwdInput.type === 'password';
-            pwdInput.type = show ? 'text' : 'password';
-            eyeIcon.className = show ? 'fa-regular fa-eye-slash' : 'fa-regular fa-eye';
-        };
+    // ── MAIN LOGIN LOGIC ──
+    loginBtn.onclick = async () => {
+        const email = document.getElementById('email').value.trim();
+        const pwd   = pwdInput.value;
 
-        // Enter key
-        document.addEventListener('keydown', (e) => {
-            if (e.key === 'Enter') loginBtn.click();
-        });
-
-        function setLoading(on) {
-            loginBtn.disabled = on;
-            btnText.style.display = on ? 'none' : 'inline';
-            btnSpinner.style.display = on ? 'block' : 'none';
+        if (!email || !pwd) {
+            status.innerText = "Please fill all fields.";
+            status.className = "error";
+            return;
         }
 
-        function setStatus(msg, type) {
-            status.textContent = msg;
-            status.className = type;
-        }
+        setLoading(true);
+        status.innerText = "Checking credentials...";
+        status.className = "info";
+        verifyWarning.classList.remove('show');
 
-        loginBtn.addEventListener('click', async () => {
-            const email = document.getElementById('email').value.trim();
-            const pwd   = pwdInput.value;
+        try {
+            // 1. Firebase Auth se login attempt
+            const cred = await signInWithEmailAndPassword(auth, email, pwd);
+            const user = cred.user;
 
-            if (!email || !pwd) {
-                setStatus('Please fill in all fields.', 'error'); return;
-            }
+            // 2. Firestore se Check karna ki User Verified hai ya nahi
+            const userRef = doc(db, "users", user.uid);
+            const userSnap = await getDoc(userRef);
 
-            setLoading(true);
-            setStatus('Authenticating...', 'info');
-            verifyWarning.classList.remove('show');
+            if (userSnap.exists()) {
+                const userData = userSnap.data();
 
-            try {
-                const cred = await signInWithEmailAndPassword(auth, email, pwd);
-                const user = cred.user;
-
-                // ── EMAIL VERIFIED CHECK ──
-                if (!user.emailVerified) {
-                    unverifiedUser = user;
-                    await signOut(auth); // logout kar do
+                if (userData.isVerified === false) {
+                    // Agar user ne OTP verify nahi kiya tha pichli baar
+                    await signOut(auth); // Use login nahi rehne denge
                     setLoading(false);
-                    setStatus('', '');
+                    status.innerText = "";
                     verifyWarning.classList.add('show');
+                    
+                    // Directing user to verification (Optionally)
+                    // window.location.href = `signup.html?email=${email}`; 
                     return;
                 }
 
-                // Verified — profile update karo
-                await saveUser(user);
-                setStatus('Welcome back! Redirecting...', 'info');
-                setTimeout(() => window.location.href = 'index.html', 600);
+                // Agar Verified hai toh
+                await updateDoc(userRef, { lastLogin: new Date().toISOString() });
+                status.innerText = "Login Successful! Redirecting...";
+                status.className = "success";
+                setTimeout(() => window.location.href = "index.html", 1000);
 
-            } catch (e) {
-                setLoading(false);
-                const msg =
-                    e.code === 'auth/invalid-credential' || e.code === 'auth/wrong-password'
-                        ? 'Incorrect email or password.' :
-                    e.code === 'auth/user-not-found'
-                        ? 'No account found with this email.' :
-                    e.code === 'auth/too-many-requests'
-                        ? 'Too many attempts. Try again later.' :
-                    'Something went wrong. Please try again.';
-                setStatus(msg, 'error');
+            } else {
+                throw new Error("User profile not found in database.");
             }
-        });
 
-        async function saveUser(user) {
-            const userRef = doc(db, "users", user.uid);
-            const snap = await getDoc(userRef);
-            if (snap.exists()) {
-                await updateDoc(userRef, { isOnline: true });
-            }
+        } catch (e) {
+            setLoading(false);
+            console.error(e);
+            status.innerText = "Invalid Email or Password.";
+            status.className = "error";
         }
+    };
 
-        // Resend verification
-        let resendCooldown = false;
-        window.resendVerification = async () => {
-            if (resendCooldown) return;
+    // Resend functionality for unverified users
+    window.resendVerification = () => {
+        // User ko signup page par bhej dena jahan wo naya OTP le sake
+        window.location.href = "signup.html";
+    };
 
-            // Re-login karke verification bhejo
-            const email = document.getElementById('email').value.trim();
-            const pwd   = pwdInput.value;
+    // Password Toggle
+    document.getElementById('eyeBtn').onclick = () => {
+        const type = pwdInput.type === 'password' ? 'text' : 'password';
+        pwdInput.type = type;
+        document.getElementById('eyeIcon').className = type === 'password' ? 'fa-regular fa-eye' : 'fa-regular fa-eye-slash';
+    };
+</script>
 
-            resendVerifyBtn.disabled = true;
-            resendCooldown = true;
-
-            try {
-                const cred = await signInWithEmailAndPassword(auth, email, pwd);
-                await sendEmailVerification(cred.user);
-                await signOut(auth);
-                setStatus('Verification email sent! Check your inbox.', 'success');
-            } catch(e) {
-                setStatus('Could not resend. Try again later.', 'error');
-            }
-
-            // 60 second cooldown
-            let secs = 60;
-            resendVerifyBtn.innerText = `Resend (${secs}s)`;
-            const timer = setInterval(() => {
-                secs--;
-                resendVerifyBtn.innerText = `Resend (${secs}s)`;
-                if (secs <= 0) {
-                    clearInterval(timer);
-                    resendVerifyBtn.disabled = false;
-                    resendVerifyBtn.innerText = "Resend Verification Email";
-                    resendCooldown = false;
-                }
-            }, 1000);
-        };
-    </script>
 </body>
 </html>
