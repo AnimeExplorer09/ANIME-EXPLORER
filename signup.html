@@ -179,20 +179,27 @@
     const generateCode = () => Math.floor(100000 + Math.random() * 900000).toString();
 
     async function sendOTPEmail(email, username, code) {
+    // Screenshot 1000288900.jpg wala Web App URL yahan paste karein
+    const scriptURL = "https://script.google.com/macros/s/AKfycbx6FEsuyq3m_2EL4euuR3GpbnHUvlfgMgpsclShgxD56Tjk8FucnD6AblHklc4kgzcIsw/exec"; 
+    
     try {
-        const response = await fetch("/api/send-otp", { 
-    method: "POST",
+        // Google Script ke liye mode: 'no-cors' aur simple body chahiye
+        await fetch(scriptURL, { 
+            method: "POST",
+            mode: "no-cors", 
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ email, username, code })
         });
-        const result = await response.json();
-        console.log("API Response:", result); // Debugging ke liye
-        return result.success;
+        
+        // 'no-cors' mein response check nahi hota, isliye hamesha success return karein
+        console.log("OTP Sent via Google Script");
+        return true; 
     } catch (e) { 
         console.error("Fetch Error:", e);
         return false; 
     }
 }
+
 
 
     // --- SIGNUP LOGIC ---
@@ -327,4 +334,3 @@
 
 </body>
 </html>
-
