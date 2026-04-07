@@ -51,7 +51,8 @@
             border: 1px solid var(--glass-border);
             border-radius: 35px;
             padding: 50px 40px;
-            width: 90%; max-width: 420px;
+            width: 90%;
+            max-width: 420px;
             text-align: center;
             position: relative;
             box-shadow: 0 40px 100px rgba(0, 0, 0, 0.5);
@@ -133,84 +134,68 @@
         #status.info    { color: #b39dff; }
         #status.success { color: #4caf50; }
 
-        /* Verify warning box */
-        .verify-warning {
-            display: none;
-            background: rgba(255,152,0,0.1);
-            border: 1px solid rgba(255,152,0,0.3);
-            border-radius: 14px; padding: 14px 16px;
-            margin-top: 16px; text-align: left;
-        }
-        .verify-warning.show { display: block; }
-        .verify-warning p {
-            font-size: 13px; color: #ffb74d; line-height: 1.5;
-        }
-        .resend-verify-btn {
-            margin-top: 10px;
-            background: transparent;
-            border: 1px solid rgba(255,152,0,0.4);
-            color: #ffb74d; padding: 8px 16px;
-            border-radius: 10px; font-size: 12px; font-weight: 700;
-            cursor: pointer; font-family: inherit; transition: 0.2s;
-        }
-        .resend-verify-btn:active { background: rgba(255,152,0,0.1); }
-        .resend-verify-btn:disabled { opacity: 0.4; cursor: not-allowed; }
-
         .footer-link {
             margin-top: 30px; font-size: 14px; color: rgba(255,255,255,0.4);
         }
         .footer-link a { color: var(--primary); text-decoration: none; font-weight: 700; transition: 0.3s; }
         .footer-link a:hover { color: var(--accent); }
+
+        .resend-info {
+            margin-top: 15px;
+            font-size: 12px;
+            color: rgba(255,255,255,0.3);
+        }
+        .resend-info a {
+            color: var(--primary);
+            cursor: pointer;
+            text-decoration: underline;
+        }
     </style>
 </head>
 <body>
 
-    <div class="bg-container">
-        <div class="blob"></div>
-        <div class="blob blob-2"></div>
-    </div>
+<div class="bg-container">
+    <div class="blob"></div>
+    <div class="blob blob-2"></div>
+</div>
 
-    <div class="login-card">
-        <div class="brand-logo">AnimeExplorer</div>
-        <p class="subtitle">Enter your credentials to continue</p>
+<div class="login-card">
+    <div class="brand-logo">AnimeExplorer</div>
+    <p class="subtitle">Enter your credentials to continue</p>
 
-        <div class="auth-form">
-            <div class="input-group">
-                <input type="email" id="email" placeholder="Email Address" autocomplete="email">
-                <i class="fas fa-envelope field-icon"></i>
-            </div>
-            <div class="input-group">
-                <input type="password" id="password" placeholder="Password" autocomplete="current-password">
-                <i class="fas fa-lock field-icon"></i>
-                <button class="eye-btn" id="eyeBtn" type="button" tabindex="-1">
-                    <i class="fa-regular fa-eye" id="eyeIcon"></i>
-                </button>
-            </div>
-            <button id="loginBtn" class="login-btn">
-                <span id="btnText">Sign In</span>
-                <div class="btn-spinner" id="btnSpinner"></div>
+    <div class="auth-form">
+        <div class="input-group">
+            <input type="email" id="email" placeholder="Email Address" autocomplete="email">
+            <i class="fas fa-envelope field-icon"></i>
+        </div>
+        <div class="input-group">
+            <input type="password" id="password" placeholder="Password" autocomplete="current-password">
+            <i class="fas fa-lock field-icon"></i>
+            <button class="eye-btn" id="eyeBtn" type="button" tabindex="-1">
+                <i class="fa-regular fa-eye" id="eyeIcon"></i>
             </button>
         </div>
-
-        <!-- Email not verified warning -->
-        <div class="verify-warning" id="verifyWarning">
-            <p>⚠️ Your email is not verified yet. Please check your inbox and click the verification link.</p>
-            <button class="resend-verify-btn" id="resendVerifyBtn" onclick="resendVerification()">
-                Resend Verification Email
-            </button>
-        </div>
-
-        <p id="status"></p>
-
-        <div class="footer-link">
-            Don't have an account? <a href="signup.html">Create One</a>
-        </div>
+        <button id="loginBtn" class="login-btn">
+            <span id="btnText">Sign In</span>
+            <div class="btn-spinner" id="btnSpinner"></div>
+        </button>
     </div>
 
-    <script type="module">
+    <p id="status"></p>
+
+    <div class="resend-info" id="resendInfo" style="display: none;">
+        Didn't get verification email? <a id="resendLink">Resend verification email</a>
+    </div>
+
+    <div class="footer-link">
+        Don't have an account? <a href="signup.html">Create One</a>
+    </div>
+</div>
+
+<script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-    import { getAuth, signInWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-    import { getFirestore, doc, getDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+    import { getAuth, signInWithEmailAndPassword, signOut, sendEmailVerification } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+    import { getFirestore, doc, updateDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
     const firebaseConfig = {
         apiKey: "AIzaSyDLd3TW-y89lwShUmcIHw3YGzDjo4cg3y4",
@@ -221,28 +206,72 @@
         appId: "1:673605765684:web:a6f851e0d79836b79b1861"
     };
 
-    const app  = initializeApp(firebaseConfig);
+    const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
-    const db   = getFirestore(app);
+    const db = getFirestore(app);
 
-    const loginBtn      = document.getElementById('loginBtn');
-    const btnText       = document.getElementById('btnText');
-    const btnSpinner    = document.getElementById('btnSpinner');
-    const status        = document.getElementById('status');
-    const pwdInput      = document.getElementById('password');
-    const verifyWarning = document.getElementById('verifyWarning');
+    let lastAttemptedEmail = "";
 
-    // ── LOADING HELPER ──
+    const loginBtn = document.getElementById('loginBtn');
+    const btnText = document.getElementById('btnText');
+    const btnSpinner = document.getElementById('btnSpinner');
+    const status = document.getElementById('status');
+    const pwdInput = document.getElementById('password');
+    const emailInput = document.getElementById('email');
+    const resendInfo = document.getElementById('resendInfo');
+    const resendLink = document.getElementById('resendLink');
+
     function setLoading(on) {
         loginBtn.disabled = on;
         btnText.style.display = on ? 'none' : 'inline';
         btnSpinner.style.display = on ? 'block' : 'none';
     }
 
-    // ── MAIN LOGIN LOGIC ──
+    // Resend verification email
+    resendLink.onclick = async () => {
+        if (!lastAttemptedEmail) {
+            status.innerText = "Please enter your email first.";
+            status.className = "error";
+            return;
+        }
+        try {
+            // Sign in temporarily to get user object (only if not signed in)
+            let user = auth.currentUser;
+            if (!user || user.email !== lastAttemptedEmail) {
+                // We need to sign in to send verification? Actually sendEmailVerification requires currentUser.
+                // Better approach: user tries to login, fails because not verified, then we can resend using the same credentials.
+                // For simplicity, we'll just tell user to go to signup page and request new link.
+                // But here's a workaround: try to sign in again, get user, send verification, then sign out.
+                status.innerText = "Attempting to resend...";
+                status.className = "info";
+                const pwd = pwdInput.value;
+                if (!pwd) {
+                    status.innerText = "Please enter your password to resend verification.";
+                    status.className = "error";
+                    return;
+                }
+                const cred = await signInWithEmailAndPassword(auth, lastAttemptedEmail, pwd);
+                user = cred.user;
+                await sendEmailVerification(user);
+                await signOut(auth);
+                status.innerText = "Verification email resent! Check your inbox/spam.";
+                status.className = "success";
+            } else {
+                await sendEmailVerification(user);
+                status.innerText = "Verification email resent! Check your inbox/spam.";
+                status.className = "success";
+            }
+        } catch (err) {
+            console.error(err);
+            status.innerText = "Failed to resend. Please try again or sign up again.";
+            status.className = "error";
+        }
+    };
+
     loginBtn.onclick = async () => {
-        const email = document.getElementById('email').value.trim();
-        const pwd   = pwdInput.value;
+        const email = emailInput.value.trim();
+        const pwd = pwdInput.value;
+        lastAttemptedEmail = email;
 
         if (!email || !pwd) {
             status.innerText = "Please fill all fields.";
@@ -253,54 +282,44 @@
         setLoading(true);
         status.innerText = "Checking credentials...";
         status.className = "info";
-        verifyWarning.classList.remove('show');
+        resendInfo.style.display = "none";
 
         try {
-            // 1. Firebase Auth se login attempt
             const cred = await signInWithEmailAndPassword(auth, email, pwd);
             const user = cred.user;
 
-            // 2. Firestore se Check karna ki User Verified hai ya nahi
-            const userRef = doc(db, "users", user.uid);
-            const userSnap = await getDoc(userRef);
-
-            if (userSnap.exists()) {
-                const userData = userSnap.data();
-
-                if (userData.isVerified === false) {
-                    // Agar user ne OTP verify nahi kiya tha pichli baar
-                    await signOut(auth); // Use login nahi rehne denge
-                    setLoading(false);
-                    status.innerText = "";
-                    verifyWarning.classList.add('show');
-                    
-                    // Directing user to verification (Optionally)
-                    // window.location.href = `signup.html?email=${email}`; 
-                    return;
-                }
-
-                // Agar Verified hai toh
-                await updateDoc(userRef, { lastLogin: new Date().toISOString() });
-                status.innerText = "Login Successful! Redirecting...";
-                status.className = "success";
-                setTimeout(() => window.location.href = "index.html", 1000);
-
-            } else {
-                throw new Error("User profile not found in database.");
+            // Check if email is verified
+            if (!user.emailVerified) {
+                await signOut(auth);
+                status.innerText = "❌ Email not verified. Please check your inbox/spam and click the verification link.";
+                status.className = "error";
+                resendInfo.style.display = "block";
+                setLoading(false);
+                return;
             }
 
+            // Check if user is banned (optional, add if needed)
+            // const userSnap = await getDoc(doc(db, "users", user.uid));
+            // if (userSnap.exists() && userSnap.data().isBanned === true) { ... }
+
+            // Update last login
+            await updateDoc(doc(db, "users", user.uid), { lastLogin: serverTimestamp() });
+
+            status.innerText = "Login Successful! Redirecting...";
+            status.className = "success";
+            setTimeout(() => window.location.href = "index.html", 1000);
         } catch (e) {
             setLoading(false);
             console.error(e);
-            status.innerText = "Invalid Email or Password.";
+            if (e.code === 'auth/user-not-found' || e.code === 'auth/wrong-password') {
+                status.innerText = "Invalid email or password.";
+            } else if (e.code === 'auth/too-many-requests') {
+                status.innerText = "Too many attempts. Try again later.";
+            } else {
+                status.innerText = "Login failed. Try again.";
+            }
             status.className = "error";
         }
-    };
-
-    // Resend functionality for unverified users
-    window.resendVerification = () => {
-        // User ko signup page par bhej dena jahan wo naya OTP le sake
-        window.location.href = "signup.html";
     };
 
     // Password Toggle
@@ -310,6 +329,5 @@
         document.getElementById('eyeIcon').className = type === 'password' ? 'fa-regular fa-eye' : 'fa-regular fa-eye-slash';
     };
 </script>
-
 </body>
 </html>
