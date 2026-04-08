@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Master Admin - AnimeExplorer</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap');
+
+        :root { 
+            --primary: #7c4dff; 
+            --primary-glow: rgba(124, 77, 255, 0.3);
+            --bg: #08090b; 
+            --card: #12141a; 
+            --gold: #ffcf4b; 
+            --danger: #ff4b5c;
+            --success: #00e676;
+        }
+
+        body { 
+            background: var(--bg); 
+            color: #e2e8f0; 
+            font-family: 'Plus Jakarta Sans', sans-serif; 
+            margin: 0; 
+            padding-bottom: 40px; 
+        }
+
+        ::-webkit-scrollbar { width: 5px; }
+        ::-webkit-scrollbar-track { background: var(--bg); }
+        ::-webkit-scrollbar-thumb { background: #333; border-radius: 10px; }
+
+        .app-header { 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            padding: 20px; 
+            background: rgba(18, 20, 26, 0.8);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        .logo { font-weight: 800; font-size: 1.2rem; color: var(--primary); display: flex; align-items: center; gap: 8px; }
+
+        .admin-container { padding: 20px; max-width: 700px; margin: auto; }
+
+        .admin-tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 25px;
+            background: var(--card);
+            padding: 6px;
+            border-radius: 18px;
+            border: 1px solid rgba(255,255,255,0.05);
+        }
+        .tab-btn {
+            flex: 1;
+            padding: 12px;
+            border-radius: 14px;
+            border: none;
+            background: transparent;
+            color: #64748b;
+            font-weight: 700;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+        .tab-btn.active {
+            background: var(--primary);
+            color: white;
+            box-shadow: 0 4px 15px var(--primary-glow);
+        }
+
+        .stat-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 25px; }
+        .stat-box { 
+            background: var(--card); 
+            padding: 20px 10px; 
+            border-radius: 20px; 
+            text-align: center; 
+            border: 1px solid rgba(255,255,255,0.03);
+        }
+        .stat-box h2 { font-size: 24px; color: #fff; margin: 0; font-weight: 800; }
+        .stat-box p { font-size: 10px; color: #64748b; margin-top: 5px; text-transform: uppercase; font-weight: 600; }
+
+        .card { 
+            background: var(--card); 
+            border-radius: 24px; 
+            padding: 20px; 
+            border: 1px solid rgba(255,255,255,0.05); 
+            margin-bottom: 25px;
+        }
+        .card-title { font-size: 14px; font-weight: 700; margin-bottom: 15px; display: flex; align-items: center; gap: 10px; }
+
+        input, select, textarea { 
+            width: 100%; padding: 15px; background: #08090b; border: 1px solid #222; 
+            color: white; border-radius: 16px; font-size: 14px; box-sizing: border-box; outline: none; margin-bottom: 10px;
+        }
+
+        .btn-primary { 
+            background: var(--primary); color: white; width: 100%; margin-top: 12px; 
+            padding: 14px; border: none; border-radius: 16px; font-weight: 700; cursor: pointer;
+        }
+        .btn-gold { background: var(--gold); color: black; }
+
+        .search-box { 
+            background: var(--card); padding: 14px 20px; border-radius: 50px; 
+            margin: 25px 0; border: 1px solid rgba(255,255,255,0.05); display: flex; align-items: center; gap: 12px; 
+        }
+        .search-box input { flex: 1; background: transparent; border: none; margin-bottom: 0; }
+
+        .user-row, .shop-item-row { 
+            display: flex; align-items: center; gap: 15px; padding: 12px 0; border-bottom: 1px solid rgba(255,255,255,0.03); 
+        }
+        .user-avatar { width: 45px; height: 45px; border-radius: 50%; object-fit: cover; }
+        .user-info { flex: 1; }
+        .action-btns { display: flex; gap: 8px; }
+        .circle-btn { width: 38px; height: 38px; border-radius: 50%; border: none; display: flex; align-items: center; justify-content: center; cursor: pointer; }
+        .btn-verify { background: rgba(255, 207, 75, 0.1); color: var(--gold); }
+        .btn-verify.active { background: var(--gold); color: #000; }
+        .btn-ban { background: rgba(255, 75, 92, 0.1); color: var(--danger); }
+        .btn-ban.active { background: var(--danger); color: white; }
+    </style>
+</head>
+<body>
+
+    <div class="app-header">
+        <div class="logo"><i class="fa-solid fa-bolt-lightning"></i> MASTER ADMIN</div>
+        <i class="fa-solid fa-circle-user" onclick="location.href='profile.html'" style="font-size: 1.5rem; color: #444; cursor:pointer;"></i>
+    </div>
+
+    <div class="admin-container" id="adminContent" style="display:none;">
+        
+        <div class="admin-tabs">
+            <button class="tab-btn active" id="tabUsersBtn" onclick="switchTab('users')">Users</button>
+            <button class="tab-btn" id="tabStoreBtn" onclick="switchTab('store')">Store</button>
+        </div>
+
+        <div id="tab-users">
+            <div class="stat-grid">
+                <div class="stat-box"><h2 id="totalU">0</h2><p>Users</p></div>
+                <div class="stat-box"><h2 id="totalP">0</h2><p>Polls</p></div>
+                <div class="stat-box"><h2 id="totalB">0</h2><p>Banned</p></div>
+            </div>
+
+            <div class="card">
+                <div class="card-title" style="color: var(--primary);"><i class="fa-solid fa-tower-broadcast"></i> Global Broadcast</div>
+                <textarea id="globalMsg" rows="3" placeholder="What's the update today?"></textarea>
+                <button onclick="sendGlobalNotice()" id="noticeBtn" class="btn-primary">Send to All Users</button>
+            </div>
+
+            <div class="search-box">
+                <i class="fa-solid fa-magnifying-glass" style="color: var(--primary);"></i>
+                <input type="text" id="userSearch" placeholder="Search by name or UID..." oninput="filterUsers()">
+            </div>
+
+            <div class="card">
+                <div class="card-title"><i class="fa-solid fa-shield-halved"></i> User Management</div>
+                <div id="userList">Loading users...</div>
+            </div>
+        </div>
+
+        <div id="tab-store" style="display:none;">
+            <div class="card">
+                <div class="card-title" style="color: var(--gold);"><i class="fa-solid fa-cart-plus"></i> Add Store Item</div>
+                <input type="text" id="itemName" placeholder="Item Name (e.g. Neon Border)">
+                <div style="display: flex; gap: 10px;">
+                    <input type="number" id="itemPrice" placeholder="Price">
+                    <select id="itemType">
+                        <option value="border">Border</option>
+                        <option value="banner">Banner</option>
+                    </select>
+                </div>
+                <p style="font-size: 11px; color: #64748b; margin: 5px 0 10px 5px;">Upload Image/GIF (Directly to ImgBB):</p>
+                <input type="file" id="itemFile" accept="image/*" style="padding: 10px; margin-bottom: 15px;">
+                
+                <input type="text" id="itemValue" placeholder="CSS Class (Only for special effects, else leave empty)">
+                <button onclick="addItem()" id="addBtn" class="btn-primary btn-gold">Upload & Add to Shop</button>
+            </div>
+
+            <div class="card">
+                <div class="card-title"><i class="fa-solid fa-boxes-stacked"></i> Inventory List</div>
+                <div id="shopItemsList">Loading items...</div>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+        import { getFirestore, doc, getDoc, getDocs, collection, updateDoc, addDoc, deleteDoc, serverTimestamp, query, where } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+        const firebaseConfig = { 
+            apiKey: "AIzaSyDLd3TW-y89lwShUmcIHw3YGzDjo4cg3y4", 
+            authDomain: "animea2z.firebaseapp.com", 
+            projectId: "animea2z", 
+            storageBucket: "animea2z.firebasestorage.app", 
+            messagingSenderId: "673605765684", 
+            appId: "1:673605765684:web:a6f851e0d79836b79b1861" 
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        let allUsersData = [];
+
+        onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                const snap = await getDoc(doc(db, "users", user.uid));
+                if (snap.exists() && snap.data().customId === "1000000001") {
+                    document.getElementById('adminContent').style.display = "block";
+                    initDashboard();
+                } else {
+                    alert("Unauthorized Access!");
+                    window.location.href = "index.html";
+                }
+            } else {
+                window.location.href = "login.html";
+            }
+        });
+
+        async function initDashboard() {
+            loadStats();
+            loadUsers();
+        }
+
+        window.switchTab = (tab) => {
+            document.getElementById('tab-users').style.display = tab === 'users' ? 'block' : 'none';
+            document.getElementById('tab-store').style.display = tab === 'store' ? 'block' : 'none';
+            document.getElementById('tabUsersBtn').classList.toggle('active', tab === 'users');
+            document.getElementById('tabStoreBtn').classList.toggle('active', tab === 'store');
+            if(tab === 'store') loadShopItems();
+        };
+
+        // --- STATS & USERS ---
+        async function loadStats() {
+            const uSnap = await getDocs(collection(db, "users"));
+            const bSnap = await getDocs(query(collection(db, "users"), where("isBanned", "==", true)));
+            const pSnap = await getDocs(collection(db, "polls"));
+            document.getElementById('totalU').innerText = uSnap.size;
+            document.getElementById('totalB').innerText = bSnap.size;
+            document.getElementById('totalP').innerText = pSnap.size;
+        }
+
+        async function loadUsers() {
+            const uSnap = await getDocs(collection(db, "users"));
+            allUsersData = [];
+            uSnap.forEach(d => allUsersData.push({ id: d.id, ...d.data() }));
+            renderUserList(allUsersData);
+        }
+
+        function renderUserList(users) {
+            const area = document.getElementById('userList');
+            area.innerHTML = '';
+            users.forEach(u => {
+                area.innerHTML += `
+                    <div class="user-row">
+                        <img class="user-avatar" src="${u.avatar || 'https://via.placeholder.com/100'}" style="border: 2px solid ${u.isVerified ? 'var(--gold)' : 'transparent'}">
+                        <div class="user-info">
+                            <b>${u.username || 'User'} ${u.isVerified ? '<i class="fa-solid fa-circle-check" style="color:var(--gold)"></i>' : ''}</b>
+                            <br><small>ID: ${u.customId || 'N/A'}</small>
+                        </div>
+                        <div class="action-btns">
+                            <button class="circle-btn btn-verify ${u.isVerified ? 'active' : ''}" onclick="toggleVerification('${u.id}', ${u.isVerified})">
+                                <i class="fa-solid fa-certificate"></i>
+                            </button>
+                            <button class="circle-btn btn-ban ${u.isBanned ? 'active' : ''}" onclick="toggleBan('${u.id}', ${u.isBanned})">
+                                <i class="fa-solid fa-ban"></i>
+                            </button>
+                        </div>
+                    </div>`;
+            });
+        }
+
+        window.filterUsers = () => {
+            const term = document.getElementById('userSearch').value.toLowerCase();
+            const filtered = allUsersData.filter(u => 
+                (u.username && u.username.toLowerCase().includes(term)) || 
+                (u.customId && u.customId.toString().includes(term))
+            );
+            renderUserList(filtered);
+        };
+
+        window.toggleVerification = async (uid, status) => {
+            await updateDoc(doc(db, "users", uid), { isVerified: !status });
+            loadUsers();
+        };
+
+        window.toggleBan = async (uid, status) => {
+            if(!confirm("Change ban status?")) return;
+            await updateDoc(doc(db, "users", uid), { isBanned: !status });
+            loadUsers();
+            loadStats();
+        };
+
+        window.sendGlobalNotice = async () => {
+            const msg = document.getElementById('globalMsg').value.trim();
+            if(!msg) return;
+            await addDoc(collection(db, "notifications"), { message: msg, timestamp: serverTimestamp() });
+            alert("Broadcast sent!");
+            document.getElementById('globalMsg').value = '';
+        };
+
+        // --- STORE LOGIC: DIRECT IMGBB UPLOAD (NO STILL GIFS) ---
+        window.addItem = async () => {
+            const name = document.getElementById('itemName').value.trim();
+            const price = parseInt(document.getElementById('itemPrice').value);
+            const type = document.getElementById('itemType').value;
+            const value = document.getElementById('itemValue').value.trim();
+            const fileInput = document.getElementById('itemFile');
+            const btn = document.getElementById('addBtn');
+
+            if(!name || isNaN(price) || !fileInput.files[0]) {
+                return alert("Please fill Name, Price and select a GIF/Image!");
+            }
+
+            btn.innerText = "Direct Uploading...";
+            btn.disabled = true;
+
+            try {
+                // Seedha file ko ImgBB pe bhejna (Animation save rahega)
+                const formData = new FormData();
+                formData.append('image', fileInput.files[0]);
+
+                const res = await fetch("https://api.imgbb.com/1/upload?key=eab281e4cee2c8c755ed3f7594fd120b", {
+                    method: "POST",
+                    body: formData
+                });
+                const json = await res.json();
+
+                if(json.success) {
+                    const imgUrl = json.data.url;
+
+                    // Firestore mein item add karna
+                    await addDoc(collection(db, "shop_items"), { 
+                        name, 
+                        price, 
+                        type, 
+                        image: imgUrl, // Preview ke liye animated GIF link
+                        value: value || imgUrl, // Agar class nahi hai toh image link hi value ban jayegi
+                        createdAt: serverTimestamp() 
+                    });
+
+                    alert("Animated Item Added Successfully!");
+                    
+                    // Cleanup
+                    document.getElementById('itemName').value = '';
+                    document.getElementById('itemPrice').value = '';
+                    document.getElementById('itemValue').value = '';
+                    fileInput.value = '';
+                    loadShopItems();
+                } else {
+                    alert("ImgBB Error: " + json.error.message);
+                }
+            } catch (e) {
+                console.error(e);
+                alert("Upload failed. Check internet/API key.");
+            } finally {
+                btn.innerText = "Upload & Add to Shop";
+                btn.disabled = false;
+            }
+        };
+
+        async function loadShopItems() {
+            const area = document.getElementById('shopItemsList');
+            const snap = await getDocs(collection(db, "shop_items"));
+            area.innerHTML = '';
+            snap.forEach(d => {
+                const item = d.data();
+                area.innerHTML += `
+                    <div class="shop-item-row">
+                        <img src="${item.image}" style="width:35px; height:35px; border-radius:8px; object-fit:cover; border:1px solid #333;">
+                        <div class="user-info" style="margin-left: 10px;">
+                            <b style="font-size:14px;">${item.name}</b><br>
+                            <small style="color:var(--gold)">${item.price} Coins</small> | <small style="text-transform:capitalize;">${item.type}</small>
+                        </div>
+                        <button class="circle-btn btn-ban" onclick="deleteShopItem('${d.id}')">
+                            <i class="fa-solid fa-trash"></i>
+                        </button>
+                    </div>`;
+            });
+        }
+
+        window.deleteShopItem = async (id) => {
+            if(confirm("Delete this item from store?")) {
+                await deleteDoc(doc(db, "shop_items", id));
+                loadShopItems();
+            }
+        };
+    </script>
+</body>
+</html>
