@@ -1,0 +1,549 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Anime Shop | Premium Store</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,600;14..32,700;14..32,800&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background: #0a0b10;
+            color: #ffffff;
+            font-family: 'Inter', sans-serif;
+            padding-bottom: 30px;
+        }
+
+        /* Header */
+        .store-header {
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 14px 20px;
+            background: rgba(10, 11, 16, 0.85);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(124, 77, 255, 0.2);
+        }
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+        .back-btn {
+            width: 38px;
+            height: 38px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(255,255,255,0.05);
+            border-radius: 12px;
+            color: white;
+            font-size: 18px;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .back-btn:active {
+            background: #7c4dff;
+            transform: scale(0.92);
+        }
+        .logo h2 {
+            font-size: 20px;
+            font-weight: 800;
+            background: linear-gradient(135deg, #fff, #b794f4);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            letter-spacing: -0.5px;
+        }
+        .coin-pill {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(255, 215, 0, 0.12);
+            border: 1px solid rgba(255, 215, 0, 0.25);
+            padding: 8px 16px;
+            border-radius: 40px;
+            font-weight: 700;
+            font-size: 15px;
+            color: #FFD700;
+        }
+        .coin-pill i {
+            font-size: 14px;
+        }
+
+        /* Container */
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px 16px 40px;
+        }
+
+        /* Daily Bonus Card */
+        .bonus-card {
+            background: linear-gradient(135deg, rgba(124, 77, 255, 0.15), rgba(124, 77, 255, 0.05));
+            border: 1px solid rgba(124, 77, 255, 0.3);
+            border-radius: 24px;
+            padding: 18px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 28px;
+            backdrop-filter: blur(10px);
+            transition: 0.3s;
+        }
+        .bonus-icon {
+            width: 48px;
+            height: 48px;
+            background: linear-gradient(135deg, #7c4dff, #b794f4);
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            margin-right: 16px;
+            box-shadow: 0 8px 20px rgba(124, 77, 255, 0.3);
+        }
+        .bonus-info h4 {
+            font-size: 16px;
+            font-weight: 800;
+            margin-bottom: 4px;
+        }
+        .bonus-info p {
+            font-size: 12px;
+            color: #aaa;
+        }
+        .claim-btn {
+            background: #7c4dff;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 30px;
+            color: white;
+            font-weight: 700;
+            font-size: 13px;
+            cursor: pointer;
+            transition: 0.2s;
+            box-shadow: 0 4px 12px rgba(124, 77, 255, 0.4);
+        }
+        .claim-btn:active {
+            transform: scale(0.96);
+        }
+        .claim-btn:disabled {
+            background: #2a2a3a;
+            box-shadow: none;
+            cursor: not-allowed;
+        }
+
+        /* Section Title */
+        .section-title {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin: 28px 0 16px 0;
+        }
+        .section-title i {
+            font-size: 18px;
+            color: #7c4dff;
+            background: rgba(124, 77, 255, 0.15);
+            padding: 6px;
+            border-radius: 10px;
+        }
+        .section-title span {
+            font-size: 16px;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+            color: #ddd;
+        }
+
+        /* Shop Grid */
+        .shop-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 16px;
+        }
+        .item-card {
+            background: #13151c;
+            border-radius: 20px;
+            padding: 18px 12px 16px;
+            text-align: center;
+            border: 1px solid rgba(255,255,255,0.05);
+            transition: transform 0.2s, border-color 0.2s;
+        }
+        .item-card:active {
+            transform: scale(0.98);
+            border-color: rgba(124, 77, 255, 0.4);
+        }
+        /* Border preview */
+        .border-preview {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            margin: 0 auto 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #1e1f2a;
+        }
+        .border-preview img {
+            width: 68px;
+            height: 68px;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+        /* Banner preview */
+        .banner-preview {
+            width: 100%;
+            height: 80px;
+            border-radius: 14px;
+            margin-bottom: 12px;
+            background-size: cover;
+            background-position: center;
+            background-color: #1e1f2a;
+        }
+        .item-name {
+            font-weight: 700;
+            font-size: 14px;
+            margin: 8px 0 4px;
+        }
+        .item-price {
+            color: #FFD700;
+            font-weight: 800;
+            font-size: 13px;
+            margin: 6px 0;
+        }
+        .buy-btn {
+            width: 100%;
+            background: #7c4dff;
+            border: none;
+            padding: 10px;
+            border-radius: 30px;
+            color: white;
+            font-weight: 700;
+            font-size: 13px;
+            cursor: pointer;
+            transition: 0.2s;
+            margin-top: 8px;
+        }
+        .buy-btn:active {
+            transform: scale(0.96);
+        }
+        .buy-btn.owned {
+            background: #2a2a3a;
+            color: #aaa;
+            cursor: default;
+        }
+        .buy-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        /* Empty state */
+        .empty-state {
+            text-align: center;
+            padding: 50px 20px;
+            color: #aaa;
+        }
+        .empty-state i {
+            font-size: 48px;
+            margin-bottom: 12px;
+            opacity: 0.5;
+        }
+
+        /* Skeleton Loading */
+        .skeleton-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 16px;
+        }
+        .skeleton-card {
+            background: #13151c;
+            border-radius: 20px;
+            padding: 18px 12px 16px;
+        }
+        .skeleton-img {
+            width: 80px;
+            height: 80px;
+            background: #23252e;
+            border-radius: 50%;
+            margin: 0 auto 12px;
+        }
+        .skeleton-text {
+            height: 14px;
+            background: #23252e;
+            border-radius: 8px;
+            margin: 8px auto;
+            width: 80%;
+        }
+        .skeleton-price {
+            height: 12px;
+            background: #23252e;
+            border-radius: 8px;
+            width: 50%;
+            margin: 6px auto;
+        }
+        .skeleton-btn {
+            height: 36px;
+            background: #23252e;
+            border-radius: 30px;
+            margin-top: 8px;
+        }
+        @keyframes shimmer {
+            0% { background-position: -200% 0; }
+            100% { background-position: 200% 0; }
+        }
+        .shimmer {
+            background: linear-gradient(90deg, #1a1c24 25%, #2a2d38 50%, #1a1c24 75%);
+            background-size: 200% 100%;
+            animation: shimmer 1.2s infinite;
+        }
+
+        /* Toast */
+        .toast {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%) translateY(100px);
+            background: #1e1f2a;
+            backdrop-filter: blur(20px);
+            padding: 12px 24px;
+            border-radius: 40px;
+            color: white;
+            font-weight: 600;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            z-index: 2000;
+            transition: 0.3s;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+        .toast.show {
+            transform: translateX(-50%) translateY(0);
+        }
+        .toast i {
+            color: #4ade80;
+        }
+        .toast.error i {
+            color: #ff6b6b;
+        }
+    </style>
+</head>
+<body>
+
+<header class="store-header">
+    <div class="header-left">
+        <div class="back-btn" onclick="history.back()">
+            <i class="fa-solid fa-arrow-left"></i>
+        </div>
+        <div class="logo">
+            <h2>Anime Shop</h2>
+        </div>
+    </div>
+    <div class="coin-pill">
+        <i class="fa-solid fa-coins"></i>
+        <span id="userCoins">--</span>
+    </div>
+</header>
+
+<div class="container">
+    <!-- Daily Bonus Card -->
+    <div class="bonus-card">
+        <div style="display: flex; align-items: center;">
+            <div class="bonus-icon">
+                <i class="fa-solid fa-gift"></i>
+            </div>
+            <div class="bonus-info">
+                <h4>Daily Bonus</h4>
+                <p id="bonusStatus">Claim 50 free coins!</p>
+            </div>
+        </div>
+        <button class="claim-btn" id="claimBtn" onclick="claimDaily()">Claim</button>
+    </div>
+
+    <!-- Section Title -->
+    <div class="section-title">
+        <i class="fa-solid fa-wand-magic-sparkles"></i>
+        <span>Borders & Banners</span>
+    </div>
+
+    <!-- Shop Grid -->
+    <div id="storeGrid" class="shop-grid">
+        <!-- Skeletons will be shown initially -->
+        <div class="skeleton-card"><div class="skeleton-img shimmer"></div><div class="skeleton-text shimmer"></div><div class="skeleton-price shimmer"></div><div class="skeleton-btn shimmer"></div></div>
+        <div class="skeleton-card"><div class="skeleton-img shimmer"></div><div class="skeleton-text shimmer"></div><div class="skeleton-price shimmer"></div><div class="skeleton-btn shimmer"></div></div>
+        <div class="skeleton-card"><div class="skeleton-img shimmer"></div><div class="skeleton-text shimmer"></div><div class="skeleton-price shimmer"></div><div class="skeleton-btn shimmer"></div></div>
+        <div class="skeleton-card"><div class="skeleton-img shimmer"></div><div class="skeleton-text shimmer"></div><div class="skeleton-price shimmer"></div><div class="skeleton-btn shimmer"></div></div>
+    </div>
+</div>
+
+<div id="toastMsg" class="toast"></div>
+
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+    import { getFirestore, doc, getDoc, getDocs, updateDoc, increment, collection } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+    const firebaseConfig = {
+        apiKey: "AIzaSyDLd3TW-y89lwShUmcIHw3YGzDjo4cg3y4",
+        authDomain: "animea2z.firebaseapp.com",
+        projectId: "animea2z",
+        storageBucket: "animea2z.firebasestorage.app",
+        messagingSenderId: "673605765684",
+        appId: "1:673605765684:web:a6f851e0d79836b79b1861"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+
+    let userBalance = 0;
+    let userData = {};
+
+    function showToast(msg, isError = false) {
+        const toast = document.getElementById('toastMsg');
+        toast.innerHTML = `<i class="fa-solid ${isError ? 'fa-circle-exclamation' : 'fa-circle-check'}"></i> ${msg}`;
+        toast.classList.add('show');
+        if (isError) toast.classList.add('error');
+        else toast.classList.remove('error');
+        setTimeout(() => toast.classList.remove('show'), 2500);
+    }
+
+    onAuthStateChanged(auth, async (u) => {
+        if (u) {
+            await loadStore(u.uid);
+        } else {
+            window.location.href = "login.html";
+        }
+    });
+
+    async function loadStore(uid) {
+        try {
+            // Get user data
+            const userSnap = await getDoc(doc(db, "users", uid));
+            if (!userSnap.exists()) return;
+            userData = userSnap.data();
+            userBalance = userData.coins || 0;
+            document.getElementById('userCoins').innerText = userBalance;
+
+            // Daily bonus check
+            const today = new Date().toDateString();
+            if (userData.lastClaim === today) {
+                const claimBtn = document.getElementById('claimBtn');
+                claimBtn.disabled = true;
+                claimBtn.innerText = "Claimed";
+                document.getElementById('bonusStatus').innerText = "Come back tomorrow!";
+            }
+
+            // Load shop items
+            const itemsSnap = await getDocs(collection(db, "shop_items"));
+            const grid = document.getElementById('storeGrid');
+            if (itemsSnap.empty) {
+                grid.innerHTML = `<div class="empty-state"><i class="fa-regular fa-box-open"></i><p>No items available yet.</p></div>`;
+                return;
+            }
+
+            let html = '';
+            itemsSnap.forEach(docSnap => {
+                const item = docSnap.data();
+                const isOwned = (item.type === 'border' && userData.activeBorder === item.value) ||
+                                (item.type === 'banner' && userData.banner === item.value);
+
+                let previewHtml = '';
+                if (item.type === 'border') {
+                    previewHtml = `
+                        <div class="border-preview ${item.value || ''}">
+                            <img src="${item.image}" alt="preview" loading="lazy">
+                        </div>
+                    `;
+                } else {
+                    previewHtml = `
+                        <div class="banner-preview" style="background-image: url('${item.image}');"></div>
+                    `;
+                }
+
+                html += `
+                    <div class="item-card">
+                        ${previewHtml}
+                        <div class="item-name">${item.name}</div>
+                        <div class="item-price"><i class="fa-solid fa-coins"></i> ${item.price}</div>
+                        <button class="buy-btn ${isOwned ? 'owned' : ''}" 
+                                data-type="${item.type}" 
+                                data-value="${item.value}" 
+                                data-price="${item.price}"
+                                ${isOwned ? 'disabled' : ''}>
+                            ${isOwned ? 'Owned' : 'Buy Now'}
+                        </button>
+                    </div>
+                `;
+            });
+            grid.innerHTML = html;
+
+            // Attach event listeners to buttons
+            document.querySelectorAll('.buy-btn:not(.owned)').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const type = btn.dataset.type;
+                    const value = btn.dataset.value;
+                    const price = parseInt(btn.dataset.price);
+                    buyItem(type, value, price);
+                });
+            });
+        } catch (err) {
+            console.error(err);
+            showToast("Failed to load store", true);
+        }
+    }
+
+    async function buyItem(type, value, cost) {
+        if (userBalance < cost) {
+            showToast(`Need ${cost - userBalance} more coins!`, true);
+            return;
+        }
+        if (!confirm(`Buy this for ${cost} coins?`)) return;
+
+        const userRef = doc(db, "users", auth.currentUser.uid);
+        let updateData = { coins: increment(-cost) };
+        if (type === 'border') updateData.activeBorder = value;
+        if (type === 'banner') updateData.banner = value;
+
+        try {
+            await updateDoc(userRef, updateData);
+            showToast("Purchased successfully! 🎉");
+            setTimeout(() => location.reload(), 1500);
+        } catch (err) {
+            console.error(err);
+            showToast("Transaction failed", true);
+        }
+    }
+
+    window.claimDaily = async () => {
+        const claimBtn = document.getElementById('claimBtn');
+        if (claimBtn.disabled) return;
+        const userRef = doc(db, "users", auth.currentUser.uid);
+        const today = new Date().toDateString();
+        try {
+            await updateDoc(userRef, {
+                coins: increment(50),
+                lastClaim: today
+            });
+            showToast("+50 Coins added! 🪙");
+            claimBtn.disabled = true;
+            claimBtn.innerText = "Claimed";
+            document.getElementById('bonusStatus').innerText = "Come back tomorrow!";
+            userBalance += 50;
+            document.getElementById('userCoins').innerText = userBalance;
+        } catch (err) {
+            showToast("Failed to claim bonus", true);
+        }
+    };
+</script>
+</body>
+</html>
