@@ -7,19 +7,90 @@
     <link rel="stylesheet" href="main.css">
     <link rel="stylesheet" href="components.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
+<script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
+
     <style>
-        .anime-card { background: var(--bg-card); border-radius: 10px; overflow: hidden; position: relative; transition: 0.3s; }
-        .anime-card:active { transform: scale(0.95); }
-        .anime-card img { width: 100%; height: 180px; object-fit: cover; background: #333; }
-        .card-content { padding: 10px; }
-        .card-title { font-size: 13px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #fff; }
-        .grid-container { display: grid; grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); gap: 10px; padding: 15px; }
-        .search-box { width: 100%; background: #23252b; border: 1px solid #5738B0; padding: 12px 15px; border-radius: 25px; color: white; outline: none; }
-        
-        .chip-slider { display: flex; gap: 10px; overflow-x: auto; padding: 15px 5px; scrollbar-width: none; }
+  
+.anime-card { 
+        background: var(--bg-card); 
+        border-radius: 9px; 
+        overflow: hidden; 
+        position: relative; 
+        border: 1px solid rgba(255,255,255,0.05);
+        box-shadow: var(--shadow-soft);
+        transition: all 0.3s ease;
+        aspect-ratio: 0.75 / 1;
+    }
+.anime-card:active {
+        transform: scale(0.96);
+        border-color: var(--accent-blue);
+    }
+
+    .anime-card img { 
+        width: 100%; 
+        height: 100%; 
+        object-fit: cover; 
+        opacity: 0.85;
+    }
+             .card-content { 
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        padding: 12px;
+        background: linear-gradient(transparent, rgba(18, 23, 29, 0.95));
+    }
+
+
+.card-title { 
+        font-size: 12px; 
+        font-weight: 700; 
+        color: var(--text-primary);
+        line-height: 1.2;
+        margin-bottom: 4px;
+        display: -webkit-box;
+        -webkit-line-clamp: 2; /* 2 lines max for title */
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+        .grid-container { 
+        display: grid; 
+        /* Ek line mein 2 equal cards ke liye */
+        grid-template-columns: repeat(2, 1fr); 
+        gap: 16px; 
+        padding: 15px; 
+        /* Smooth scrolling performance */
+        overflow-x: hidden;
+    }
+.search-box {
+    width: 100%;
+    background: rgba(15, 17, 22, 0.4) !important; /* Semi-transparent */
+    backdrop-filter: blur(12px); /* Glass effect */
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(87, 56, 176, 0.3);
+    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.5);
+    padding: 12px 15px;
+    border-radius: 10px;
+    color: white;
+    outline: none;
+    box-sizing: border-box;
+    transition: all 0.3s ease;
+}
+
+.search-container a:active {
+    transform: translateY(-50%) scale(0.9) !important;
+}
+
+
+.search-box:focus {
+    border-color: #5738B0;
+    box-shadow: 0 0 10px rgba(87, 56, 176, 0.4);
+}
+  .chip-slider { display: flex; gap: 10px; overflow-x: auto; scrollbar-width: none; }
         .chip-slider::-webkit-scrollbar { display: none; }
-        .chip { background: #23252b; color: white; padding: 8px 16px; border-radius: 20px; font-size: 13px; font-weight: 500; white-space: nowrap; border: 1px solid #333; text-decoration: none; cursor: pointer; }
-        .chip.active { background: white; color: black; border-color: white; }
+        .chip { background: #23252b; color: white; padding: 8px 16px; border-radius: 15px; font-size: 13px; font-weight: 500; white-space: nowrap; border: 1px solid #333; text-decoration: none; cursor: pointer; }
+        .chip.active { background: #5738B0; color: white; border-color: #5738B0;  }
         
         body { height: auto !important; overflow-y: auto !important; display: block !important; background-color: #0f1116; color: white; padding-bottom: 80px; }
         .hidden { display: none !important; }
@@ -48,27 +119,17 @@
         .btn-no { background: #333; color: white; }
 
         .nsfw-badge {
-            background: #ff0000; color: white; font-size: 9px; padding: 1px 5px;
+            background: #e88b00; color: white; font-size: 9px; padding: 1px 5px;
             border-radius: 4px; font-weight: 800; display: inline-block;
             margin-left: 8px; vertical-align: middle;
         }
-/* BOTTOM NAVIGATION CSS */
-/* OPTIMIZED BOTTOM NAVIGATION */
-/* FIXED UNIFORM BOTTOM NAV */
-.bottom-nav {
-    position: fixed;
-    bottom: 0;
-    left: 0;
-    width: 100%;
-    height: 70px; /* Fix standard height for both pages */
-    display: flex;
-    justify-content: space-around;
-    align-items: center;
-    background: #1a1c22; /* Same dark theme */
-    border-top: 1px solid rgba(255, 255, 255, 0.1);
-    padding-bottom: env(safe-area-inset-bottom);
-    z-index: 5000; /* Sabse upar rahega */
-}
+    .bottom-nav {
+        background: #161c24 !important;
+        border-radius: 25px 25px 0 0;
+        height: 80px;
+        border-top: 1px solid rgba(255,255,255,0.05) !important;
+        box-shadow: 0 -10px 30px rgba(0,0,0,0.5);
+    }
 
 .nav-item {
     text-decoration: none;
@@ -96,15 +157,411 @@
     color: #5738B0; /* Your Brand Purple */
 }
 
-/* Touch Effect */
 .nav-item:active {
     transform: scale(0.9);
+}
+.app-header .logo {
+    letter-spacing: 1px;
+}
+.app-header i:active {
+    transform: scale(0.9);
+}
+
+.skeleton {
+    background: #1a1c22;
+    background: linear-gradient(110deg, #1a1c22 8%, #23252b 18%, #1a1c22 33%);
+    border-radius: 10px;
+    background-size: 200% 100%;
+    animation: shimmer 1.5s linear infinite;
+}
+
+@keyframes shimmer {
+    to { background-position-x: -200%; }
+}
+
+.skeleton-card {
+    height: 240px; /* Anime card ke barabar */
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.skeleton-img { height: 180px; width: 100%; border-radius: 10px; }
+.skeleton-text { height: 15px; width: 80%; border-radius: 5px; margin-left: 5px; }
+.skeleton-small { height: 10px; width: 40%; border-radius: 5px; margin-left: 5px; }
+
+.skeleton-activity {
+    min-width: 220px;
+    height: 66px; /* Jo aapke original card ki height hai */
+    background: #1a1c22;
+    border-radius: 15px;
+    border: 1px solid #333;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px;
+}
+
+.skeleton-circle {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+.hero-wrapper {
+    opacity: 0;
+    transform: translateY(10px);
+    transition: opacity 0.8s ease, transform 0.8s ease;
+}
+
+.hero-wrapper.visible {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.hero-mirror-bg {
+    position: absolute;
+    inset: 0;
+    background-size: cover;
+    background-position: center 20%;
+    z-index: 1;
+    filter: brightness(0.8); /* Image ko thoda saaf rakha hai */
+}
+/* Screenshot jaisa Top aur Bottom Blur (Sirf kinaro par) */
+/* Swiper Container Size */
+.swiper {
+    width: 100%;
+    height: 220px; /* Aapke hisab se height set karein */
+    margin: 10px 0;
+    border-radius: 15px;
+    overflow: hidden;
+}
+.hero-slide {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: flex-end; /* Card bottom mein rahega */
+}
+
+/* Background Banner Style */
+.hero-mirror-bg {
+    position: absolute;
+    inset: 0;
+    background-size: cover;
+    background-position: center;
+    filter: brightness(0.7);
+    z-index: 0;
+}
+
+/* Floating Card Overlay (Screenshot Jaisa) */
+.hero-main-content {
+    position: relative;
+    z-index: 5;
+    margin: 10px; 
+    width: auto; /* Fixed width ki jagah auto taaki chota lage */
+    max-width: 80%; /* Screen se bahar na jaye */
+    background: rgba(0, 0, 0, 0.3); /* Bilkul halka transparent black */
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 10px;
+    padding: 8px 12px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
 }
 
 
 
+/* Upar ka blur */
+.hero-wrapper::before {
+    top: 0;
+    background: linear-gradient(to bottom, rgba(15, 17, 22, 0.95), transparent);
+    mask-image: linear-gradient(to bottom, black, transparent);
+    -webkit-mask-image: linear-gradient(to bottom, black, transparent);
+}
 
-    </style>
+/* Niche ka blur */
+.hero-wrapper::after {
+    bottom: 0;
+    background: linear-gradient(to top, rgba(15, 17, 22, 1), transparent);
+    mask-image: linear-gradient(to top, black, transparent);
+    -webkit-mask-image: linear-gradient(to top, black, transparent);
+}
+
+/* Content Jo Blur ke upar dikhega */
+/* Hero Container Fix */
+#hero-mirror-container {
+    height: 240px; 
+    position: relative;
+}
+/* Glassmorphism content ko properly position karein */
+
+
+.hero-small-poster {
+    width: 35px; /* Poster size chota kiya */
+    height: 50px;
+    border-radius: 4px;
+    object-fit: cover;
+}
+
+.hero-details-text {
+    flex: 1;
+    opacity: 0.85; /* Text aur details thode halkey dikhenge */
+}
+.hero-details-text h1 {
+    font-size: 13px; /* Title font chota kiya */
+    margin: 0;
+    color: #fff;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 150px;
+}
+.hero-meta-info {
+    font-size: 10px; /* Sub-text font chota kiya */
+    color: rgba(255, 255, 255, 0.7);
+    margin-top: 2px;
+}
+
+.hero-list-icon {
+    width: 30px; 
+    height: 30px;
+    background: #5738B0; /* Brand Purple Color */
+    border-radius: 8px; /* Thoda square-ish rounded look watchlist ke liye */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    color: #fff;
+    box-shadow: 0 4px 10px rgba(87, 56, 176, 0.3);
+    flex-shrink: 0;
+}
+/* Naya Sticky Section Logic */
+.sticky-top-section {
+    position: sticky;
+    top: 0;
+    z-index: 1001;
+    background: #0f1116; /* Same as body background */
+    padding-bottom: 5px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+/* Header fix ko override karein kyunki uska parent ab sticky hai */
+.app-header {
+    position: relative !important;
+    top: 0 !important;
+    border-radius: 0 0 15px 15px;
+}
+
+/* Chip slider ka background fix karein taaki scrolling content niche se na dikhe */
+.chip-slider {
+    background: #0f1116;
+    margin: 0;
+    padding: 1px;
+    
+}
+
+.close-search {
+    align-self: flex-end;
+    font-size: 24px;
+    color: #94a3b8;
+    margin-bottom: 20px;
+    cursor: pointer;
+}
+
+.search-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(15, 17, 22, 0.98);
+    z-index: 10005;
+    display: none;
+    flex-direction: column;
+    padding: 16px 20px;  /* Sirf thodi si top padding */
+    backdrop-filter: blur(20px);
+    justify-content: flex-start;
+    align-items: flex-start;
+    box-sizing: border-box;
+}
+
+.search-overlay.active {
+    display: flex;
+}
+
+.search-bar-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    width: 100%;
+    margin: 0;
+    padding: 0;
+}
+.history-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 11px 8px;
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+    cursor: pointer;
+    transition: background 0.2s;
+    border-radius: 8px;
+}
+
+.history-item:active {
+    background: rgba(87, 56, 176, 0.15);
+}
+
+.history-item-left {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex: 1;
+}
+
+.history-item-left i {
+    color: #555;
+    font-size: 14px;
+}
+
+.history-item-text {
+    font-size: 14px;
+    color: #ccc;
+}
+
+.history-delete {
+    color: #555;
+    font-size: 14px;
+    padding: 4px 8px;
+    cursor: pointer;
+}
+.card-panel {
+    position: absolute;
+    top: 0; right: -100%;
+    width: 65%;
+    height: 100%;
+    background: rgba(10, 10, 15, 0.97);
+    backdrop-filter: blur(10px);
+    border-left: 1px solid rgba(87,56,176,0.4);
+    border-radius: 0 9px 9px 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    padding: 12px 10px;
+    transition: right 0.3s cubic-bezier(0.32,1,0.23,1);
+    z-index: 10;
+}
+.card-panel.open {
+    right: 0;
+}
+.panel-score {
+    font-size: 22px;
+    font-weight: 900;
+    color: #FFB800;
+    line-height: 1;
+}
+.panel-score-label {
+    font-size: 9px;
+    color: #666;
+    font-weight: 600;
+    letter-spacing: 1px;
+    margin-top: -6px;
+}
+.panel-meta {
+    font-size: 10px;
+    color: #888;
+    text-align: center;
+    line-height: 1.5;
+    padding: 0 4px;
+}
+.panel-btn {
+    width: 100%;
+    padding: 9px 6px;
+    border-radius: 10px;
+    border: none;
+    font-size: 11px;
+    font-weight: 800;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    transition: 0.2s;
+}
+.panel-btn:active { transform: scale(0.95); }
+.btn-watchlist {
+    background: #5738B0;
+    color: white;
+}
+.btn-watchlist.added {
+    background: #1a1c22;
+    color: #5738B0;
+    border: 1px solid #5738B0;
+}
+.btn-details {
+    background: rgba(255,255,255,0.05);
+    color: #ccc;
+    border: 1px solid rgba(255,255,255,0.1);
+}
+.panel-close {
+    position: absolute;
+    top: 6px; right: 8px;
+    font-size: 14px;
+    color: #555;
+    cursor: pointer;
+    padding: 4px;
+}
+
+.status-picker {
+    position: absolute;
+    inset: 0;
+    background: rgba(10,10,15,0.98);
+    border-radius: 0 9px 9px 0;
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 10px;
+    z-index: 20;
+}
+.status-picker.show { display: flex; }
+
+.status-opt {
+    width: 100%;
+    padding: 9px 6px;
+    border-radius: 10px;
+    border: 1px solid rgba(255,255,255,0.08);
+    font-size: 11px;
+    font-weight: 800;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    transition: 0.15s;
+    background: rgba(255,255,255,0.03);
+    color: #ccc;
+}
+.status-opt:active { transform: scale(0.95); }
+.status-opt.plan  { border-color: #5738B0; color: #7B5CE8; }
+.status-opt.watch { border-color: #00c853; color: #00c853; }
+.status-opt.done  { border-color: #FFB800; color: #FFB800; }
+
+.status-back {
+    font-size: 10px;
+    color: #555;
+    cursor: pointer;
+    margin-top: 2px;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+      </style>
 </head>
 <body>
     <div id="ageVerificationModal" class="hidden">
@@ -116,20 +573,83 @@
             <button class="modal-btn btn-no" id="cancelAge">No, Go back</button>
         </div>
     </div>
+    
 
-    <header class="app-header">
-        <div class="logo">AnimeExplorer</div>
-    </header>
-
-    <div class="container" style="padding:15px;">
-        <input type="text" id="searchInput" class="search-box" placeholder="Search anime and press Enter...">
+    <div class="sticky-top-section">
+       <header class="app-header" style="display: flex; justify-content: space-between; align-items: center; padding: 2px 20px; background: #1a1c22; border-bottom: 1px solid rgba(255,255,255,0.1);">
+    <div class="logo" style="display: flex; flex-direction: column; line-height: 0.8; cursor: pointer; user-select: none;">
+        <div style="display: flex; align-items: center; gap: 2px; margin-bottom: 2px;">
+            <span style="font-size: 22px; font-weight: 900; color: #fff; letter-spacing: 1px; text-transform: uppercase;">
+                ANIME
+            </span>
+            <div style="position: relative; display: flex; align-items: center; justify-content: center; width: 14px; height: 14px; border: 2.5px solid #8261ee; border-radius: 50%; margin-top: -2px;">
+                <div style="position: absolute; bottom: -4px; right: -4px; width: 5px; height: 2.5px; background: #8261ee; transform: rotate(45deg); border-radius: 1px;"></div>
+            </div>
+        </div>
         
-       <div class="chip-slider">
-    <div class="chip active" id="chip-all">All</div>
-    <div class="chip" id="chip-trending">Trending</div>
-    <div class="chip" id="chip-movies">Movies</div>
+        <div style="display: flex; align-items: center;">
+            <span style="font-size: 18px; font-weight: 900; color: #8261ee; letter-spacing: 2px; text-transform: uppercase;">
+                EXPLORE
+            </span>
+        </div>
+    </div>
+            <div class="header-icons" style="display: flex; gap: 20px; align-items: center;">
+                <div id="triggerSearch" style="cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 2px;">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" style="width: 20px; height: 20px; color: #94a3b8;">
+        <path fill-rule="evenodd" d="M10.5 3.75a6.75 6.75 0 1 0 0 13.5 6.75 6.75 0 0 0 0-13.5ZM2.25 10.5a8.25 8.25 0 1 1 14.59 5.28l4.69 4.69a.75.75 0 1 1-1.06 1.06l-4.69-4.69A8.25 8.25 0 0 1 2.25 10.5Z" clip-rule="evenodd" />
+    </svg>
+       <span style="font-size: 10px; font-weight: 600; color: #94a3b8;">Search</span>
 </div>
 
+                <div onclick="location.href='inbox.html'" style="position: relative; cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 2px;">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" style="width: 20px; height: 20px; color: #94a3b8;">
+                        <path d="M1.5 8.67v8.58a3 3 0 0 0 3 3h15a3 3 0 0 0 3-3V8.67l-8.928 5.493a3 3 0 0 1-3.144 0L1.5 8.67Z" />
+                        <path d="M22.5 6.908V6.75a3 3 0 0 0-3-3h-15a3 3 0 0 0-3 3v.158l9.714 5.978a1.5 1.5 0 0 0 1.572 0L22.5 6.908Z" />
+                    </svg>
+                    <span style="font-size: 10px; font-weight: 600; color: #94a3b8;">Inbox</span>
+                    <span id="inboxDot" class="hidden" style="position: absolute; top: -2px; right: 2px; width: 8px; height: 8px; background: #ff4b2b; border-radius: 50%; border: 2px solid #1a1c22;"></span>
+                </div>
+                <a href="calendar.html" style="text-decoration: none; color: #94a3b8; display: flex; flex-direction: column; align-items: center; gap: 2px;">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" style="width: 20px; height: 20px;"><path d="M12.75 12.75a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0ZM7.5 15.75a.75.75 0 1 0 0-1.5.75.75 0 0 0 0 1.5ZM8.25 17.25a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0ZM9.75 15.75a.75.75 0 1 0 0-1.5.75.75 0 0 0 0 1.5ZM10.5 17.25a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0ZM12 15.75a.75.75 0 1 0 0-1.5.75.75 0 0 0 0 1.5ZM12.75 17.25a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0ZM14.25 15.75a.75.75 0 1 0 0-1.5.75.75 0 0 0 0 1.5ZM15 17.25a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0ZM16.5 15.75a.75.75 0 1 0 0-1.5.75.75 0 0 0 0 1.5ZM15 12.75a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0ZM16.5 13.5a.75.75 0 1 0 0-1.5.75.75 0 0 0 0 1.5Z" /><path fill-rule="evenodd" d="M6.75 2.25A.75.75 0 0 1 7.5 3v1.5h9V3A.75.75 0 0 1 18 3v1.5h.75a3 3 0 0 1 3 3v11.25a3 3 0 0 1-3 3H5.25a3 3 0 0 1-3-3V7.5a3 3 0 0 1 3-3H6V3a.75.75 0 0 1 .75-.75Zm13.5 9a1.5 1.5 0 0 0-1.5-1.5H5.25a1.5 1.5 0 0 0-1.5 1.5v7.5a1.5 1.5 0 0 0 1.5 1.5h13.5a1.5 1.5 0 0 0 1.5-1.5v-7.5Z" clip-rule="evenodd" /></svg>
+                    <span style="font-size: 10px; font-weight: 600;">Calendar</span>
+                </a>
+                <a href="news.html" style="text-decoration: none; color: #94a3b8; display: flex; flex-direction: column; align-items: center; gap: 2px;">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" style="width: 20px; height: 20px;"><path fill-rule="evenodd" d="M4.125 3C3.089 3 2.25 3.84 2.25 4.875V18a3 3 0 0 0 3 3h15a3 3 0 0 1-3-3V4.875C17.25 3.839 16.41 3 15.375 3H4.125ZM12 9.75a.75.75 0 0 0 0 1.5h1.5a.75.75 0 0 0 0-1.5H12Zm-.75-2.25a.75.75 0 0 1 .75-.75h1.5a.75.75 0 0 1 0 1.5H12a.75.75 0 0 1-.75-.75ZM6 12.75a.75.75 0 0 0 0 1.5h7.5a.75.75 0 0 0 0-1.5H6Zm-.75 3.75a.75.75 0 0 1 .75-.75h7.5a.75.75 0 0 1 0 1.5H6a.75.75 0 0 1-.75-.75ZM6 6.75a.75.75 0 0 0-.75.75v3c0 .414.336.75.75.75h3a.75.75 0 0 0 .75-.75v-3A.75.75 0 0 0 9 6.75H6Z" clip-rule="evenodd" /><path d="M18.75 6.75h1.875c.621 0 1.125.504 1.125 1.125V18a1.5 1.5 0 0 1-3 0V6.75Z" /></svg>
+                    <span style="font-size: 10px; font-weight: 600;">News</span>
+                </a>
+            </div>
+        </header>
+
+        <div class="container" style="padding: 15px 15px 0 15px;">           
+            </div>
+            <div class="chip-slider">
+                <div class="chip active" id="chip-all">All</div>  
+                <div class="chip" id="chip-airing">Top Airing</div>
+                <div class="chip" id="chip-seasonal">Seasonal</div>
+                <div class="chip" id="chip-novel">Light Novels</div> 
+                <div class="chip" id="chip-manga">Manga</div>
+                <div class="chip" id="chip-movies">Movies</div>
+                <div class="chip" id="chip-characters">Characters</div>
+                <div class="chip" id="chip-favorite">Favorites</div>
+                <div class="chip" id="chip-action">Action</div>
+                <div class="chip" id="chip-romance">Romance</div>
+                <div class="chip" id="chip-horror">Horror</div>
+                <div class="chip" id="chip-comedy">Comedy</div>
+            </div>
+        </div>
+    </div>
+    <div id="main-content-scrollable">
+        <div id="hero-mirror-container" class="swiper hero-wrapper hidden">
+            <div id="hero-skeleton" class="skeleton" style="position:absolute; inset:0; z-index:10;"></div>
+            <div class="swiper-wrapper" id="hero-swiper-wrapper"></div>
+        </div>
+
+        <div id="activity-section" style="margin: 10px 5px 20px 5px;">
+            <h3 style="color: #5738B0; font-size: 16px; margin-bottom: 10px;">Recent Activity</h3>
+            <div id="activityFeed" style="display: flex; gap: 15px; overflow-x: auto; padding-bottom: 10px; scrollbar-width: none; -webkit-overflow-scrolling: touch;">
+                <p style="font-size: 12px; color: #666;">Loading updates...</p>
+            </div>
+        </div>
 
         <h3 id="listTitle" style="margin: 10px 0 10px 5px; color: #5738B0;">Trending Now</h3>
         <div id="animeGrid" class="grid-container"></div>
@@ -142,172 +662,674 @@
             <button class="btn-load-more" id="loadMoreBtn">Load More</button>
         </div>
     </div>
+    
 
-    <nav class="bottom-nav">
+
+<nav class="bottom-nav">
     <a href="index.html" class="nav-item active">
-        <i class="fa-solid fa-compass"></i>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" style="width: 24px; height: 24px;">
+            <path d="M11.47 3.841a.75.75 0 0 1 1.06 0l8.69 8.69a.75.75 0 1 0 1.06-1.061l-8.689-8.69a2.25 2.25 0 0 0-3.182 0l-8.69 8.69a.75.75 0 1 0 1.061 1.06l8.69-8.689Z" />
+            <path d="m12 5.432 8.159 8.159c.03.03.06.058.091.086v6.198c0 1.035-.84 1.875-1.875 1.875H15a.75.75 0 0 1-.75-.75v-4.5a.75.75 0 0 0-.75-.75h-3a.75.75 0 0 0-.75.75V21a.75.75 0 0 1-.75.75H5.625a1.875 1.875 0 0 1-1.875-1.875v-6.198a2.29 2.29 0 0 0 .091-.086L12 5.432Z" />
+        </svg>
         <span>Home</span>
     </a>
     <a href="watchlist.html" class="nav-item">
-        <i class="fa-solid fa-bookmark"></i>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" style="width: 24px; height: 24px;">
+            <path fill-rule="evenodd" d="M6.32 2.577a49.255 49.255 0 0 1 11.36 0c1.497.174 2.57 1.46 2.57 2.93V21a.75.75 0 0 1-1.085.67L12 18.089l-7.165 3.583A.75.75 0 0 1 3.75 21V5.507c0-1.47 1.073-2.756 2.57-2.93Z" clip-rule="evenodd" />
+        </svg>
         <span>List</span>
     </a>
     <a href="poll.html" class="nav-item">
-        <i class="fa-solid fa-chart-simple"></i>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" style="width: 24px; height: 24px;">
+            <path d="M18.375 2.25c-1.035 0-1.875.84-1.875 1.875v15.75c0 1.035.84 1.875 1.875 1.875h.75c1.035 0 1.875-.84 1.875-1.875V4.125c0-1.036-.84-1.875-1.875-1.875h-.75ZM9.75 8.625c0-1.036.84-1.875 1.875-1.875h.75c1.036 0 1.875.84 1.875 1.875v11.25c0 1.035-.84 1.875-1.875 1.875h-.75a1.875 1.875 0 0 1-1.875-1.875V8.625ZM3 13.125c0-1.036.84-1.875 1.875-1.875h.75c1.036 0 1.875.84 1.875 1.875v6.75c0 1.035-.84 1.875-1.875 1.875h-.75A1.875 1.875 0 0 1 3 19.875v-6.75Z" />
+        </svg>
         <span>Polls</span>
     </a>
     <a href="chat.html" class="nav-item">
-        <i class="fa-solid fa-comments"></i>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" style="width: 24px; height: 24px;">
+            <path fill-rule="evenodd" d="M4.848 2.771A49.144 49.144 0 0 1 12 2.25c2.43 0 4.817.178 7.152.52 1.978.292 3.348 2.024 3.348 3.97v6.02c0 1.946-1.37 3.678-3.348 3.97a48.901 48.901 0 0 1-3.476.383.39.39 0 0 0-.297.17l-2.755 4.133a.75.75 0 0 1-1.248 0l-2.755-4.133a.39.39 0 0 0-.297-.17 48.9 48.9 0 0 1-3.476-.384c-1.978-.29-3.348-2.024-3.348-3.97V6.741c0-1.946 1.37-3.68 3.348-3.97Z" clip-rule="evenodd" />
+        </svg>
         <span>Chat</span>
     </a>
     <a href="profile.html" class="nav-item">
-        <i class="fa-solid fa-user"></i>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" style="width: 24px; height: 24px;">
+            <path fill-rule="evenodd" d="M7.5 6a4.5 4.5 0 1 1 9 0 4.5 4.5 0 0 1-9 0ZM3.751 20.105a8.25 8.25 0 0 1 16.498 0 .75.75 0 0 1-.437.695A18.683 18.683 0 0 1 12 22.5c-2.786 0-5.433-.608-7.812-1.7a.75.75 0 0 1-.437-.695Z" clip-rule="evenodd" />
+        </svg>
         <span>Profile</span>
     </a>
+    <a href="admin.html" class="nav-item" id="adminTab" style="display: none;">
+    <i class="fa-solid fa-crown"></i>
+    <span>Admin</span>
+</a>
+
 </nav>
+<div id="searchOverlay" class="search-overlay">
+    
+    <div style="display: flex; align-items: center; gap: 12px; width: 100%;">
+        <input type="text" id="overlayInput" class="search-box" 
+               placeholder="Search anime..." style="flex: 1;">
+        <a href="image-search.html" style="color: #94a3b8; background: rgba(255,255,255,0.1); 
+           width: 45px; height: 45px; border-radius: 12px; display: flex; 
+           align-items: center; justify-content: center; text-decoration: none;">
+            <i class="fa-solid fa-camera"></i>
+        </a>
+        <div id="closeOverlay" style="cursor: pointer; color: #94a3b8; font-size: 22px; 
+             display: flex; align-items: center; justify-content: center;
+             width: 45px; height: 45px; background: rgba(255,255,255,0.05); 
+             border-radius: 12px; flex-shrink: 0;">
+            <i class="fa-solid fa-xmark"></i>
+        </div>
+    </div>
 
+    <!-- Search History Section -->
+    <div id="searchHistoryBox" style="width: 100%; margin-top: 20px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+            <span style="font-size: 13px; color: #94a3b8; font-weight: 600;">Recent Searches</span>
+            <span id="clearHistory" style="font-size: 12px; color: #5738B0; cursor: pointer; font-weight: 600;">Clear All</span>
+        </div>
+        <div id="historyList"></div>
+    </div>
 
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+</div>
+
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+    import { getFirestore, collection, query, orderBy, limit, onSnapshot } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+    
+    const firebaseConfig = { 
+        apiKey: "AIzaSyDLd3TW-y89lwShUmcIHw3YGzDjo4cg3y4", 
+        authDomain: "animea2z.firebaseapp.com", 
+        projectId: "animea2z", 
+        storageBucket: "animea2z.firebasestorage.app", 
+        messagingSenderId: "673605765684", 
+        appId: "1:673605765684:web:a6f851e0d79836b79b1861" 
+    };
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+
+onAuthStateChanged(auth, async (user) => { 
+    if(!user) {
+        window.location.href = "login.html"; 
+    } else {
+        const { doc, getDoc } = await import("https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js");
         
-        const firebaseConfig = { apiKey: "AIzaSyDLd3TW-y89lwShUmcIHw3YGzDjo4cg3y4", authDomain: "animea2z.firebaseapp.com", projectId: "animea2z", storageBucket: "animea2z.firebasestorage.app", messagingSenderId: "673605765684", appId: "1:673605765684:web:a6f851e0d79836b79b1861" };
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
-
-        onAuthStateChanged(auth, user => { if(!user) window.location.href = "login.html"; });
-
-        const grid = document.getElementById('animeGrid');
-        const loader = document.getElementById('loading');
-        const ageModal = document.getElementById('ageVerificationModal');
-        const loadMoreBtn = document.getElementById('loadMoreBtn');
-        const loadMoreSection = document.getElementById('loadMoreSection');
-        const listTitle = document.getElementById('listTitle');
-        
-        let currentPage = 1;
-        let isFetching = false;
-        let currentQuery = '';
-        let currentType = ''; // '' for all, 'movie' for movies
-        let hasNextPage = true;
-        let pendingUrl = '';
-
-        fetchAnime();
-
-        // Movie Chip Logic
-        document.getElementById('chip-movies').onclick = function() {
-            updateActiveChip(this);
-            currentType = 'movie';
-            currentQuery = '';
-            resetAndFetch("Anime Movies");
-        };
-
-        document.getElementById('chip-all').onclick = function() {
-            updateActiveChip(this);
-            currentType = '';
-            currentQuery = '';
-            resetAndFetch("Trending Now");
-        };
-
-        document.getElementById('chip-trending').onclick = function() {
-            updateActiveChip(this);
-            currentType = '';
-            currentQuery = '';
-            resetAndFetch("Trending Now");
-        };
-
-        function updateActiveChip(el) {
-            document.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
-            el.classList.add('active');
-        }
-
-        function resetAndFetch(title) {
-            currentPage = 1;
-            grid.innerHTML = '';
-            hasNextPage = true;
-            listTitle.innerText = title;
-            fetchAnime();
-        }
-
-        loadMoreBtn.onclick = () => { if (!isFetching && hasNextPage) { currentPage++; fetchAnime(); } };
-
-        document.getElementById('cancelAge').onclick = () => ageModal.classList.add('hidden');
-        document.getElementById('confirmAge').onclick = () => {
-            ageModal.classList.add('hidden');
-            if(pendingUrl) location.href = pendingUrl;
-        };
-
-        document.getElementById('searchInput').addEventListener('keypress', (e) => {
-            if(e.key === 'Enter') {
-                currentQuery = e.target.value.trim();
-                currentType = '';
-                updateActiveChip(document.getElementById('chip-all'));
-                resetAndFetch(currentQuery ? `Results: ${currentQuery}` : "Trending Now");
+        try {
+            const userSnap = await getDoc(doc(db, "users", user.uid));
+            if (userSnap.exists()) {
+                const userData = userSnap.data();
+              
+                if (userData.customId === "1000000001") {
+                    const adminTab = document.getElementById('adminTab');
+                    if(adminTab) {
+                        adminTab.style.display = "flex"; // Button ko show kar do
+                    }
+                }
             }
+        } catch (err) {
+            console.error("Admin check error:", err);
+        }
+    }
+});
+
+
+    const grid = document.getElementById('animeGrid');
+    const loader = document.getElementById('loading');
+    const ageModal = document.getElementById('ageVerificationModal');
+    const loadMoreBtn = document.getElementById('loadMoreBtn');
+    const loadMoreSection = document.getElementById('loadMoreSection');
+    const listTitle = document.getElementById('listTitle');
+    const triggerSearch = document.getElementById('triggerSearch');
+const searchOverlay = document.getElementById('searchOverlay');
+const overlayInput = document.getElementById('overlayInput');
+const closeOverlay = document.getElementById('closeOverlay');
+
+
+    let currentPage = 1;
+    let isFetching = false;
+    let currentQuery = '';
+    let currentCategory = 'all'; 
+    let hasNextPage = true;
+    let pendingUrl = '';
+
+    
+const chips = {
+    'chip-all': { cat: 'all', title: 'Trending Now' },    
+    'chip-airing': { cat: 'airing', title: 'Top Airing Anime' },
+    'chip-seasonal': { cat: 'seasonal', title: 'This Season' },
+    'chip-novel': { cat: 'novel', title: 'Popular Light Novels' }, // Added
+    'chip-manga': { cat: 'manga', title: 'Top Manga' },
+    'chip-movies': { cat: 'movie', title: 'Anime Movies' },
+    'chip-characters': { cat: 'characters', title: 'Popular Characters' },
+    'chip-favorite': { cat: 'favorite', title: 'Most Favorited' },
+    'chip-action': { cat: 'action', title: 'Action Anime' },
+    'chip-romance': { cat: 'romance', title: 'Romance Anime' },
+    'chip-horror': { cat: 'horror', title: 'Horror Anime' },
+    'chip-comedy': { cat: 'comedy', title: 'Comedy Anime' }
+};
+
+    Object.keys(chips).forEach(id => {
+        const el = document.getElementById(id);
+        if(el) {
+            el.onclick = function() {
+                document.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
+                this.classList.add('active');
+                currentCategory = chips[id].cat;
+                currentQuery = '';
+                
+                resetAndFetch(chips[id].title);
+            };
+        }
+    });
+
+    function resetAndFetch(title) {
+        currentPage = 1;
+        grid.innerHTML = '';
+        hasNextPage = true;
+        listTitle.innerText = title;
+        fetchData();
+    }
+
+    // Header icon par click karne se overlay khulega
+if (triggerSearch) {
+    triggerSearch.onclick = () => {
+    searchOverlay.classList.add('active');
+    renderHistory(); // ← YEH ADD KARO
+    setTimeout(() => overlayInput.focus(), 100);
+};
+}
+
+// Close button logic
+if (closeOverlay) {
+    closeOverlay.onclick = () => searchOverlay.classList.remove('active');
+}
+
+// Search execute karne ka naya function
+function executeSearch(queryText) {
+    currentQuery = queryText.trim();
+    if (currentQuery) {
+        saveToHistory(currentQuery); // ← YEH ADD KARO
+        searchOverlay.classList.remove('active');
+        let searchPrefix = "Results";
+        if(currentCategory === 'characters') searchPrefix = "Character Results";
+        resetAndFetch(`${searchPrefix} for: ${currentQuery}`);
+    }
+}
+// Input field mein Enter dabane par search trigger karein
+if (overlayInput) {
+    overlayInput.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') {
+            executeSearch(overlayInput.value);
+        }
+    });
+}
+
+    loadMoreBtn.onclick = () => { if (!isFetching && hasNextPage) { currentPage++; fetchData(); } };
+
+    async function fetchData() {
+    if (isFetching) return;
+    isFetching = true;
+    
+    
+    loader.classList.remove('hidden');
+    loadMoreSection.classList.add('hidden');
+    
+ 
+    const skeletonHTML = `
+        <div class="skeleton-card">
+            <div class="skeleton skeleton-img"></div>
+            <div class="skeleton skeleton-text"></div>
+            <div class="skeleton skeleton-small"></div>
+        </div>`.repeat(10);
+
+    if(currentPage === 1) {
+        grid.innerHTML = skeletonHTML;
+    }
+
+    let currentLimit = (currentPage === 1) ? 25 : 15;
+    let endpoint = '';
+    
+    
+    if (currentQuery) {
+        if (currentCategory === 'characters') {
+            endpoint = `characters?q=${currentQuery}&page=${currentPage}&limit=${currentLimit}`;
+        } else if (currentCategory === 'manga' || currentCategory === 'novel') {
+            let type = (currentCategory === 'novel') ? '&type=novel' : '';
+            endpoint = `manga?q=${currentQuery}${type}&page=${currentPage}&limit=${currentLimit}`;
+        } else {
+            let movieFilter = (currentCategory === 'movie') ? '&type=movie' : '';
+            endpoint = `anime?q=${currentQuery}${movieFilter}&page=${currentPage}&limit=${currentLimit}`;
+        }
+    } else {
+        switch(currentCategory) {
+            case 'seasonal': endpoint = `seasons/now?page=${currentPage}&limit=${currentLimit}`; break;
+            case 'manga': endpoint = `top/manga?page=${currentPage}&limit=${currentLimit}`; break;
+            case 'novel': endpoint = `top/manga?type=novel&page=${currentPage}&limit=${currentLimit}`; break;
+            case 'movie': endpoint = `anime?type=movie&order_by=popularity&page=${currentPage}&limit=${currentLimit}`; break;
+            case 'characters': endpoint = `top/characters?page=${currentPage}&limit=${currentLimit}`; break;
+            case 'airing': endpoint = `top/anime?filter=airing&page=${currentPage}&limit=${currentLimit}`; break;
+            case 'favorite': endpoint = `top/anime?filter=favorite&page=${currentPage}&limit=${currentLimit}`; break;
+            case 'horror': endpoint = `anime?genres=14&order_by=score&sort=desc&page=${currentPage}&limit=${currentLimit}`; break;
+            case 'action': endpoint = `anime?genres=1&order_by=score&sort=desc&page=${currentPage}&limit=${currentLimit}`; break;
+            case 'romance': endpoint = `anime?genres=22&order_by=score&sort=desc&page=${currentPage}&limit=${currentLimit}`; break;
+            case 'comedy': endpoint = `anime?genres=4&order_by=score&sort=desc&page=${currentPage}&limit=${currentLimit}`; break;
+            default: endpoint = `top/anime?filter=bypopularity&page=${currentPage}&limit=${currentLimit}`;
+        }
+    }
+
+    try {
+        const res = await fetch(`https://api.jikan.moe/v4/${endpoint}`);
+        const data = await res.json();
+       
+        if(currentPage === 1) grid.innerHTML = ''; 
+        
+        if(!data.data || data.data.length === 0) {
+            hasNextPage = false;
+            if(currentPage === 1) grid.innerHTML = '<p style="width:100%; text-align:center; color:#888;">No results found.</p>';
+            return;
+        }
+
+        hasNextPage = data.pagination.has_next_page;
+       
+        data.data.forEach(item => {
+            const card = document.createElement('div');
+            card.className = 'anime-card';
+            const isChar = (currentCategory === 'characters' || (item.url && item.url.includes('/character/')));
+            const isManga = (currentCategory === 'manga' || currentCategory === 'novel' || item.type === 'Manga' || item.type === 'Light Novel');
+            const title = item.name || item.title_english || item.title;
+            const subText = isChar ? `❤️ ${item.favorites || 0}` : `⭐ ${item.score || 'N/A'}`;
+            const isNSFW = item.rating && (item.rating.includes('Hentai') || item.rating.includes('Explicit'));
+            // card.onclick hata do — ab panel handle karega
+card.onclick = null;
+
+const type = isChar ? 'char' : (isManga ? 'manga' : 'anime');
+const detailUrl = `details.html?id=${item.mal_id}&type=${type}`;
+
+card.innerHTML = `
+    <img src="${item.images.jpg.image_url}" loading="lazy" alt="img"
+         onclick="togglePanel(event, this.closest('.anime-card'))">
+    <div class="card-content" 
+         onclick="togglePanel(event, this.closest('.anime-card'))">
+        <div class="card-title">${title}</div>
+        <div style="font-size:11px;color:#aaa;display:flex;justify-content:space-between;align-items:center;">
+            <span>${isChar ? '❤ ' + (item.favorites||0) : '⭐ ' + (item.score||'N/A')}</span>
+            ${isNSFW ? '<span class="nsfw-badge">18+</span>' : ''}
+        </div>
+    </div>
+
+    <!-- QUICK PANEL -->
+    <div class="card-panel" id="panel-${item.mal_id}">
+       
+
+    <!-- Status Picker -->
+    <div class="status-picker" id="sp-${item.mal_id}">
+        <div style="font-size:10px;color:#666;font-weight:700;margin-bottom:4px;">SELECT STATUS</div>
+        <button class="status-opt plan"
+            onclick="saveStatus(event,${item.mal_id},'${(title).replace(/'/g,"\\'")}','${item.images.jpg.image_url}','${type}',${item.episodes||0},'Plan to Watch')">
+            <i class="fa-solid fa-clock"></i> Plan to Watch
+        </button>
+        <button class="status-opt watch"
+            onclick="saveStatus(event,${item.mal_id},'${(title).replace(/'/g,"\\'")}','${item.images.jpg.image_url}','${type}',${item.episodes||0},'Watching')">
+            <i class="fa-solid fa-play"></i> Watching
+        </button>
+        <button class="status-opt done"
+            onclick="saveStatus(event,${item.mal_id},'${(title).replace(/'/g,"\\'")}','${item.images.jpg.image_url}','${type}',${item.episodes||0},'Completed')">
+            <i class="fa-solid fa-check"></i> Completed
+        </button>
+        <div class="status-back" onclick="hideStatusPicker(event,'${item.mal_id}')">
+            <i class="fa-solid fa-arrow-left"></i> Back
+        </div>
+    </div>
+        <i class="fa-solid fa-xmark panel-close" 
+           onclick="closePanel(event, 'panel-${item.mal_id}')"></i>
+        <div class="panel-score">${item.score || 'N/A'}</div>
+        <div class="panel-score-label">SCORE</div>
+        <div class="panel-meta">
+            ${item.episodes ? item.episodes + ' Eps' : ''}
+            ${item.year ? '· ' + item.year : ''}
+            ${item.rating ? '<br>' + item.rating.split(' ')[0] : ''}
+        </div>
+        <button class="panel-btn btn-watchlist" 
+                id="wl-${item.mal_id}"
+                onclick="showStatusPicker(event,'${item.mal_id}')">
+            <i class="fa-solid fa-plus"></i> Watchlist
+        </button>
+        <button class="panel-btn btn-details"
+                onclick="goToDetails(event, '${detailUrl}', ${isNSFW})">
+            <i class="fa-solid fa-circle-info"></i> Details
+        </button>
+    </div>`;
+checkIfWatchlisted(item.mal_id);
+grid.appendChild(card);
         });
 
-        async function fetchAnime() {
-            if (isFetching) return;
-            isFetching = true;
-            loader.classList.remove('hidden');
-            loadMoreSection.classList.add('hidden');
+        loadMoreSection.classList.toggle('hidden', !hasNextPage);
+
+    } catch(e) { 
+        console.error("Fetch error:", e);
+    } finally {
+        isFetching = false;
+        loader.classList.add('hidden');
+    }
+}
+            function listenToActivities() {
+    const activityFeed = document.getElementById('activityFeed');
+    const activitySkeletonHTML = `
+        <div class="skeleton-activity">
+            <div class="skeleton skeleton-circle"></div>
+            <div style="flex:1;">
+                <div class="skeleton" style="height:10px; width:60%; mb:5px; margin-bottom:8px;"></div>
+                <div class="skeleton" style="height:8px; width:90%;"></div>
+            </div>
+        </div>`.repeat(5); // 5 khali cards dikhayega
+
+    activityFeed.innerHTML = activitySkeletonHTML;
+
+    const q = query(collection(db, "activities"), orderBy("timestamp", "desc"), limit(10));
+
+    onSnapshot(q, (snapshot) => {
+        if (snapshot.empty) {
+            activityFeed.innerHTML = '<p style="font-size: 12px; color: #666; width:100%; text-align:center;">No recent activity.</p>';
+            return;
+        } 
+        activityFeed.innerHTML = snapshot.docs.map(doc => {
+            const act = doc.data();
+            const displayPic = act.userImg || 'https://cdn-icons-png.flaticon.com/512/149/149071.png';
             
-            let endpoint = '';
-            if (currentQuery) {
-                endpoint = `anime?q=${currentQuery}&page=${currentPage}&limit=15`;
-            } else if (currentType === 'movie') {
-                endpoint = `anime?type=movie&order_by=popularity&page=${currentPage}&limit=15`;
-            } else {
-                endpoint = `top/anime?filter=bypopularity&page=${currentPage}&limit=15`;
-            }
-
-            try {
-                const res = await fetch(`https://api.jikan.moe/v4/${endpoint}`);
-                const data = await res.json();
-                
-                if(!data.data || data.data.length === 0) {
-                    hasNextPage = false;
-                    return;
-                }
-
-                hasNextPage = data.pagination.has_next_page;
-                
-                data.data.forEach(anime => {
-                    const card = document.createElement('div');
-                    card.className = 'anime-card';
-                    const isNSFW = anime.rating && (anime.rating.includes('Hentai') || anime.rating.includes('Explicit'));
-                    
-                    card.onclick = () => {
-                        if(isNSFW) {
-                            pendingUrl = `details.html?id=${anime.mal_id}`;
-                            ageModal.classList.remove('hidden');
-                        } else {
-                            location.href = `details.html?id=${anime.mal_id}`;
-                        }
-                    };
-                    
-                    const imgUrl = anime.images.jpg.image_url; // 240p-ish quality
-                    
-                    card.innerHTML = `
-                        <img src="${imgUrl}" loading="lazy" alt="anime">
-                        <div class="card-content">
-                            <div class="card-title">${anime.title_english || anime.title}</div>
-                            <div style="font-size:11px; color:#aaa; display: flex; align-items: center;">
-                                <span>⭐ ${anime.score || 'N/A'}</span>
-                                ${isNSFW ? '<span class="nsfw-badge">18+</span>' : ''}
-                            </div>
-                        </div>`;
-                    grid.appendChild(card);
-                });
-
-                if(hasNextPage) loadMoreSection.classList.remove('hidden');
-
-            } catch(e) { 
-                console.error("Fetch Error:", e); 
-            } finally {
-                isFetching = false;
-                loader.classList.add('hidden');
-            }
+            return `
+                <div onclick="location.href='details.html?id=${act.malId || ''}&type=${act.type || 'anime'}'" 
+                     style="min-width: 220px; background: #1a1c22; padding: 12px; border-radius: 15px; border: 1px solid #333; display: flex; align-items: center; gap: 12px; flex-shrink: 0; cursor: pointer;">
+                    <img src="${displayPic}" style="width: 40px; height: 40px; border-radius: 50%; object-fit: cover; border: 2px solid #5738B0;">
+                    <div style="overflow: hidden; flex: 1;">
+                        <div style="font-size: 12px; font-weight: 800; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${act.userName}</div>
+                        <div style="font-size: 10px; color: #aaa; line-height: 1.3;">
+                            ${act.action} <span style="color: #5738B0; font-weight: 600;">${act.animeTitle}</span>
+                        </div>
+                    </div>
+                </div>`;
+        }).join('');
+    });
+}
+function listenForNotifications() {
+    const q = query(collection(db, "notifications"), orderBy("timestamp", "desc"), limit(1));
+    onSnapshot(q, (snapshot) => {
+        if (!snapshot.empty) {
+            const dot = document.getElementById('inboxDot');
+            if(dot) dot.classList.remove('hidden');
         }
-    </script>
+    });
+}
+async function loadMirrorHero() {
+    const swiperWrapper = document.getElementById('hero-swiper-wrapper');
+    const container = document.getElementById('hero-mirror-container');
+    const skeleton = document.getElementById('hero-skeleton');
+
+    if (!swiperWrapper || !container) return;
+
+    try {
+        const response = await fetch('https://api.jikan.moe/v4/top/anime?filter=airing&limit=10');
+        const result = await response.json();
+        
+        if (result && result.data && result.data.length > 0) {
+            // Slides generate karna
+            swiperWrapper.innerHTML = result.data.map(anime => `
+                <div class="swiper-slide hero-slide" onclick="location.href='details.html?id=${anime.mal_id}&type=anime'">
+                    <div class="hero-mirror-bg" style="background-image: url('${anime.images.jpg.large_image_url}');"></div>
+                    <div class="hero-main-content">
+                        <img class="hero-small-poster" src="${anime.images.jpg.image_url}" alt="poster">
+                        <div class="hero-details-text">
+                            <h1>${anime.title_english || anime.title}</h1>
+                            <div class="hero-meta-info">
+                                <span>${anime.year || '2026'}</span> | <span>TV • ${anime.episodes || '?'} Eps</span>
+                            </div>
+                        </div>
+                        <div class="hero-list-icon"><i class="fa-solid fa-bookmark"></i></div>
+                    </div>
+                </div>
+            `).join('');
+
+            // Skeleton hatayein aur container dikhayein
+            if (skeleton) skeleton.style.display = 'none';
+            container.classList.remove('hidden');
+            setTimeout(() => container.classList.add('visible'), 50);
+
+            // Swiper Start karein (Small delay to ensure DOM is ready)
+            setTimeout(() => {
+                new Swiper('#hero-mirror-container', {
+                    loop: true,
+                    speed: 1000,
+                    autoplay: {
+                        delay: 4000,
+                        disableOnInteraction: false,
+                    },
+                    effect: 'fade',
+                    fadeEffect: {
+                        crossFade: true
+                    },
+                    observer: true,
+                    observeParents: true,
+                });
+            }, 100);
+        }
+    } catch (err) {
+        console.error("Hero Fetch Error:", err);
+        if (container) container.style.display = 'none';
+    }
+}
+
+// ===== SEARCH HISTORY =====
+const MAX_HISTORY = 10;
+
+function getHistory() {
+    return JSON.parse(localStorage.getItem('animeSearchHistory') || '[]');
+}
+
+function saveToHistory(query) {
+    let history = getHistory();
+    history = history.filter(h => h.toLowerCase() !== query.toLowerCase());
+    history.unshift(query);
+    if (history.length > MAX_HISTORY) history = history.slice(0, MAX_HISTORY);
+    localStorage.setItem('animeSearchHistory', JSON.stringify(history));
+}
+
+function deleteHistoryItem(query) {
+    let history = getHistory().filter(h => h !== query);
+    localStorage.setItem('animeSearchHistory', JSON.stringify(history));
+    renderHistory();
+}
+
+function renderHistory() {
+    const historyList = document.getElementById('historyList');
+    const historyBox = document.getElementById('searchHistoryBox');
+    const history = getHistory();
+    if (!historyList) return;
+    if (history.length === 0) {
+        historyBox.style.display = 'none';
+        return;
+    }
+    historyBox.style.display = 'block';
+    historyList.innerHTML = history.map(q => `
+        <div class="history-item">
+            <div class="history-item-left" onclick="selectHistory('${q.replace(/'/g, "\\'")}')">
+                <i class="fa-solid fa-clock-rotate-left"></i>
+                <span class="history-item-text">${q}</span>
+            </div>
+            <div class="history-delete" onclick="deleteHistoryItem('${q.replace(/'/g, "\\'")}')">
+                <i class="fa-solid fa-xmark"></i>
+            </div>
+        </div>
+    `).join('');
+}
+
+function selectHistory(query) {
+    overlayInput.value = query;
+    executeSearch(query);
+}
+
+window.selectHistory = selectHistory;
+window.deleteHistoryItem = deleteHistoryItem;
+
+document.getElementById('clearHistory').onclick = () => {
+    localStorage.removeItem('animeSearchHistory');
+    renderHistory();
+};
+// ===== END SEARCH HISTORY =====
+
+
+// Function call
+loadMirrorHero();
+
+listenToActivities();
+fetchData();
+listenForNotifications();
+// Panel toggle
+window.togglePanel = (e, card) => {
+    e.stopPropagation();
+    // Pehle sab band karo
+    document.querySelectorAll('.card-panel.open').forEach(p => {
+        if (p !== card.querySelector('.card-panel')) p.classList.remove('open');
+    });
+    card.querySelector('.card-panel').classList.toggle('open');
+};
+
+window.closePanel = (e, panelId) => {
+    e.stopPropagation();
+    document.getElementById(panelId)?.classList.remove('open');
+};
+
+// Bahar tap karne par band ho
+document.addEventListener('click', () => {
+    document.querySelectorAll('.card-panel.open')
+            .forEach(p => p.classList.remove('open'));
+});
+
+// Details — NSFW check ke saath
+window.goToDetails = (e, url, isNSFW) => {
+    e.stopPropagation();
+    if (isNSFW) {
+        pendingUrl = url;
+        ageModal.classList.remove('hidden');
+    } else {
+        location.href = url;
+    }
+};
+window.showStatusPicker = (e, malId) => {
+    e.stopPropagation();
+    document.getElementById('sp-' + malId).classList.add('show');
+};
+
+window.hideStatusPicker = (e, malId) => {
+    e.stopPropagation();
+    document.getElementById('sp-' + malId).classList.remove('show');
+};
+
+window.saveStatus = async (e, malId, title, img, type, episodes, status) => {
+    e.stopPropagation();
+    try {
+        const { doc, setDoc, addDoc, collection, serverTimestamp, getDoc } =
+            await import("https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js");
+        const user = auth.currentUser;
+        if (!user) return;
+
+        await setDoc(doc(db, "users", user.uid, "watchlist", String(malId)), {
+            malId, title, image: img, type,
+            episodes: episodes || 0,
+            status,
+            addedAt: serverTimestamp()
+        });
+
+        const userSnap = await getDoc(doc(db, "users", user.uid));
+        const userData = userSnap.exists() ? userSnap.data() : {};
+
+        await addDoc(collection(db, "activities"), {
+            userName: userData.username || "Otaku",
+            userImg:  userData.avatar  || "",
+            action:   status === 'Completed' ? 'completed' :
+                      status === 'Watching'  ? 'is watching' : 'added to watchlist',
+            animeTitle: title,
+            malId, type,
+            timestamp: serverTimestamp()
+        });
+
+        // Button ko update karo
+        const btn = document.getElementById('wl-' + malId);
+        if (btn) {
+            const icon = status === 'Completed' ? 'fa-check' :
+                         status === 'Watching'  ? 'fa-play'  : 'fa-clock';
+            btn.innerHTML = `<i class="fa-solid ${icon}"></i> ${status}`;
+            btn.classList.add('added');
+        }
+
+        // Picker band karo
+        document.getElementById('sp-' + malId)?.classList.remove('show');
+
+    } catch(err) { console.error(err); }
+};
+// Watchlist add
+window.addToWatchlist = async (e, malId, title, img, type, episodes) => {
+    e.stopPropagation();
+    const btn = document.getElementById('wl-' + malId);
+    if (!btn || btn.classList.contains('added')) return;
+
+    try {
+        const { doc, setDoc, addDoc, collection, serverTimestamp, getDoc } = 
+            await import("https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js");
+        const user = auth.currentUser;
+        if (!user) return;
+
+        // Watchlist save — episodes ke saath
+        await setDoc(doc(db, "users", user.uid, "watchlist", String(malId)), {
+            malId, title, image: img, type,
+            episodes: episodes || 0,
+            status: "Plan to Watch",
+            addedAt: serverTimestamp()
+        });
+
+        // User ka data lo
+        const userSnap = await getDoc(doc(db, "users", user.uid));
+        const userData = userSnap.exists() ? userSnap.data() : {};
+
+        // Activity feed mein likho
+        await addDoc(collection(db, "activities"), {
+            userName: userData.username || "Otaku",
+            userImg: userData.avatar || "",
+            action: "added to watchlist",
+            animeTitle: title,
+            malId: malId,
+            type: type,
+            timestamp: serverTimestamp()
+        });
+
+        btn.innerHTML = '<i class="fa-solid fa-check"></i> Added';
+        btn.classList.add('added');
+
+    } catch(err) {
+        console.error("Watchlist error:", err);
+    }
+};
+async function checkIfWatchlisted(malId) {
+    try {
+        const { doc, getDoc } = await import("https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js");
+        const user = auth.currentUser;
+        if (!user) return;
+
+        const snap = await getDoc(doc(db, "users", user.uid, "watchlist", String(malId)));
+        if (snap.exists()) {
+            const btn = document.getElementById('wl-' + malId);
+            if (!btn) return;
+
+            const status = snap.data().status || 'Plan to Watch';
+            const icon = status === 'Completed' ? 'fa-check' :
+                         status === 'Watching'  ? 'fa-play'  : 'fa-clock';
+
+            btn.innerHTML = `<i class="fa-solid ${icon}"></i> ${status}`;
+            btn.classList.add('added');
+        }
+    } catch(err) {
+        console.error("Watchlist check error:", err);
+    }
+}
+</script>
 </body>
 </html>
