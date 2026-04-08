@@ -8,194 +8,81 @@
     <style>
         :root {
             --primary: #7c4dff;
-            --primary-glow: rgba(124, 77, 255, 0.5);
-            --accent: #00e5ff;
+            --primary-glow: rgba(124,77,255,0.5);
             --bg-dark: #050507;
-            --glass-bg: rgba(255, 255, 255, 0.03);
-            --glass-border: rgba(255, 255, 255, 0.08);
+            --glass-bg: rgba(255,255,255,0.03);
+            --glass-border: rgba(255,255,255,0.08);
         }
-
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-
+        * { margin:0; padding:0; box-sizing:border-box; }
         body, html {
-            width: 100%; height: 100%;
-            font-family: 'Plus Jakarta Sans', 'Inter', sans-serif;
-            background-color: var(--bg-dark);
+            width:100%; height:100%;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background: var(--bg-dark);
             color: white;
-            overflow: hidden;
-            display: flex; align-items: center; justify-content: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
-
-        .bg-container {
-            position: fixed; inset: 0; z-index: -1;
-            background: radial-gradient(circle at 50% 50%, #12121c 0%, #050507 100%);
-        }
-
-        .blob {
-            position: absolute; width: 400px; height: 400px;
-            background: var(--primary);
-            filter: blur(100px); border-radius: 50%; opacity: 0.2;
-            animation: move 25s infinite alternate;
-        }
-        .blob-2 { background: var(--accent); animation-duration: 18s; right: 0; bottom: 0; }
-
-        @keyframes move {
-            0% { transform: translate(0, 0) scale(1); }
-            100% { transform: translate(150px, 100px) scale(1.3); }
-        }
-
+        .bg-container { position:fixed; inset:0; background:radial-gradient(circle at 50% 50%, #12121c 0%, #050507 100%); z-index:-1; }
         .login-card {
             background: var(--glass-bg);
             backdrop-filter: blur(30px);
-            -webkit-backdrop-filter: blur(30px);
             border: 1px solid var(--glass-border);
             border-radius: 35px;
             padding: 50px 40px;
             width: 90%;
             max-width: 420px;
             text-align: center;
-            position: relative;
-            box-shadow: 0 40px 100px rgba(0, 0, 0, 0.5);
-            animation: cardEntrance 1s cubic-bezier(0.2, 0.8, 0.2, 1);
         }
-
-        @keyframes cardEntrance {
-            from { opacity: 0; transform: scale(0.9) translateY(30px); }
-            to { opacity: 1; transform: scale(1) translateY(0); }
-        }
-
-        .brand-logo {
-            font-size: 36px; font-weight: 800;
-            background: linear-gradient(135deg, #fff 0%, #b39dff 100%);
-            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-            margin-bottom: 8px; letter-spacing: -1.5px;
-        }
-
-        .subtitle { color: rgba(255,255,255,0.5); font-size: 14px; margin-bottom: 35px; }
-
-        .auth-form { display: flex; flex-direction: column; gap: 18px; }
-        
-        .input-group { position: relative; text-align: left; }
-        .input-group .field-icon { 
-            position: absolute; left: 18px; top: 50%; 
-            transform: translateY(-50%); color: rgba(255,255,255,0.3);
-            transition: 0.3s; pointer-events: none;
-        }
-
+        .brand-logo { font-size: 36px; font-weight:800; margin-bottom:8px; }
+        .subtitle { color:rgba(255,255,255,0.5); font-size:14px; margin-bottom:35px; }
+        .auth-form { display:flex; flex-direction:column; gap:18px; }
+        .input-group { position:relative; }
+        .input-group i { position:absolute; left:18px; top:50%; transform:translateY(-50%); color:rgba(255,255,255,0.3); }
         .input-group input {
-            width: 100%; padding: 16px 16px 16px 52px;
-            background: rgba(255,255,255,0.04);
-            border: 1px solid transparent; border-radius: 18px;
-            color: white; font-size: 15px; transition: 0.4s;
-            outline: none; font-family: inherit;
+            width:100%; padding:16px 16px 16px 52px;
+            background:rgba(255,255,255,0.04);
+            border:1px solid transparent;
+            border-radius:18px;
+            color:white;
+            outline:none;
         }
-        .input-group input::placeholder { color: rgba(255,255,255,0.25); }
-        .input-group input:focus {
-            background: rgba(255,255,255,0.08);
-            border-color: var(--primary);
-            box-shadow: 0 0 20px rgba(124, 77, 255, 0.2);
-        }
-
-        .eye-btn {
-            position: absolute; right: 16px; top: 50%;
-            transform: translateY(-50%);
-            background: none; border: none;
-            color: rgba(255,255,255,0.3);
-            cursor: pointer; font-size: 14px; padding: 4px;
-            transition: color 0.2s;
-        }
-        .eye-btn:hover { color: var(--primary); }
-
+        .input-group input:focus { border-color:var(--primary); }
         .login-btn {
-            background: var(--primary);
-            color: white; border: none; padding: 16px;
-            border-radius: 18px; font-weight: 700; font-size: 16px;
-            cursor: pointer; transition: 0.3s;
-            box-shadow: 0 10px 25px var(--primary-glow);
-            margin-top: 10px; font-family: inherit; width: 100%;
-            display: flex; align-items: center; justify-content: center; gap: 8px;
+            background:var(--primary); color:white; border:none; padding:16px;
+            border-radius:18px; font-weight:700; cursor:pointer;
+            width:100%;
+            margin-top:10px;
         }
-        .login-btn:hover { transform: translateY(-3px); box-shadow: 0 15px 35px var(--primary-glow); }
-        .login-btn:active { transform: scale(0.98); }
-        .login-btn:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
-
-        .btn-spinner {
-            display: none; width: 16px; height: 16px;
-            border: 2px solid rgba(255,255,255,0.3);
-            border-top-color: white; border-radius: 50%;
-            animation: spin 0.7s linear infinite;
-        }
-        @keyframes spin { to { transform: rotate(360deg); } }
-
-        #status {
-            margin-top: 20px; font-size: 13px; font-weight: 600; min-height: 20px;
-        }
-        #status.error   { color: #ff6b6b; }
-        #status.info    { color: #b39dff; }
-        #status.success { color: #4caf50; }
-
-        .footer-link {
-            margin-top: 30px; font-size: 14px; color: rgba(255,255,255,0.4);
-        }
-        .footer-link a { color: var(--primary); text-decoration: none; font-weight: 700; transition: 0.3s; }
-        .footer-link a:hover { color: var(--accent); }
-
-        .resend-info {
-            margin-top: 15px;
-            font-size: 12px;
-            color: rgba(255,255,255,0.3);
-        }
-        .resend-info a {
-            color: var(--primary);
-            cursor: pointer;
-            text-decoration: underline;
-        }
+        #status { margin-top:20px; font-size:13px; }
+        .error { color:#ff6b6b; }
+        .success { color:#4caf50; }
+        .info { color:#b39dff; }
+        .footer-link { margin-top:30px; font-size:14px; color:#888; }
+        .footer-link a { color:var(--primary); }
+        .resend-info { margin-top:15px; font-size:12px; display:none; }
+        .resend-info a { color:var(--primary); cursor:pointer; }
     </style>
 </head>
 <body>
-
-<div class="bg-container">
-    <div class="blob"></div>
-    <div class="blob blob-2"></div>
-</div>
-
+<div class="bg-container"></div>
 <div class="login-card">
     <div class="brand-logo">AnimeExplorer</div>
     <p class="subtitle">Enter your credentials to continue</p>
-
     <div class="auth-form">
-        <div class="input-group">
-            <input type="email" id="email" placeholder="Email Address" autocomplete="email">
-            <i class="fas fa-envelope field-icon"></i>
-        </div>
-        <div class="input-group">
-            <input type="password" id="password" placeholder="Password" autocomplete="current-password">
-            <i class="fas fa-lock field-icon"></i>
-            <button class="eye-btn" id="eyeBtn" type="button" tabindex="-1">
-                <i class="fa-regular fa-eye" id="eyeIcon"></i>
-            </button>
-        </div>
-        <button id="loginBtn" class="login-btn">
-            <span id="btnText">Sign In</span>
-            <div class="btn-spinner" id="btnSpinner"></div>
-        </button>
+        <div class="input-group"><i class="fas fa-envelope"></i><input type="email" id="email" placeholder="Email Address"></div>
+        <div class="input-group"><i class="fas fa-lock"></i><input type="password" id="password" placeholder="Password"></div>
+        <button id="loginBtn" class="login-btn">Sign In</button>
     </div>
-
     <p id="status"></p>
-
-    <div class="resend-info" id="resendInfo" style="display: none;">
-        Didn't get verification email? <a id="resendLink">Resend verification email</a>
-    </div>
-
-    <div class="footer-link">
-        Don't have an account? <a href="signup.html">Create One</a>
-    </div>
+    <div class="resend-info" id="resendInfo">Didn't get verification email? <a id="resendLink">Resend</a></div>
+    <div class="footer-link">Don't have an account? <a href="signup.html">Create One</a></div>
 </div>
 
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
     import { getAuth, signInWithEmailAndPassword, signOut, sendEmailVerification } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-    import { getFirestore, doc, updateDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+    import { getFirestore, doc, getDoc, setDoc, updateDoc, serverTimestamp, runTransaction } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
     const firebaseConfig = {
         apiKey: "AIzaSyDLd3TW-y89lwShUmcIHw3YGzDjo4cg3y4",
@@ -205,128 +92,119 @@
         messagingSenderId: "673605765684",
         appId: "1:673605765684:web:a6f851e0d79836b79b1861"
     };
-
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
     const db = getFirestore(app);
 
-    let lastAttemptedEmail = "";
+    let lastEmail = "";
 
-    const loginBtn = document.getElementById('loginBtn');
-    const btnText = document.getElementById('btnText');
-    const btnSpinner = document.getElementById('btnSpinner');
-    const status = document.getElementById('status');
-    const pwdInput = document.getElementById('password');
-    const emailInput = document.getElementById('email');
-    const resendInfo = document.getElementById('resendInfo');
-    const resendLink = document.getElementById('resendLink');
+    document.getElementById('loginBtn').onclick = async () => {
+        const email = document.getElementById('email').value.trim();
+        const password = document.getElementById('password').value;
+        const status = document.getElementById('status');
+        const loginBtn = document.getElementById('loginBtn');
+        const resendInfo = document.getElementById('resendInfo');
 
-    function setLoading(on) {
-        loginBtn.disabled = on;
-        btnText.style.display = on ? 'none' : 'inline';
-        btnSpinner.style.display = on ? 'block' : 'none';
-    }
-
-    // Resend verification email
-    resendLink.onclick = async () => {
-        if (!lastAttemptedEmail) {
-            status.innerText = "Please enter your email first.";
-            status.className = "error";
-            return;
-        }
-        try {
-            // Sign in temporarily to get user object (only if not signed in)
-            let user = auth.currentUser;
-            if (!user || user.email !== lastAttemptedEmail) {
-                // We need to sign in to send verification? Actually sendEmailVerification requires currentUser.
-                // Better approach: user tries to login, fails because not verified, then we can resend using the same credentials.
-                // For simplicity, we'll just tell user to go to signup page and request new link.
-                // But here's a workaround: try to sign in again, get user, send verification, then sign out.
-                status.innerText = "Attempting to resend...";
-                status.className = "info";
-                const pwd = pwdInput.value;
-                if (!pwd) {
-                    status.innerText = "Please enter your password to resend verification.";
-                    status.className = "error";
-                    return;
-                }
-                const cred = await signInWithEmailAndPassword(auth, lastAttemptedEmail, pwd);
-                user = cred.user;
-                await sendEmailVerification(user);
-                await signOut(auth);
-                status.innerText = "Verification email resent! Check your inbox/spam.";
-                status.className = "success";
-            } else {
-                await sendEmailVerification(user);
-                status.innerText = "Verification email resent! Check your inbox/spam.";
-                status.className = "success";
-            }
-        } catch (err) {
-            console.error(err);
-            status.innerText = "Failed to resend. Please try again or sign up again.";
-            status.className = "error";
-        }
-    };
-
-    loginBtn.onclick = async () => {
-        const email = emailInput.value.trim();
-        const pwd = pwdInput.value;
-        lastAttemptedEmail = email;
-
-        if (!email || !pwd) {
+        if (!email || !password) {
             status.innerText = "Please fill all fields.";
             status.className = "error";
             return;
         }
+        lastEmail = email;
 
-        setLoading(true);
-        status.innerText = "Checking credentials...";
+        loginBtn.disabled = true;
+        loginBtn.innerText = "Logging in...";
+        status.innerText = "Checking...";
         status.className = "info";
         resendInfo.style.display = "none";
 
         try {
-            const cred = await signInWithEmailAndPassword(auth, email, pwd);
+            const cred = await signInWithEmailAndPassword(auth, email, password);
             const user = cred.user;
 
-            // Check if email is verified
+            // Check email verification
             if (!user.emailVerified) {
                 await signOut(auth);
                 status.innerText = "❌ Email not verified. Please check your inbox/spam and click the verification link.";
                 status.className = "error";
                 resendInfo.style.display = "block";
-                setLoading(false);
+                loginBtn.disabled = false;
+                loginBtn.innerText = "Sign In";
                 return;
             }
 
-            // Check if user is banned (optional, add if needed)
-            // const userSnap = await getDoc(doc(db, "users", user.uid));
-            // if (userSnap.exists() && userSnap.data().isBanned === true) { ... }
+            // Ensure Firestore document exists for this verified user
+            const userRef = doc(db, "users", user.uid);
+            const userSnap = await getDoc(userRef);
 
-            // Update last login
-            await updateDoc(doc(db, "users", user.uid), { lastLogin: serverTimestamp() });
+            if (!userSnap.exists()) {
+                // Create new user document with custom sequential ID
+                let customId = Date.now().toString().slice(-7);
+                try {
+                    customId = await runTransaction(db, async (transaction) => {
+                        const counterRef = doc(db, "userCounter", "counter");
+                        const snap = await transaction.get(counterRef);
+                        let next = 1000000001;
+                        if (snap.exists()) next = (snap.data().count || 1000000000) + 1;
+                        transaction.set(counterRef, { count: next });
+                        return String(next);
+                    });
+                } catch(e) { console.warn("Counter fallback", e); }
 
-            status.innerText = "Login Successful! Redirecting...";
+                const username = user.displayName || user.email.split('@')[0];
+                await setDoc(userRef, {
+                    uid: user.uid,
+                    customId: customId,
+                    username: username,
+                    email: user.email,
+                    avatar: `https://ui-avatars.com/api/?name=${encodeURIComponent(username)}&background=7c4dff&color=fff`,
+                    coins: 0,
+                    isVerified: true,
+                    joinedAt: new Date().toLocaleDateString(),
+                    lastLogin: serverTimestamp()
+                });
+            } else {
+                // Update last login time
+                await updateDoc(userRef, { lastLogin: serverTimestamp() });
+            }
+
+            status.innerText = "Login successful! Redirecting...";
             status.className = "success";
             setTimeout(() => window.location.href = "index.html", 1000);
-        } catch (e) {
-            setLoading(false);
-            console.error(e);
-            if (e.code === 'auth/user-not-found' || e.code === 'auth/wrong-password') {
-                status.innerText = "Invalid email or password.";
-            } else if (e.code === 'auth/too-many-requests') {
-                status.innerText = "Too many attempts. Try again later.";
-            } else {
-                status.innerText = "Login failed. Try again.";
-            }
+        } catch (err) {
+            console.error(err);
+            status.innerText = "Invalid email or password.";
             status.className = "error";
+            loginBtn.disabled = false;
+            loginBtn.innerText = "Sign In";
         }
     };
 
-    // Password Toggle
-    document.getElementById('eyeBtn').onclick = () => {
-        const type = pwdInput.type === 'password' ? 'text' : 'password';
-        pwdInput.type = type;
-        document.getElementById('eyeIcon').className = type === 'password' ? 'fa-regular fa-eye' : 'fa-regular fa-eye-slash';
+    // Resend verification email
+    document.getElementById('resendLink').onclick = async () => {
+        const status = document.getElementById('status');
+        if (!lastEmail) {
+            status.innerText = "Please enter your email first.";
+            status.className = "error";
+            return;
+        }
+        try {
+            // We need to sign in temporarily to get user object, then send verification, then sign out
+            const password = document.getElementById('password').value;
+            if (!password) {
+                status.innerText = "Please enter your password to resend verification.";
+                status.className = "error";
+                return;
+            }
+            const cred = await signInWithEmailAndPassword(auth, lastEmail, password);
+            await sendEmailVerification(cred.user);
+            await signOut(auth);
+            status.innerText = "Verification email resent! Check your inbox/spam.";
+            status.className = "success";
+        } catch (err) {
+            status.innerText = "Failed to resend. Please try again.";
+            status.className = "error";
+        }
     };
 </script>
 </body>
