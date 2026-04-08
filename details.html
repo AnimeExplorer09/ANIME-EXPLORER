@@ -4,343 +4,926 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Anime Details</title>
-    
-    <link rel="stylesheet" href="main.css"> 
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-
     <style>
-    /* --- PAGE SPECIFIC CSS --- */
-    body { 
-        padding-bottom: 40px; 
-        overflow-y: auto; 
-        min-height: 100vh; 
-        display: block;
-        background: #0f1014;
-        color: white;
-        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    }
+        :root {
+            --primary: #5738B0;
+            --primary-glow: #5738B04d;
+            --primary-soft: #5738B01a;
+            --bg: #0f1014;
+            --card: #1a1c22;
+            --card2: #13151d;
+            --border: #ffffff0f;
+            --border-p: #5738B040;
+            --dim: #94a3b8;
+            --text: #e2e8f0;
+        }
 
-    #content { display: block; min-height: 100vh; }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
 
-    .banner-container { position: relative; width: 100%; height: 260px; background: #000; }
-    .banner-img {
-        width: 100%; height: 100%; object-fit: cover; opacity: 0.4;
-        mask-image: linear-gradient(to bottom, black 40%, transparent 100%);
-        -webkit-mask-image: linear-gradient(to bottom, black 40%, transparent 100%);
-    }
-    
-    .content-container { padding: 20px; margin-top: -120px; position: relative; z-index: 10; margin-bottom: 60px; }
-    .header-flex { display: flex; gap: 15px; align-items: flex-end; }
-    .poster-img { width: 110px; border-radius: 8px; box-shadow: 0 5px 20px rgba(0,0,0,0.6); border: 2px solid #2a2a2a; background: #111; }
-    .title { font-size: 18px; font-weight: 700; line-height: 1.3; color: white; text-shadow: 2px 2px 10px rgba(0,0,0,0.8); margin-bottom: 5px; }
-    .genres { font-size: 11px; color: #ccc; display: flex; flex-wrap: wrap; gap: 5px; }
-    .genre-tag { background: rgba(255,255,255,0.1); padding: 2px 8px; border-radius: 4px; backdrop-filter: blur(5px); }
+        body {
+            background: var(--bg);
+            color: var(--text);
+            font-family: 'Segoe UI', sans-serif;
+            padding-bottom: 60px;
+            overflow-y: auto;
+            min-height: 100vh;
+        }
 
-    .stats-box {
-        display: flex; justify-content: space-between;
-        background: rgba(255,255,255,0.05); padding: 15px;
-        border-radius: 12px; margin-top: 20px; border: 1px solid #333;
-    }
-    .stat-item { text-align: center; }
-    .stat-val { font-size: 16px; font-weight: bold; color: white; display: block; }
-    .stat-label { font-size: 11px; color: #888; text-transform: uppercase; }
+        /* ── LOADING ── */
+        #loading {
+            height: 100vh;
+            display: flex; justify-content: center; align-items: center;
+            flex-direction: column; gap: 14px;
+        }
+        .loader-ring {
+            width: 48px; height: 48px;
+            border: 3px solid #5738B030;
+            border-top-color: var(--primary);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        #loading p { color: var(--dim); font-size: 13px; font-weight: 600; }
 
-    /* RATING BUTTON STYLE */
-    .btn-user-rate {
-        background: rgba(87, 56, 176, 0.1); border: 1px solid #5738B0;
-        color: #fff; padding: 6px 12px; border-radius: 20px;
-        font-size: 13px; font-weight: bold; cursor: pointer; transition: 0.3s;
-        display: inline-flex; align-items: center; gap: 5px; margin-top: 8px;
-    }
-    .btn-user-rate i { color: #ffd700; }
-    .btn-user-rate:active { transform: scale(0.9); }
+        .hidden { display: none !important; }
 
-    .action-card { background: #1a1c22; padding: 15px; border-radius: 12px; margin-top: 20px; border: 1px solid #333; }
-    .form-group { display: flex; gap: 10px; margin-top: 10px; }
-    select { background: #0f1014; color: white; border: 1px solid #444; padding: 12px; border-radius: 8px; flex: 1; outline: none; font-size: 14px; }
+        /* ── BACK BUTTON ── */
+        .back-btn {
+            position: fixed; top: 16px; left: 16px; z-index: 200;
+            width: 38px; height: 38px;
+            background: #000000cc;
+            border-radius: 12px;
+            display: flex; align-items: center; justify-content: center;
+            color: white; text-decoration: none;
+            backdrop-filter: blur(10px);
+            border: 1px solid #ffffff1a;
+            transition: 0.2s;
+        }
+        .back-btn:active { background: var(--primary); transform: scale(0.93); }
 
-    button.add-btn { background: #5738B0; color: white; border: none; padding: 0 25px; border-radius: 8px; font-weight: bold; display: flex; align-items: center; gap: 8px; cursor: pointer; transition: 0.2s; }
-    .synopsis-area { margin-top: 25px; }
-    .section-title { font-size: 15px; color: #5738B0; margin-bottom: 10px; font-weight: 600; }
-    .synopsis-text { font-size: 14px; line-height: 1.6; color: #ddd; }
+        /* ── BANNER ── */
+        .banner-container {
+            position: relative; width: 100%; height: 280px;
+        }
+        .banner-img {
+            width: 100%; height: 100%; object-fit: cover;
+            opacity: 0.35;
+            mask-image: linear-gradient(to bottom, black 20%, transparent 100%);
+            -webkit-mask-image: linear-gradient(to bottom, black 20%, transparent 100%);
+        }
+        .banner-overlay {
+            position: absolute; inset: 0;
+            background: linear-gradient(to bottom, #0f101400 40%, #0f1014 100%);
+        }
 
-    #loading { height: 100vh; display: flex; justify-content: center; align-items: center; }
-    .hidden { display: none !important; }
-    .back-btn { position: fixed; top: 15px; left: 15px; z-index: 100; background: rgba(0,0,0,0.6); width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; backdrop-filter: blur(5px); }
+        /* ── CONTENT ── */
+        .content-container {
+            padding: 0 16px 0;
+            margin-top: -130px;
+            position: relative; z-index: 10;
+        }
 
-    /* MODERN RATING MODAL UI */
-    .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.85); z-index: 2000; display: flex; justify-content: center; align-items: center; visibility: hidden; opacity: 0; transition: 0.3s; backdrop-filter: blur(8px); }
-    .modal-overlay.show { visibility: visible; opacity: 1; }
-    .modal-box { background: #1a1c22; width: 90%; max-width: 340px; border-radius: 20px; padding: 30px 20px; text-align: center; border: 1px solid #333; transform: scale(0.8); transition: 0.3s; }
-    .modal-overlay.show .modal-box { transform: scale(1); }
+        /* ── HEADER FLEX ── */
+        .header-flex {
+            display: flex; gap: 15px; align-items: flex-end;
+            margin-bottom: 20px;
+        }
 
-    .rating-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; margin: 25px 0; }
-    .rating-item { background: #0f1014; border: 1px solid #333; padding: 12px 5px; border-radius: 12px; font-size: 14px; font-weight: bold; color: #888; cursor: pointer; transition: 0.2s; }
-    .rating-item.selected { background: #5738B0; color: white; border-color: #5738B0; transform: scale(1.1); box-shadow: 0 0 15px rgba(87, 56, 176, 0.4); }
+        .poster-wrap { position: relative; flex-shrink: 0; }
+        .poster-img {
+            width: 115px;
+            border-radius: 12px;
+            box-shadow: 0 8px 30px #00000099, 0 0 0 2px #5738B040;
+            display: block;
+            background: var(--card2);
+        }
+        .poster-status-badge {
+            position: absolute; bottom: -8px; left: 50%;
+            transform: translateX(-50%);
+            background: var(--primary);
+            color: white; font-size: 9px; font-weight: 800;
+            padding: 3px 10px; border-radius: 20px;
+            white-space: nowrap; letter-spacing: 0.5px;
+            text-transform: uppercase;
+        }
 
-    .btn-save-rate { background: #5738B0; color: white; font-weight: bold; border: none; padding: 14px; border-radius: 12px; width: 100%; font-size: 15px; cursor: pointer; }
-    .btn-cancel-rate { margin-top: 15px; background: transparent; color: #666; border: none; font-size: 13px; font-weight: 600; cursor: pointer; width: 100%; }
+        .header-info { flex: 1; padding-bottom: 4px; }
+        .title {
+            font-size: 17px; font-weight: 800;
+            line-height: 1.3; color: white;
+            text-shadow: 0 2px 10px #00000099;
+            margin-bottom: 8px;
+        }
+        .genres {
+            display: flex; flex-wrap: wrap; gap: 5px;
+            margin-bottom: 10px;
+        }
+        .genre-tag {
+            background: var(--primary-soft);
+            border: 1px solid var(--border-p);
+            color: #b39dff;
+            padding: 3px 9px; border-radius: 6px;
+            font-size: 10px; font-weight: 600;
+        }
 
-    .char-row { display: flex; justify-content: space-between; align-items: center; background: rgba(255,255,255,0.03); padding: 8px; border-radius: 8px; border: 1px solid #222; }
+        .btn-user-rate {
+            background: var(--primary-soft);
+            border: 1px solid var(--border-p);
+            color: white; padding: 7px 13px; border-radius: 20px;
+            font-size: 12px; font-weight: 700; cursor: pointer;
+            display: inline-flex; align-items: center; gap: 6px;
+            transition: 0.2s;
+        }
+        .btn-user-rate:active { transform: scale(0.95); background: var(--primary); }
+        .btn-user-rate i { color: #ffd700; }
+
+        /* ── STATS BOX ── */
+        .stats-box {
+            display: flex;
+            background: var(--card);
+            border: 1px solid var(--border-p);
+            border-radius: 16px;
+            overflow: hidden;
+            margin-bottom: 16px;
+        }
+        .stat-item {
+            flex: 1; text-align: center; padding: 14px 8px;
+            position: relative;
+        }
+        .stat-item:not(:last-child)::after {
+            content: '';
+            position: absolute; right: 0; top: 20%; bottom: 20%;
+            width: 1px; background: var(--border);
+        }
+        .stat-val {
+            display: block;
+            font-size: 15px; font-weight: 800; color: white;
+            margin-bottom: 3px;
+        }
+        .stat-label {
+            font-size: 10px; color: var(--dim);
+            text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600;
+        }
+
+        /* ── ACTION CARD ── */
+        .action-card {
+            background: var(--card);
+            border: 1px solid var(--border-p);
+            border-radius: 16px;
+            padding: 16px;
+            margin-bottom: 16px;
+        }
+        .action-card-label {
+            font-size: 11px; color: var(--dim);
+            font-weight: 700; text-transform: uppercase;
+            letter-spacing: 0.5px; margin-bottom: 10px;
+        }
+        .form-group { display: flex; gap: 10px; }
+
+        select {
+            background: var(--card2); color: white;
+            border: 1px solid var(--border-p);
+            padding: 12px 14px; border-radius: 12px;
+            flex: 1; outline: none; font-size: 13px;
+            font-family: inherit;
+            transition: 0.2s;
+        }
+        select:focus { border-color: var(--primary); }
+
+        .add-btn {
+            background: var(--primary); color: white;
+            border: none; padding: 0 20px; border-radius: 12px;
+            font-weight: 700; font-size: 13px;
+            display: flex; align-items: center; gap: 8px;
+            cursor: pointer; transition: 0.2s;
+            white-space: nowrap;
+        }
+        .add-btn:active { transform: scale(0.96); opacity: 0.9; }
+        .add-btn.added { background: #16a34a; }
+
+        /* ── SECTION ── */
+        .section { margin-bottom: 24px; }
+        .section-title {
+            font-size: 13px; font-weight: 800;
+            color: var(--dim);
+            text-transform: uppercase; letter-spacing: 1px;
+            display: flex; align-items: center; gap: 8px;
+            margin-bottom: 12px;
+        }
+        .section-title i { color: var(--primary); font-size: 12px; }
+        .section-title::after {
+            content: ''; flex: 1; height: 1px;
+            background: var(--border);
+        }
+
+        /* ── SYNOPSIS ── */
+        .synopsis-text {
+            font-size: 14px; line-height: 1.75; color: #b0b7c5;
+        }
+        .synopsis-text.clamped {
+            display: -webkit-box;
+            -webkit-line-clamp: 4;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+        .read-more-btn {
+            background: none; border: none;
+            color: var(--primary); font-size: 13px;
+            font-weight: 700; cursor: pointer;
+            margin-top: 6px; padding: 0;
+            display: flex; align-items: center; gap: 5px;
+            font-family: inherit;
+        }
+
+        /* ── TRAILER ── */
+        .trailer-wrap {
+            width: 100%; border-radius: 14px;
+            overflow: hidden;
+            border: 1px solid var(--border-p);
+            aspect-ratio: 16/9; background: #000;
+        }
+        .trailer-wrap iframe { width: 100%; height: 100%; border: none; }
+
+        /* ── CHARACTERS ── */
+        .char-card {
+            display: flex; justify-content: space-between; align-items: center;
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 12px; padding: 10px 12px;
+            margin-bottom: 8px;
+            animation: fadeUp 0.3s ease both;
+        }
+        @keyframes fadeUp {
+            from { opacity: 0; transform: translateY(8px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+        .char-side { display: flex; align-items: center; gap: 10px; }
+        .char-img {
+            width: 46px; height: 58px;
+            border-radius: 8px; object-fit: cover;
+            background: var(--card2);
+        }
+        .char-name { font-size: 13px; font-weight: 700; color: white; }
+        .char-role {
+            font-size: 10px; color: var(--primary);
+            font-weight: 700; text-transform: uppercase;
+            letter-spacing: 0.3px; margin-top: 2px;
+        }
+        .char-va { font-size: 11px; color: var(--dim); margin-top: 1px; }
+
+        /* ── RECOMMENDATIONS ── */
+        .rec-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+        }
+        .rec-card {
+            background: var(--card);
+            border-radius: 12px; overflow: hidden;
+            cursor: pointer; border: 1px solid var(--border);
+            transition: 0.2s;
+            animation: fadeUp 0.35s ease both;
+        }
+        .rec-card:active { transform: scale(0.97); border-color: var(--border-p); }
+        .rec-img-wrap { position: relative; }
+        .rec-card img {
+            width: 100%; height: 120px;
+            object-fit: cover; display: block;
+        }
+        .rec-title {
+            font-size: 11px; padding: 7px 8px;
+            color: var(--text); font-weight: 600;
+            white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+        }
+
+        /* ── COMMENTS ── */
+        .comment-input-wrap {
+            background: var(--card);
+            border: 1.5px solid var(--border-p);
+            border-radius: 14px; padding: 12px;
+            margin-bottom: 16px; transition: 0.2s;
+        }
+        .comment-input-wrap:focus-within {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px #5738B01f;
+        }
+        #commentInput {
+            width: 100%; background: transparent;
+            color: white; border: none;
+            font-family: inherit; font-size: 14px;
+            outline: none; resize: none; line-height: 1.6;
+        }
+        #commentInput::placeholder { color: #ffffff33; }
+        .comment-footer {
+            display: flex; justify-content: space-between; align-items: center;
+            margin-top: 10px;
+        }
+        .char-count { font-size: 11px; color: var(--dim); }
+        .post-btn {
+            background: var(--primary); color: white;
+            border: none; padding: 8px 18px;
+            border-radius: 10px; font-size: 12px; font-weight: 700;
+            cursor: pointer; font-family: inherit;
+            display: flex; align-items: center; gap: 6px;
+            transition: 0.2s;
+        }
+        .post-btn:active { transform: scale(0.95); opacity: 0.9; }
+
+        .comment-card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 12px; padding: 12px 14px;
+            animation: fadeUp 0.3s ease both;
+        }
+        .comment-head {
+            display: flex; justify-content: space-between;
+            align-items: center; margin-bottom: 7px;
+        }
+        .comment-user {
+            font-size: 13px; font-weight: 700; color: var(--primary);
+        }
+        .comment-meta {
+            display: flex; align-items: center; gap: 10px;
+        }
+        .comment-time { font-size: 10px; color: var(--dim); }
+        .comment-del {
+            color: #ff6b6b; font-size: 12px; cursor: pointer;
+            background: none; border: none; padding: 2px;
+            transition: 0.2s;
+        }
+        .comment-del:active { transform: scale(0.9); }
+        .comment-text { font-size: 13px; color: #b0b7c5; line-height: 1.55; }
+
+        /* ── RATING MODAL ── */
+        .modal-overlay {
+            position: fixed; inset: 0;
+            background: #000000cc;
+            z-index: 2000;
+            display: flex; justify-content: center; align-items: center;
+            visibility: hidden; opacity: 0; transition: 0.25s;
+            backdrop-filter: blur(8px);
+        }
+        .modal-overlay.show { visibility: visible; opacity: 1; }
+
+        .modal-box {
+            background: var(--card);
+            width: 90%; max-width: 340px;
+            border-radius: 22px; padding: 28px 20px;
+            text-align: center;
+            border: 1px solid var(--border-p);
+            transform: scale(0.85); transition: 0.25s;
+            box-shadow: 0 20px 60px #00000099;
+        }
+        .modal-overlay.show .modal-box { transform: scale(1); }
+
+        .modal-icon {
+            width: 52px; height: 52px;
+            background: var(--primary-soft);
+            border: 1px solid var(--border-p);
+            border-radius: 16px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 22px; color: #ffd700;
+            margin: 0 auto 14px;
+        }
+        .modal-box h3 { font-size: 17px; font-weight: 800; color: white; margin-bottom: 5px; }
+        .modal-box p { font-size: 12px; color: var(--dim); }
+
+        .rating-grid {
+            display: grid; grid-template-columns: repeat(5, 1fr);
+            gap: 8px; margin: 20px 0;
+        }
+        .rating-item {
+            background: var(--card2);
+            border: 1px solid var(--border);
+            padding: 12px 5px; border-radius: 10px;
+            font-size: 14px; font-weight: 800; color: var(--dim);
+            cursor: pointer; transition: 0.2s;
+        }
+        .rating-item.selected {
+            background: var(--primary); color: white;
+            border-color: var(--primary);
+            transform: scale(1.08);
+            box-shadow: 0 4px 16px var(--primary-glow);
+        }
+
+        .btn-save-rate {
+            background: var(--primary); color: white;
+            font-weight: 800; border: none; padding: 14px;
+            border-radius: 14px; width: 100%; font-size: 14px;
+            cursor: pointer; font-family: inherit;
+            transition: 0.2s;
+        }
+        .btn-save-rate:active { opacity: 0.85; transform: scale(0.98); }
+        .btn-cancel-rate {
+            margin-top: 12px; background: transparent;
+            color: var(--dim); border: none;
+            font-size: 13px; font-weight: 600;
+            cursor: pointer; width: 100%; font-family: inherit;
+        }
+
+        /* ── COMMENTS GAP ── */
+        #commentsList { display: flex; flex-direction: column; gap: 10px; }
     </style>
 </head>
 <body>
 
-    <a href="index.html" class="back-btn"><i class="fa-solid fa-arrow-left"></i></a>
+<a href="index.html" class="back-btn"><i class="fa-solid fa-arrow-left"></i></a>
 
-    <div id="loading">
-        <i class="fa-solid fa-circle-notch fa-spin" style="font-size: 40px; color: #5738B0;"></i>
+<!-- LOADING -->
+<div id="loading">
+    <div class="loader-ring"></div>
+    <p>Loading details...</p>
+</div>
+
+<!-- CONTENT -->
+<div id="content" class="hidden">
+
+    <!-- BANNER -->
+    <div class="banner-container">
+        <img id="banner" class="banner-img" src="">
+        <div class="banner-overlay"></div>
     </div>
 
-    <div id="content" class="hidden">
-        <div class="banner-container">
-            <img id="banner" class="banner-img" src="">
-        </div>
-        
-        <div class="content-container">
-            <div class="header-flex">
+    <div class="content-container">
+
+        <!-- HEADER -->
+        <div class="header-flex">
+            <div class="poster-wrap">
                 <img id="poster" class="poster-img" src="">
-                <div style="flex: 1;">
-                    <div id="title" class="title">Anime Title</div>
-                    <div id="genres" class="genres"></div>
-                    <button id="userRateBtn" class="btn-user-rate">
-                        <i class="fa-regular fa-star"></i> <span id="userScoreText">Rate Anime</span>
+                <div id="statusBadge" class="poster-status-badge hidden"></div>
+            </div>
+            <div class="header-info">
+                <div id="title" class="title">Loading...</div>
+                <div id="genres" class="genres"></div>
+                <button id="userRateBtn" class="btn-user-rate">
+                    <i class="fa-solid fa-star"></i>
+                    <span id="userScoreText">Rate Anime</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- STATS -->
+        <div class="stats-box">
+            <div class="stat-item">
+                <span class="stat-val">
+                    <i class="fa-solid fa-star" style="color:#ffd700; font-size:11px;"></i>
+                    <span id="score">—</span>
+                </span>
+                <span class="stat-label">Score</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-val" id="episodes">—</span>
+                <span class="stat-label" id="epsLabel">Episodes</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-val" id="year">—</span>
+                <span class="stat-label">Year</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-val" id="type" style="font-size:12px;">—</span>
+                <span class="stat-label">Type</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-val" id="airing" style="font-size:11px;">—</span>
+                <span class="stat-label">Status</span>
+            </div>
+        </div>
+
+        <!-- ADD TO LIST -->
+        <div class="action-card" id="actionCard">
+            <div class="action-card-label">
+                <i class="fa-solid fa-list" style="color:var(--primary);"></i> Add to your list
+            </div>
+            <div class="form-group">
+                <select id="statusSelect">
+    <option value="Watching">Watching</option>
+    <option value="Completed">Completed</option>
+    <option value="Plan to Watch">Plan to Watch</option>
+    <option value="Dropped">Dropped</option>
+</select>
+                <button id="addBtn" class="add-btn">
+                    <i class="fa-solid fa-plus" id="addIcon"></i>
+                    <span id="addText">Add</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- SYNOPSIS -->
+        <div class="section">
+            <div class="section-title"><i class="fa-solid fa-book-open"></i> Synopsis</div>
+            <p id="synopsis" class="synopsis-text clamped">Loading...</p>
+            <button class="read-more-btn" id="readMoreBtn">
+                <i class="fa-solid fa-chevron-down"></i> Read More
+            </button>
+        </div>
+
+        <!-- TRAILER -->
+        <div id="trailer-section" class="section hidden">
+            <div class="section-title"><i class="fa-solid fa-play"></i> Official Trailer</div>
+            <div class="trailer-wrap">
+                <iframe id="trailer-video" allowfullscreen></iframe>
+            </div>
+        </div>
+
+        <!-- CHARACTERS -->
+        <div class="section">
+            <div class="section-title"><i class="fa-solid fa-users"></i> Characters</div>
+            <div id="characters-list">
+                <p style="color:var(--dim); font-size:13px;">Loading characters...</p>
+            </div>
+        </div>
+
+        <!-- RECOMMENDATIONS -->
+        <div class="section">
+            <div class="section-title"><i class="fa-solid fa-wand-magic-sparkles"></i> You May Also Like</div>
+            <div id="recommendations-grid" class="rec-grid">
+                <p style="color:var(--dim); font-size:13px;">Loading...</p>
+            </div>
+        </div>
+
+        <!-- COMMENTS -->
+        <div class="section">
+            <div class="section-title"><i class="fa-solid fa-comments"></i> Comments</div>
+            <div class="comment-input-wrap">
+                <textarea id="commentInput" rows="3" placeholder="Share your thoughts..." maxlength="300"></textarea>
+                <div class="comment-footer">
+                    <span class="char-count"><span id="charCount">0</span>/300</span>
+                    <button class="post-btn" id="postCommentBtn">
+                        <i class="fa-solid fa-paper-plane"></i> Post
                     </button>
                 </div>
             </div>
-
-            <div class="stats-box">
-                <div class="stat-item">
-                    <span class="stat-val"><i class="fa-solid fa-star" style="color:gold; font-size:12px;"></i> <span id="score">0.0</span></span>
-                    <span class="stat-label">MAL Score</span>
-                </div>
-                <div class="stat-item">
-                    <span class="stat-val"><span id="episodes">?</span></span>
-                    <span class="stat-label">Episodes</span>
-                </div>
-                <div class="stat-item">
-                    <span class="stat-val"><span id="year">2023</span></span>
-                    <span class="stat-label">Year</span>
-                </div>
-                <div class="stat-item">
-                    <span class="stat-val"><span id="type" style="text-transform:uppercase; font-size:12px;">TV</span></span>
-                    <span class="stat-label">Type</span>
-                </div>
-            </div>
-
-            <div class="action-card">
-                <div style="font-size: 13px; color: #aaa; margin-bottom: 5px;">Set Status & Add</div>
-                <div class="form-group">
-                    <select id="statusSelect">
-                        <option value="watching">Watching</option>
-                        <option value="completed">Completed</option>
-                        <option value="plan">Plan to Watch</option>
-                        <option value="dropped">Dropped</option>
-                    </select>
-                    <button id="addBtn" class="add-btn">
-                        <i class="fa-solid fa-plus"></i> Add
-                    </button>
-                </div>
-            </div>
-
-            <div class="synopsis-area">
-                <div class="section-title">Synopsis</div>
-                <p id="synopsis" class="synopsis-text">Description loading...</p>
-            </div>
-
-            <div class="synopsis-area" style="margin-top: 30px;">
-                <div class="section-title">Characters & Voice Actors</div>
-                <div id="characters-list" style="display: flex; flex-direction: column; gap: 12px; margin-top: 10px;">
-                    <p style="color: #888; font-size: 13px;">Loading characters...</p>
-                </div>
+            <div id="commentsList">
+                <p style="color:var(--dim); font-size:13px; text-align:center;">Loading comments...</p>
             </div>
         </div>
+
     </div>
+</div>
 
-    <div id="rateModal" class="modal-overlay">
-        <div class="modal-box">
-            <div style="color: #5738B0; font-size: 32px; margin-bottom: 10px;"><i class="fa-solid fa-star"></i></div>
-            <h3 style="color:white; font-size:18px; margin-bottom: 5px;">Rate this Anime</h3>
-            <p style="color: #777; font-size: 12px;">Your rating helps us recommend better.</p>
-            
-            <div class="rating-grid" id="ratingOptions"></div>
-
-            <button class="btn-save-rate" id="saveRateBtn">Save Rating</button>
-            <button class="btn-cancel-rate" id="closeModalBtn">Maybe Later</button>
-        </div>
+<!-- RATING MODAL -->
+<div id="rateModal" class="modal-overlay">
+    <div class="modal-box">
+        <div class="modal-icon"><i class="fa-solid fa-star"></i></div>
+        <h3>Rate this Anime</h3>
+        <p>Your rating helps us recommend better</p>
+        <div class="rating-grid" id="ratingOptions"></div>
+        <button class="btn-save-rate" id="saveRateBtn">Save Rating</button>
+        <button class="btn-cancel-rate" id="closeModalBtn">Maybe Later</button>
     </div>
+</div>
 
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-        import { getFirestore, doc, setDoc, getDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+    import {
+        getFirestore, doc, setDoc, getDoc, updateDoc, collection,
+        addDoc, query, orderBy, onSnapshot, serverTimestamp, deleteDoc
+    } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-        const firebaseConfig = {
-            apiKey: "AIzaSyDLd3TW-y89lwShUmcIHw3YGzDjo4cg3y4",
-            authDomain: "animea2z.firebaseapp.com",
-            projectId: "animea2z",
-            storageBucket: "animea2z.firebasestorage.app",
-            messagingSenderId: "673605765684",
-            appId: "1:673605765684:web:a6f851e0d79836b79b1861"
-        };
+    const firebaseConfig = {
+        apiKey: "AIzaSyDLd3TW-y89lwShUmcIHw3YGzDjo4cg3y4",
+        authDomain: "animea2z.firebaseapp.com",
+        projectId: "animea2z",
+        storageBucket: "animea2z.firebasestorage.app",
+        messagingSenderId: "673605765684",
+        appId: "1:673605765684:web:a6f851e0d79836b79b1861"
+    };
 
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
-        const db = getFirestore(app);
+    const app  = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db   = getFirestore(app);
 
-        const params = new URLSearchParams(window.location.search);
-        const animeId = params.get('id');
-        let currentAnime = null;
-        let isAlreadyAdded = false;
-        let currentUserScore = 0;
-        let selectedRating = 0;
+    const params      = new URLSearchParams(window.location.search);
+    const malId       = params.get('id');
+    const contentType = params.get('type') || 'anime';
 
-        if(animeId) { fetchAnimeDetails(animeId); }
+    let currentData   = null;
+    let selectedRating = 0;
 
-        function detectSeason(title) {
-            const match = title.match(/season\s*(\d+)|(\d+)(st|nd|rd|th)\s*season|part\s*(\d+)/i);
-            return match ? parseInt(match[1] || match[2] || match[4]) : 1;
-        }
+    if (malId) fetchDetails();
 
-        async function fetchAnimeDetails(id) {
-            try {
-                const res = await fetch(`https://api.jikan.moe/v4/anime/${id}`);
-                const json = await res.json();
-                currentAnime = json.data;
-                
-                document.getElementById('loading').classList.add('hidden');
-                document.getElementById('content').classList.remove('hidden');
+    // ── TIME AGO ──
+    function timeAgo(date) {
+        const diff = Date.now() - date.getTime();
+        const mins  = Math.floor(diff / 60000);
+        const hours = Math.floor(diff / 3600000);
+        const days  = Math.floor(diff / 86400000);
+        if (mins < 1)  return 'Just now';
+        if (mins < 60) return `${mins}m ago`;
+        if (hours < 24) return `${hours}h ago`;
+        if (days < 7)  return `${days}d ago`;
+        return date.toLocaleDateString('en-GB', { day:'numeric', month:'short' });
+    }
 
-                const displayTitle = currentAnime.title_english || currentAnime.title;
-                document.getElementById('title').innerText = displayTitle;
-                document.getElementById('banner').src = currentAnime.images.jpg.large_image_url;
-                document.getElementById('poster').src = currentAnime.images.jpg.image_url;
-                document.getElementById('score').innerText = currentAnime.score || '0.0';
-                document.getElementById('episodes').innerText = currentAnime.episodes || '?';
-                document.getElementById('year').innerText = currentAnime.year || 'N/A';
-                document.getElementById('type').innerText = currentAnime.type || 'TV';
-                document.getElementById('synopsis').innerText = currentAnime.synopsis || "No description.";
-                
-                if(currentAnime.genres) {
-                    document.getElementById('genres').innerHTML = currentAnime.genres
-                        .map(g => `<span class="genre-tag">${g.name}</span>`).join('');
-                }
+    // ── FETCH DETAILS ──
+    async function fetchDetails() {
+        try {
+            const apiPath = contentType === 'char'
+                ? `characters/${malId}/full`
+                : `${contentType}/${malId}/full`;
+            const res  = await fetch(`https://api.jikan.moe/v4/${apiPath}`);
+            const { data } = await res.json();
+            currentData = data;
 
-                onAuthStateChanged(auth, async (user) => {
-                    if (user) {
-                        const docSnap = await getDoc(doc(db, "users", user.uid, "watchlist", String(id)));
-                        if (docSnap.exists()) {
-                            isAlreadyAdded = true;
-                            const data = docSnap.data();
-                            updateAddBtnUI(data.status);
-                            if(data.userScore > 0) {
-                                currentUserScore = data.userScore;
-                                updateRateBtnUI(data.userScore);
-                            }
+            document.getElementById('loading').classList.add('hidden');
+            document.getElementById('content').classList.remove('hidden');
+
+            const title = data.title_english || data.title || data.name;
+            document.getElementById('title').innerText = title;
+            document.getElementById('banner').src = data.images.jpg.large_image_url || data.images.jpg.image_url;
+            document.getElementById('poster').src = data.images.jpg.image_url;
+            document.getElementById('score').innerText = data.score || '—';
+            document.getElementById('synopsis').innerText = data.synopsis || data.about || 'No description available.';
+
+            // Status badge on poster
+            if (data.status) {
+                const badge = document.getElementById('statusBadge');
+                badge.innerText = data.status.replace('Currently Airing','Airing').replace('Finished Airing','Finished');
+                badge.classList.remove('hidden');
+            }
+
+            // Airing status stat
+            const airingEl = document.getElementById('airing');
+            if (data.status) {
+                const isAiring = data.status.toLowerCase().includes('airing');
+                airingEl.innerHTML = isAiring
+                    ? `<span style="color:#4ade80;">● Airing</span>`
+                    : `<span style="color:var(--dim);">Finished</span>`;
+            }
+
+            if (contentType === 'manga') {
+                document.getElementById('epsLabel').innerText = 'Chapters';
+                document.getElementById('episodes').innerText = data.chapters || '?';
+                document.getElementById('type').innerText = data.type || 'Manga';
+                document.getElementById('year').innerText = data.published?.prop?.from?.year || '—';
+            } else if (contentType === 'char') {
+                document.getElementById('actionCard').classList.add('hidden');
+                document.getElementById('episodes').innerText = 'N/A';
+                document.getElementById('year').innerText = 'N/A';
+            } else {
+                document.getElementById('episodes').innerText = data.episodes || '?';
+                document.getElementById('year').innerText = data.year || '—';
+                document.getElementById('type').innerText = data.type || 'TV';
+            }
+
+            if (data.genres) {
+                document.getElementById('genres').innerHTML = data.genres
+                    .map(g => `<span class="genre-tag">${g.name}</span>`).join('');
+            }
+
+            // Trailer
+            if (data.trailer?.embed_url) {
+                const sec   = document.getElementById('trailer-section');
+                const video = document.getElementById('trailer-video');
+                const thumb = data.trailer.images?.maximum_image_url || data.images.jpg.large_image_url;
+                const videoUrl = data.trailer.embed_url + (data.trailer.embed_url.includes('?') ? '&' : '?') + 'autoplay=1';
+                video.srcdoc = `
+                    <style>*{padding:0;margin:0;overflow:hidden}html,body{height:100%;background:#000}img,span{position:absolute;width:100%;top:0;bottom:0;margin:auto;object-fit:cover}.play{height:56px;width:56px;background:#5738B0;border-radius:50%;left:50%;top:50%;transform:translate(-50%,-50%);display:flex;align-items:center;justify-content:center;position:absolute;font-size:22px;color:white}</style>
+                    <a href="${videoUrl}"><img src="${thumb}"><div class="play">▶</div></a>`;
+                sec.classList.remove('hidden');
+            }
+
+            // Auth
+            onAuthStateChanged(auth, async (user) => {
+                if (user) {
+                    if (contentType !== 'char') {
+                        const snap = await getDoc(doc(db, "users", user.uid, "watchlist", String(malId)));
+                        if (snap.exists()) {
+                            setAddedState(snap.data().status);
                         }
                     }
-                });
+                    fetchUserRating(user.uid);
+                }
+            });
 
-                fetchCharacters(id);
-            } catch (error) { console.error(error); }
+            if (contentType !== 'char') {
+    fetchCharacters();
+    setTimeout(() => fetchRecommendations(), 1000);
+    setTimeout(() => loadComments(), 500);
+}
+
+        } catch(e) { console.error(e); }
+    }
+
+    function setAddedState(status) {
+        const btn = document.getElementById('addBtn');
+        btn.innerHTML = '<i class="fa-solid fa-check"></i> <span>Added</span>';
+        btn.classList.add('added');
+        document.getElementById('statusSelect').value = status || 'watching';
+    }
+
+    // ── READ MORE ──
+    const synopsisEl  = document.getElementById('synopsis');
+    const readMoreBtn = document.getElementById('readMoreBtn');
+    let expanded = false;
+    readMoreBtn.onclick = () => {
+        expanded = !expanded;
+        synopsisEl.classList.toggle('clamped', !expanded);
+        readMoreBtn.innerHTML = expanded
+            ? '<i class="fa-solid fa-chevron-up"></i> Read Less'
+            : '<i class="fa-solid fa-chevron-down"></i> Read More';
+    };
+
+    // ── RATING MODAL ──
+    const rateModal    = document.getElementById('rateModal');
+    const ratingGrid   = document.getElementById('ratingOptions');
+    const userScoreTxt = document.getElementById('userScoreText');
+
+    ratingGrid.innerHTML = Array.from({length:10}, (_,i) => i+1)
+        .map(n => `<div class="rating-item" data-value="${n}">${n}</div>`).join('');
+
+    document.getElementById('userRateBtn').onclick = () => rateModal.classList.add('show');
+    document.getElementById('closeModalBtn').onclick = () => rateModal.classList.remove('show');
+
+    ratingGrid.addEventListener('click', (e) => {
+        const item = e.target.closest('.rating-item');
+        if (!item) return;
+        document.querySelectorAll('.rating-item').forEach(el => el.classList.remove('selected'));
+        item.classList.add('selected');
+        selectedRating = parseInt(item.dataset.value);
+    });
+
+    document.getElementById('saveRateBtn').onclick = async () => {
+        const user = auth.currentUser;
+        if (!user) return alert("Please login to rate");
+        if (!selectedRating) return alert("Please select a rating");
+        await setDoc(doc(db, "users", user.uid, "ratings", String(malId)), {
+            rating: selectedRating,
+            title: document.getElementById('title').innerText,
+            type: contentType,
+            timestamp: new Date()
+        });
+        userScoreTxt.innerText = `Rated: ${selectedRating}/10`;
+        document.getElementById('userRateBtn').querySelector('i').style.color = '#ffd700';
+        rateModal.classList.remove('show');
+    };
+
+    async function fetchUserRating(uid) {
+        const snap = await getDoc(doc(db, "users", uid, "ratings", String(malId)));
+        if (snap.exists()) {
+            const val = snap.data().rating;
+            userScoreTxt.innerText = `Rated: ${val}/10`;
+            document.querySelectorAll('.rating-item').forEach(item => {
+                if (parseInt(item.dataset.value) === val) item.classList.add('selected');
+            });
         }
+    }
 
-        // --- RATING LOGIC ---
-        function updateRateBtnUI(score) {
-            document.getElementById('userRateBtn').innerHTML = `<i class="fa-solid fa-star"></i> Rated ${score}`;
-            document.getElementById('userRateBtn').style.background = "rgba(87, 56, 176, 0.2)";
-        }
+    // ── ADD TO LIST ──
+    document.getElementById('addBtn').onclick = async () => {
+        const user = auth.currentUser;
+        if (!user) return alert("Please login");
 
-        function setupRatingGrid() {
-            const grid = document.getElementById('ratingOptions');
-            grid.innerHTML = '';
-            for(let i=1; i<=10; i++) {
-                const div = document.createElement('div');
-                div.className = `rating-item ${i === currentUserScore ? 'selected' : ''}`;
-                div.innerText = i;
-                div.onclick = () => {
-                    selectedRating = i;
-                    document.querySelectorAll('.rating-item').forEach(el => el.classList.remove('selected'));
-                    div.classList.add('selected');
-                    if (navigator.vibrate) navigator.vibrate(30);
-                };
-                grid.appendChild(div);
+        const btn    = document.getElementById('addBtn');
+        const icon   = document.getElementById('addIcon');
+        const status = document.getElementById('statusSelect').value;
+        const title  = currentData.title_english || currentData.title;
+
+        icon.className = 'fa-solid fa-circle-notch fa-spin';
+        btn.disabled = true;
+
+        try {
+            await setDoc(doc(db, "users", user.uid, "watchlist", String(malId)), {
+    malId: parseInt(malId),
+    title,
+                image: currentData.images.jpg.image_url,
+                status,
+                type: contentType,
+                totalEpisodes: currentData.episodes || currentData.chapters || 0,
+                watchedEpisodes: status === 'Completed' ? (currentData.episodes || 0) : 0,
+                season: 1,
+                addedAt: serverTimestamp()
+            });
+            await logActivity(title, 
+    status === 'Watching'      ? 'started watching' : 
+    status === 'Completed'     ? 'completed' : 'added to list');
+            setAddedState(status);
+        } catch(e) { console.error(e); }
+
+        btn.disabled = false;
+    };
+
+    async function logActivity(animeTitle, actionMsg) {
+        const user = auth.currentUser;
+        if (!user) return;
+        try {
+            const snap = await getDoc(doc(db, "users", user.uid));
+            const ud   = snap.exists() ? snap.data() : {};
+            await addDoc(collection(db, "activities"), {
+                uid: user.uid,
+                userName: ud.username || user.displayName || "Anonymous",
+                userImg: ud.avatar || 'https://cdn-icons-png.flaticon.com/512/149/149071.png',
+                animeTitle, action: actionMsg, malId, type: contentType,
+                timestamp: serverTimestamp()
+            });
+        } catch(e) { console.error(e); }
+    }
+
+    // ── CHARACTERS ──
+    async function fetchCharacters() {
+        try {
+            const res  = await fetch(`https://api.jikan.moe/v4/${contentType}/${malId}/characters`);
+            const json = await res.json();
+            const list = document.getElementById('characters-list');
+            if (!json.data?.length) { list.innerHTML = '<p style="color:var(--dim);font-size:13px;">No character data.</p>'; return; }
+            list.innerHTML = json.data.slice(0, 8).map((item, i) => {
+                const va = item.voice_actors?.find(v => v.language === 'Japanese');
+                return `<div class="char-card" style="animation-delay:${i*0.05}s">
+                    <div class="char-side">
+                        <img class="char-img" src="${item.character.images.jpg.image_url}" alt="">
+                        <div>
+                            <div class="char-name">${item.character.name}</div>
+                            <div class="char-role">${item.role}</div>
+                        </div>
+                    </div>
+                    ${va ? `<div class="char-side" style="flex-direction:row-reverse;">
+                        <img class="char-img" src="${va.person.images.jpg.image_url}" alt="">
+                        <div style="text-align:right;">
+                            <div class="char-name">${va.person.name}</div>
+                            <div class="char-va">Japanese VA</div>
+                        </div>
+                    </div>` : ''}
+                </div>`;
+            }).join('');
+        } catch(e) { console.error(e); }
+    }
+
+    // ── RECOMMENDATIONS ──
+    async function fetchRecommendations() {
+        try {
+            const res  = await fetch(`https://api.jikan.moe/v4/${contentType}/${malId}/recommendations`);
+            const json = await res.json();
+            const grid = document.getElementById('recommendations-grid');
+            if (!json.data?.length) { grid.innerHTML = '<p style="color:var(--dim);font-size:13px;">No recommendations.</p>'; return; }
+            grid.innerHTML = json.data.slice(0, 6).map((rec, i) => `
+                <div class="rec-card" style="animation-delay:${i*0.06}s"
+                     onclick="location.href='details.html?id=${rec.entry.mal_id}&type=${contentType}'">
+                    <div class="rec-img-wrap">
+                        <img src="${rec.entry.images.jpg.image_url}" alt="">
+                    </div>
+                    <div class="rec-title">${rec.entry.title}</div>
+                </div>`).join('');
+        } catch(e) { console.error(e); }
+    }
+
+    // ── COMMENTS ──
+    function loadComments() {
+        if (!malId) return;
+        const q = query(collection(db, "anime_comments", String(malId), "entries"), orderBy("timestamp", "desc"));
+        onSnapshot(q, (snapshot) => {
+            const currentUser = auth.currentUser;
+            const list = document.getElementById('commentsList');
+            if (snapshot.empty) {
+                list.innerHTML = '<p style="color:var(--dim);font-size:13px;text-align:center;">No comments yet. Be the first!</p>';
+                return;
             }
-        }
+            list.innerHTML = snapshot.docs.map((d, i) => {
+                const data    = d.data();
+                const isOwner = currentUser && currentUser.uid === data.uid;
+                const time    = data.timestamp?.toDate ? timeAgo(data.timestamp.toDate()) : 'Just now';
+                return `<div class="comment-card" style="animation-delay:${i*0.04}s">
+                    <div class="comment-head">
+                        <span class="comment-user">${data.userName}</span>
+                        <div class="comment-meta">
+                            <span class="comment-time">${time}</span>
+                            ${isOwner ? `<button class="comment-del" onclick="deleteComment('${d.id}')"><i class="fa-solid fa-trash"></i></button>` : ''}
+                        </div>
+                    </div>
+                    <p class="comment-text">${data.text}</p>
+                </div>`;
+            }).join('');
+        });
+    }
 
-        document.getElementById('userRateBtn').onclick = () => {
-            if(!isAlreadyAdded) { alert("Add to list first!"); return; }
-            selectedRating = currentUserScore;
-            setupRatingGrid();
-            document.getElementById('rateModal').classList.add('show');
-        };
+    window.deleteComment = async (id) => {
+        if (!confirm("Delete this comment?")) return;
+        try { await deleteDoc(doc(db, "anime_comments", String(malId), "entries", id)); }
+        catch(e) { alert("Failed to delete."); }
+    };
 
-        document.getElementById('closeModalBtn').onclick = () => document.getElementById('rateModal').classList.remove('show');
+    // Char count
+    const commentInput = document.getElementById('commentInput');
+    const charCount    = document.getElementById('charCount');
+    commentInput.addEventListener('input', () => {
+        charCount.innerText = commentInput.value.length;
+        charCount.style.color = commentInput.value.length > 270 ? '#ff6b6b' : 'var(--dim)';
+    });
 
-        document.getElementById('saveRateBtn').onclick = async () => {
-            const user = auth.currentUser;
-            if(!user || selectedRating === 0) return;
-            try {
-                await updateDoc(doc(db, "users", user.uid, "watchlist", String(animeId)), { userScore: selectedRating });
-                currentUserScore = selectedRating;
-                updateRateBtnUI(selectedRating);
-                document.getElementById('rateModal').classList.remove('show');
-                if (navigator.vibrate) navigator.vibrate([40, 40]);
-            } catch(e) { console.error(e); }
-        };
-
-        // --- ADD LOGIC ---
-        function updateAddBtnUI(status) {
-            const btn = document.getElementById('addBtn');
-            btn.innerHTML = '<i class="fa-solid fa-check"></i> Added';
-            btn.style.background = "#00e676";
-            btn.disabled = true;
-            document.getElementById('statusSelect').value = status;
-        }
-
-        document.getElementById('addBtn').onclick = async () => {
-            const user = auth.currentUser;
-            if(!user) { window.location.href="login.html"; return; }
-            const status = document.getElementById('statusSelect').value;
-            
-            try {
-                await setDoc(doc(db, "users", user.uid, "watchlist", String(animeId)), {
-                    id: parseInt(animeId),
-                    title: currentAnime.title_english || currentAnime.title,
-                    image: currentAnime.images.jpg.image_url,
-                    totalEpisodes: currentAnime.episodes || 0,
-                    watchedEpisodes: status === 'completed' ? (currentAnime.episodes || 0) : 0,
-                    userScore: 0,
-                    status: status,
-                    season: detectSeason(currentAnime.title),
-                    addedAt: new Date()
-                });
-                isAlreadyAdded = true;
-                updateAddBtnUI(status);
-                if (navigator.vibrate) navigator.vibrate(60);
-            } catch(e) { console.error(e); }
-        };
-
-        async function fetchCharacters(id) {
-            try {
-                const res = await fetch(`https://api.jikan.moe/v4/anime/${id}/characters`);
-                const json = await res.json();
-                document.getElementById('characters-list').innerHTML = json.data.slice(0, 10).map(item => {
-                    const va = item.voice_actors.find(v => v.language === 'Japanese');
-                    return `
-                        <div class="char-row">
-                            <div style="display:flex; align-items:center; gap:10px;">
-                                <img src="${item.character.images.jpg.image_url}" style="width:45px; height:60px; border-radius:4px; object-fit:cover;">
-                                <div><div style="font-size:13px; font-weight:600;">${item.character.name}</div><div style="color:#888; font-size:11px;">${item.role}</div></div>
-                            </div>
-                            <div style="display:flex; align-items:center; gap:10px; text-align:right;">
-                                <div><div style="font-size:13px; font-weight:600;">${va ? va.person.name : 'N/A'}</div><div style="color:#888; font-size:11px;">Japanese</div></div>
-                                <img src="${va ? va.person.images.jpg.image_url : 'https://via.placeholder.com/45x60'}" style="width:45px; height:60px; border-radius:4px; object-fit:cover;">
-                            </div>
-                        </div>`;
-                }).join('');
-            } catch(e) { console.error(e); }
-        }
-    </script>
+    document.getElementById('postCommentBtn').onclick = async () => {
+        const user = auth.currentUser;
+        if (!user) return alert("Please login to comment");
+        const text = commentInput.value.trim();
+        if (!text) return alert("Write something first");
+        await addDoc(collection(db, "anime_comments", String(malId), "entries"), {
+            uid: user.uid,
+            userName: user.displayName || "User",
+            text, timestamp: new Date()
+        });
+        commentInput.value = '';
+        charCount.innerText = '0';
+    };
+</script>
 </body>
 </html>
