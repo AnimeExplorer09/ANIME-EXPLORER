@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Inbox - AnimeExplorer</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root { 
+            --bg: #0f1116; 
+            --card: #1a1c22;
+            --card2: #13151d;
+            --accent: #7c4dff;
+            --accent-glow: rgba(124, 77, 255, 0.2);
+            --gold: #ffcf4b;
+            --gold-glow: rgba(255, 207, 75, 0.15);
+            --dim: #94a3b8;
+            --border: rgba(255,255,255,0.06);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            background: var(--bg);
+            color: white;
+            font-family: 'Segoe UI', sans-serif;
+            min-height: 100vh;
+            padding-bottom: 40px;
+        }
+
+        /* ── HEADER ── */
+        .inbox-header {
+            padding: 16px 18px 14px;
+            background: rgba(26, 28, 34, 0.85);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .header-top {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            margin-bottom: 16px;
+        }
+
+        .back-btn {
+            width: 36px; height: 36px;
+            display: flex; align-items: center; justify-content: center;
+            background: rgba(255,255,255,0.05);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: 0.2s;
+            color: white;
+        }
+        .back-btn:active { background: var(--accent); transform: scale(0.93); }
+
+        .header-title {
+            font-size: 18px;
+            font-weight: 800;
+            letter-spacing: -0.3px;
+        }
+
+        /* ── TABS ── */
+        .tab-slider {
+            display: flex;
+            background: #08090d;
+            padding: 4px;
+            border-radius: 14px;
+            position: relative;
+            border: 1px solid var(--border);
+        }
+
+        .tab-item {
+            flex: 1;
+            padding: 10px 8px;
+            text-align: center;
+            font-size: 13px;
+            font-weight: 700;
+            color: var(--dim);
+            cursor: pointer;
+            z-index: 2;
+            transition: color 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 7px;
+        }
+        .tab-item.active { color: white; }
+
+        .slider-glider {
+            position: absolute;
+            top: 4px; left: 4px;
+            height: calc(100% - 8px);
+            width: calc(50% - 4px);
+            background: var(--accent);
+            border-radius: 10px;
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            z-index: 1;
+            box-shadow: 0 4px 14px var(--accent-glow);
+        }
+
+        /* ── CONTENT ── */
+        .container {
+            padding: 18px 15px;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        /* Section label */
+        .section-label {
+            font-size: 11px;
+            font-weight: 700;
+            color: var(--dim);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 12px;
+            padding-left: 4px;
+        }
+
+        /* ── CARD ── */
+        .inbox-item {
+            background: var(--card);
+            border-radius: 18px;
+            padding: 16px;
+            margin-bottom: 12px;
+            border: 1px solid var(--border);
+            position: relative;
+            overflow: hidden;
+            animation: slideUp 0.35s ease both;
+            transition: transform 0.2s;
+        }
+        .inbox-item:active { transform: scale(0.99); }
+
+        /* Left accent strip */
+        .inbox-item::before {
+            content: '';
+            position: absolute;
+            left: 0; top: 0; bottom: 0;
+            width: 3px;
+            background: var(--accent);
+            border-radius: 3px 0 0 3px;
+        }
+        .inbox-item.gift-card::before { background: var(--gold); }
+
+        /* Subtle bg tint */
+        .inbox-item::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(135deg, var(--accent-glow) 0%, transparent 60%);
+            pointer-events: none;
+        }
+        .inbox-item.gift-card::after {
+            background: linear-gradient(135deg, var(--gold-glow) 0%, transparent 60%);
+        }
+
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(14px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Icon badge */
+        .icon-badge {
+            width: 38px; height: 38px;
+            border-radius: 12px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 16px;
+            flex-shrink: 0;
+            background: var(--accent-glow);
+            color: var(--accent);
+        }
+        .gift-card .icon-badge {
+            background: var(--gold-glow);
+            color: var(--gold);
+        }
+
+        .item-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 10px;
+        }
+
+        .item-meta { flex: 1; }
+        .item-title {
+            font-size: 12px;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.6px;
+            color: var(--accent);
+        }
+        .gift-card .item-title { color: var(--gold); }
+
+        .item-date {
+            font-size: 11px;
+            color: var(--dim);
+            margin-top: 2px;
+        }
+
+        .item-body {
+            font-size: 14px;
+            color: #c8cdd8;
+            line-height: 1.6;
+            padding-left: 50px;
+        }
+
+        /* ── EMPTY / LOADING ── */
+        .status-container {
+            text-align: center;
+            margin-top: 80px;
+            color: #444;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .status-icon-wrap {
+            width: 72px; height: 72px;
+            background: rgba(124,77,255,0.08);
+            border-radius: 22px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 28px;
+            color: var(--accent);
+        }
+
+        .status-container p {
+            font-size: 14px;
+            font-weight: 600;
+            color: #444;
+        }
+    </style>
+</head>
+<body>
+
+<header class="inbox-header">
+    <div class="header-top">
+        <div class="back-btn" onclick="history.back()">
+            <i class="fa-solid fa-arrow-left"></i>
+        </div>
+        <span class="header-title">Inbox</span>
+    </div>
+
+    <div class="tab-slider">
+        <div class="slider-glider" id="glider"></div>
+        <div class="tab-item active" onclick="switchTab('official', 0)">
+            <i class="fa-solid fa-bullhorn"></i> Official
+        </div>
+        <div class="tab-item" onclick="switchTab('gifts', 1)">
+            <i class="fa-solid fa-gift"></i> Gifts & Rewards
+        </div>
+    </div>
+</header>
+
+<div class="container" id="inboxContent">
+    <div class="status-container">
+        <div class="status-icon-wrap">
+            <i class="fa-solid fa-circle-notch fa-spin"></i>
+        </div>
+        <p>Loading messages...</p>
+    </div>
+</div>
+
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+    import { getFirestore, collection, query, orderBy, onSnapshot } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+    const firebaseConfig = {
+        apiKey: "AIzaSyDLd3TW-y89lwShUmcIHw3YGzDjo4cg3y4",
+        authDomain: "animea2z.firebaseapp.com",
+        projectId: "animea2z",
+        storageBucket: "animea2z.firebasestorage.app",
+        messagingSenderId: "673605765684",
+        appId: "1:673605765684:web:a6f851e0d79836b79b1861"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db  = getFirestore(app);
+
+    let allMessages = [];
+    let currentTab  = 'official';
+
+    window.switchTab = (tab, index) => {
+        currentTab = tab;
+        document.getElementById('glider').style.transform = `translateX(${index * 100}%)`;
+        document.querySelectorAll('.tab-item').forEach((t, i) => {
+            t.classList.toggle('active', i === index);
+        });
+        renderMessages();
+    };
+
+    function loadInbox() {
+        const q = query(collection(db, "notifications"), orderBy("timestamp", "desc"));
+        onSnapshot(q, (snap) => {
+            allMessages = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+            renderMessages();
+        });
+    }
+
+    function renderMessages() {
+        const container = document.getElementById('inboxContent');
+
+        const filtered = allMessages.filter(m => {
+            const txt = (m.message || "").toLowerCase();
+            const isGift = txt.includes('gift') || txt.includes('coin') || txt.includes('reward') || txt.includes('unlocked');
+            return currentTab === 'gifts' ? isGift : !isGift;
+        });
+
+        if (filtered.length === 0) {
+            container.innerHTML = `
+                <div class="status-container">
+                    <div class="status-icon-wrap" style="opacity:0.4;">
+                        <i class="fa-solid fa-envelope-open"></i>
+                    </div>
+                    <p>No ${currentTab === 'gifts' ? 'rewards' : 'announcements'} yet.</p>
+                </div>`;
+            return;
+        }
+
+        const label = currentTab === 'gifts' ? 'Rewards & Gifts' : 'Announcements';
+        let html = `<div class="section-label">${label} · ${filtered.length}</div>`;
+
+        filtered.forEach((data, i) => {
+            const isGift = currentTab === 'gifts';
+            let dateDisplay = 'New';
+            if (data.timestamp) {
+                dateDisplay = data.timestamp.toDate().toLocaleDateString('en-GB', {
+                    day: 'numeric', month: 'short', year: 'numeric'
+                });
+            }
+
+            html += `
+                <div class="inbox-item ${isGift ? 'gift-card' : ''}" style="animation-delay:${i * 0.06}s">
+                    <div class="item-header">
+                        <div class="icon-badge">
+                            <i class="fa-solid ${isGift ? 'fa-gift' : 'fa-bullhorn'}"></i>
+                        </div>
+                        <div class="item-meta">
+                            <div class="item-title">${isGift ? 'Reward' : 'System Update'}</div>
+                            <div class="item-date"><i class="fa-regular fa-clock" style="margin-right:4px;"></i>${dateDisplay}</div>
+                        </div>
+                    </div>
+                    <div class="item-body">${data.message || ''}</div>
+                </div>`;
+        });
+
+        container.innerHTML = html;
+    }
+
+    loadInbox();
+</script>
+</body>
+</html>
