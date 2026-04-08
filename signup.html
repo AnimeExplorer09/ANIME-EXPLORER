@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Signup - AnimeExplorer</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
@@ -17,17 +17,13 @@
         body, html {
             width:100%; height:100%;
             font-family: 'Plus Jakarta Sans', sans-serif;
-            background-color: var(--bg-dark);
+            background: var(--bg-dark);
             color: white;
-            overflow: hidden;
             display: flex;
             align-items: center;
             justify-content: center;
         }
-        .bg-container { position: fixed; inset:0; z-index:-1; background: radial-gradient(circle at 50% 50%, #12121c 0%, #050507 100%); }
-        .blob { position: absolute; width:450px; height:450px; background:var(--primary); filter:blur(120px); border-radius:50%; opacity:0.15; animation:move 20s infinite alternate; }
-        .blob-2 { background:#00e5ff; animation-duration:15s; right:-100px; top:-100px; }
-        @keyframes move { 0% { transform:translate(0,0) scale(1); } 100% { transform:translate(-100px,150px) scale(1.2); } }
+        .bg-container { position:fixed; inset:0; background:radial-gradient(circle at 50% 50%, #12121c 0%, #050507 100%); z-index:-1; }
         .card {
             background: var(--glass-bg);
             backdrop-filter: blur(30px);
@@ -37,9 +33,8 @@
             width: 90%;
             max-width: 420px;
             text-align: center;
-            box-shadow: 0 40px 100px rgba(0,0,0,0.5);
         }
-        .brand-logo { font-size: 32px; font-weight:800; color:white; margin-bottom:30px; }
+        .brand-logo { font-size: 32px; font-weight:800; margin-bottom:30px; }
         .auth-form { display:flex; flex-direction:column; gap:16px; }
         .input-group { position:relative; }
         .input-group i { position:absolute; left:18px; top:50%; transform:translateY(-50%); color:rgba(255,255,255,0.3); }
@@ -50,16 +45,14 @@
             border-radius:16px;
             color:white;
             outline:none;
-            transition:0.3s;
         }
-        .input-group input:focus { border-color:var(--primary); background:rgba(255,255,255,0.08); }
+        .input-group input:focus { border-color:var(--primary); }
         .signup-btn {
             background:var(--primary); color:white; border:none; padding:16px;
             border-radius:16px; font-weight:700; cursor:pointer;
-            box-shadow:0 10px 20px var(--primary-glow); margin-top:10px;
             width:100%;
+            margin-top:10px;
         }
-        .signup-btn:disabled { opacity:0.6; cursor:not-allowed; }
         #status { margin-top:15px; font-size:13px; }
         .error { color:#ff6b6b; }
         .success { color:#4caf50; }
@@ -69,36 +62,35 @@
             border-radius:16px;
             padding:16px;
             margin-top:20px;
-            text-align:left;
             display:none;
         }
-        .info-box i { color:var(--primary); margin-right:8px; }
-        .info-box p { font-size:13px; color:#ddd; }
+        .footer-link { margin-top:20px; font-size:14px; color:#888; }
+        .footer-link a { color:var(--primary); }
     </style>
 </head>
 <body>
-<div class="bg-container"><div class="blob"></div><div class="blob blob-2"></div></div>
+<div class="bg-container"></div>
 <div class="card">
     <div class="brand-logo">AnimeExplorer</div>
-    <div class="auth-form">
-        <div class="input-group"><i class="fas fa-user"></i><input type="text" id="username" placeholder="Full Name"></div>
-        <div class="input-group"><i class="fas fa-envelope"></i><input type="email" id="email" placeholder="Email Address"></div>
-        <div class="input-group"><i class="fas fa-lock"></i><input type="password" id="password" placeholder="Password (6+ chars)"></div>
-        <div class="input-group"><i class="fas fa-lock"></i><input type="password" id="confirmPassword" placeholder="Confirm Password"></div>
-        <button id="signupBtn" class="signup-btn">Create Account</button>
+    <div id="signupForm">
+        <div class="auth-form">
+            <div class="input-group"><i class="fas fa-user"></i><input type="text" id="username" placeholder="Full Name"></div>
+            <div class="input-group"><i class="fas fa-envelope"></i><input type="email" id="email" placeholder="Email Address"></div>
+            <div class="input-group"><i class="fas fa-lock"></i><input type="password" id="password" placeholder="Password (6+ chars)"></div>
+            <div class="input-group"><i class="fas fa-lock"></i><input type="password" id="confirmPassword" placeholder="Confirm Password"></div>
+            <button id="signupBtn" class="signup-btn">Create Account</button>
+        </div>
+        <p id="status"></p>
+        <div class="info-box" id="infoBox">
+            <i class="fa-solid fa-envelope"></i> Verification email sent to <b id="infoEmail"></b>. Please check inbox/spam and click the link to verify.
+        </div>
+        <div class="footer-link">Already have an account? <a href="login.html">Login</a></div>
     </div>
-    <p id="status"></p>
-    <div id="infoBox" class="info-box">
-        <i class="fa-solid fa-envelope"></i>
-        <p>Verification email sent to <b id="infoEmail"></b>. Please check your inbox (and spam) and click the link to verify.</p>
-    </div>
-    <div style="margin-top:20px; font-size:14px; color:#888;">Already have an account? <a href="login.html" style="color:var(--primary);">Login</a></div>
 </div>
 
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-    import { getAuth, createUserWithEmailAndPassword, sendEmailVerification } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-    import { getFirestore, doc, setDoc, runTransaction } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+    import { getAuth, createUserWithEmailAndPassword, sendEmailVerification, updateProfile } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
     const firebaseConfig = {
         apiKey: "AIzaSyDLd3TW-y89lwShUmcIHw3YGzDjo4cg3y4",
@@ -110,7 +102,6 @@
     };
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
-    const db = getFirestore(app);
 
     document.getElementById('signupBtn').onclick = async () => {
         const name = document.getElementById('username').value.trim();
@@ -135,46 +126,24 @@
         btn.innerText = "Creating...";
 
         try {
-            // 1. Create user
+            // 1. Create Firebase Auth user
             const cred = await createUserWithEmailAndPassword(auth, email, pass);
             const user = cred.user;
 
-            // 2. Send verification email
+            // 2. Set display name (will be used later when Firestore doc is created)
+            await updateProfile(user, { displayName: name });
+
+            // 3. Send verification email
             await sendEmailVerification(user);
 
-            // 3. Generate unique custom ID
-            let customId = Date.now().toString().slice(-7);
-            try {
-                customId = await runTransaction(db, async (transaction) => {
-                    const counterRef = doc(db, "userCounter", "counter");
-                    const snap = await transaction.get(counterRef);
-                    let next = 1000000001;
-                    if (snap.exists()) next = (snap.data().count || 1000000000) + 1;
-                    transaction.set(counterRef, { count: next });
-                    return String(next);
-                });
-            } catch(e) { console.warn(e); }
-
-            // 4. Save to Firestore (isVerified optional, we'll rely on emailVerified from Firebase Auth)
-            await setDoc(doc(db, "users", user.uid), {
-                uid: user.uid,
-                customId: customId,
-                username: name,
-                email: email,
-                avatar: `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=7c4dff&color=fff`,
-                coins: 0,
-                isVerified: false,
-                joinedAt: new Date().toLocaleDateString()
-            });
-
-            // 5. Hide form, show info box
-            document.querySelector('.auth-form').style.display = 'none';
+            // 4. Show success message
             document.getElementById('infoEmail').innerText = email;
             document.getElementById('infoBox').style.display = 'block';
             status.innerText = "Verification email sent! Please verify and then login.";
             status.className = "success";
+            document.querySelector('.auth-form').style.display = 'none';
+            btn.style.display = 'none';
 
-            // Redirect to login after 5 seconds
             setTimeout(() => {
                 window.location.href = "login.html";
             }, 5000);
