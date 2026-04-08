@@ -1,0 +1,523 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Anime Image Search</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #5738B0;
+            --primary-glow: rgba(87, 56, 176, 0.4);
+            --accent: #a78bfa;
+            --bg: #080a0f;
+            --card: #0f1116;
+            --card2: #13151d;
+            --border: rgba(255,255,255,0.07);
+            --text-dim: #5a5f7a;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            background: var(--bg);
+            color: white;
+            font-family: 'Outfit', sans-serif;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: -200px; left: -200px;
+            width: 600px; height: 600px;
+            background: radial-gradient(circle, rgba(87,56,176,0.12) 0%, transparent 70%);
+            border-radius: 50%;
+            animation: bgPulse 6s ease-in-out infinite;
+            pointer-events: none;
+            z-index: 0;
+        }
+        body::after {
+            content: '';
+            position: fixed;
+            bottom: -150px; right: -150px;
+            width: 400px; height: 400px;
+            background: radial-gradient(circle, rgba(167,139,250,0.08) 0%, transparent 70%);
+            border-radius: 50%;
+            animation: bgPulse 8s ease-in-out infinite reverse;
+            pointer-events: none;
+            z-index: 0;
+        }
+        @keyframes bgPulse {
+            0%, 100% { transform: scale(1); opacity: 0.6; }
+            50% { transform: scale(1.1); opacity: 1; }
+        }
+
+        .page-wrapper {
+            position: relative;
+            z-index: 1;
+            max-width: 480px;
+            margin: 0 auto;
+            padding: 20px 16px 100px;
+        }
+
+        .header {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            margin-bottom: 30px;
+            padding-top: 8px;
+        }
+        .back-btn {
+            width: 40px; height: 40px;
+            display: flex; align-items: center; justify-content: center;
+            background: var(--card2);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            color: white;
+            text-decoration: none;
+            font-size: 15px;
+            transition: 0.2s;
+        }
+        .back-btn:active { transform: scale(0.93); background: var(--primary); }
+        .header-text h2 {
+            font-size: 22px;
+            font-weight: 800;
+            background: linear-gradient(135deg, #fff 30%, var(--accent));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .header-text p {
+            font-size: 12px;
+            color: var(--text-dim);
+            margin-top: 2px;
+        }
+
+        .upload-zone {
+            position: relative;
+            border-radius: 24px;
+            background: var(--card2);
+            border: 1.5px dashed rgba(87,56,176,0.4);
+            overflow: hidden;
+            cursor: pointer;
+            transition: 0.3s;
+            min-height: 220px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+        .upload-zone:active { transform: scale(0.99); border-color: var(--accent); }
+        .upload-zone.has-image { border-style: solid; border-color: var(--primary); }
+
+        .upload-placeholder {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 12px;
+            padding: 40px 20px;
+            text-align: center;
+        }
+        .upload-icon-wrap {
+            width: 70px; height: 70px;
+            background: linear-gradient(135deg, var(--primary), #7c3aed);
+            border-radius: 20px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 28px;
+            box-shadow: 0 8px 30px var(--primary-glow);
+        }
+        .upload-placeholder h3 { font-size: 16px; font-weight: 700; color: white; }
+        .upload-placeholder p { font-size: 12px; color: var(--text-dim); }
+        .upload-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: rgba(87,56,176,0.15);
+            border: 1px solid rgba(87,56,176,0.3);
+            border-radius: 20px;
+            padding: 5px 12px;
+            font-size: 11px;
+            color: var(--accent);
+            font-weight: 600;
+        }
+
+        #previewImg {
+            width: 100%;
+            height: 280px;
+            object-fit: cover;
+            display: none;
+            border-radius: 22px;
+        }
+        .preview-overlay {
+            position: absolute;
+            bottom: 0; left: 0; right: 0;
+            padding: 20px;
+            background: linear-gradient(transparent, rgba(0,0,0,0.85));
+            display: none;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .preview-overlay.visible { display: flex; }
+        .preview-label { font-size: 12px; color: rgba(255,255,255,0.7); }
+        .change-btn {
+            background: rgba(255,255,255,0.1);
+            border: 1px solid rgba(255,255,255,0.2);
+            border-radius: 8px;
+            color: white;
+            padding: 6px 12px;
+            font-size: 11px;
+            font-family: 'Outfit', sans-serif;
+            cursor: pointer;
+        }
+        input[type="file"] { display: none; }
+
+        .btn-search {
+            width: 100%;
+            margin-top: 16px;
+            padding: 18px;
+            background: linear-gradient(135deg, var(--primary), #7c3aed);
+            border: none;
+            border-radius: 16px;
+            color: white;
+            font-family: 'Outfit', sans-serif;
+            font-size: 16px;
+            font-weight: 800;
+            cursor: pointer;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            box-shadow: 0 8px 30px var(--primary-glow);
+            transition: 0.2s;
+        }
+        .btn-search:active { transform: scale(0.98); }
+        .btn-search:disabled {
+            background: #1e2030;
+            box-shadow: none;
+            color: #444;
+        }
+
+        .loader {
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            gap: 12px;
+            margin: 30px 0;
+            text-align: center;
+        }
+        .loader-ring {
+            width: 56px; height: 56px;
+            border: 3px solid rgba(87,56,176,0.2);
+            border-top-color: var(--primary);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .loader p { color: var(--text-dim); font-size: 13px; font-weight: 600; }
+        .loader span { font-size: 11px; color: #333; }
+
+        .result-header {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 14px;
+            display: none;
+        }
+        .result-header h3 {
+            font-size: 14px;
+            font-weight: 700;
+            color: var(--text-dim);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        .result-count {
+            background: var(--primary);
+            color: white;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 800;
+            padding: 2px 8px;
+        }
+
+        .result-card {
+            background: var(--card2);
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            padding: 14px;
+            margin-bottom: 10px;
+            border: 1px solid var(--border);
+            cursor: pointer;
+            transition: 0.2s;
+            animation: slideUp 0.4s ease both;
+        }
+        .result-card:active { transform: scale(0.98); background: rgba(87,56,176,0.1); border-color: rgba(87,56,176,0.4); }
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(16px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .result-rank {
+            width: 32px; height: 32px;
+            background: rgba(87,56,176,0.15);
+            border-radius: 10px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 13px;
+            font-weight: 900;
+            color: var(--accent);
+            flex-shrink: 0;
+        }
+        .result-info { flex: 1; min-width: 0; }
+        .result-title {
+            font-size: 14px;
+            font-weight: 700;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .result-meta {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-top: 4px;
+        }
+        .result-score { font-size: 11px; color: #f59e0b; font-weight: 700; }
+        .result-type {
+            font-size: 10px;
+            color: var(--text-dim);
+            background: rgba(255,255,255,0.05);
+            padding: 2px 7px;
+            border-radius: 6px;
+        }
+        .result-arrow { color: var(--text-dim); font-size: 12px; flex-shrink: 0; }
+
+        .cooldown-bar-wrap {
+            display: none;
+            margin-top: 12px;
+            background: var(--card2);
+            border-radius: 12px;
+            padding: 12px 16px;
+            border: 1px solid var(--border);
+            align-items: center;
+            gap: 10px;
+        }
+        .cooldown-bar-wrap.visible { display: flex; }
+        .cooldown-bar-bg {
+            flex: 1;
+            height: 4px;
+            background: rgba(255,255,255,0.06);
+            border-radius: 4px;
+            overflow: hidden;
+        }
+        .cooldown-bar-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary), var(--accent));
+            border-radius: 4px;
+            transition: width 1s linear;
+        }
+        .cooldown-text {
+            font-size: 12px;
+            color: var(--text-dim);
+            font-weight: 700;
+            min-width: 50px;
+            text-align: right;
+        }
+    </style>
+</head>
+<body>
+<div class="page-wrapper">
+
+    <div class="header">
+        <a href="index.html" class="back-btn"><i class="fa-solid fa-arrow-left"></i></a>
+        <div class="header-text">
+            <h2>AI Image Search</h2>
+            <p>Upload a screenshot to identify anime</p>
+        </div>
+    </div>
+
+    <div class="upload-zone" id="uploadZone" onclick="document.getElementById('fileInput').click()">
+        <div class="upload-placeholder" id="uploadPlaceholder">
+            <div class="upload-icon-wrap"><i class="fa-solid fa-wand-magic-sparkles"></i></div>
+            <h3>Drop your screenshot here</h3>
+            <p>Supports JPG, PNG, WEBP</p>
+            <div class="upload-badge"><i class="fa-solid fa-bolt"></i> Powered by Gemini AI</div>
+        </div>
+        <img id="previewImg" src="" alt="preview">
+        <div class="preview-overlay" id="previewOverlay">
+            <span class="preview-label"><i class="fa-solid fa-image"></i> Image ready</span>
+            <button class="change-btn" onclick="event.stopPropagation(); document.getElementById('fileInput').click()">Change</button>
+        </div>
+        <input type="file" id="fileInput" accept="image/*">
+    </div>
+
+    <button id="searchBtn" class="btn-search">
+        <i class="fa-solid fa-magnifying-glass"></i> Identify Anime
+    </button>
+
+    <div class="cooldown-bar-wrap" id="cooldownWrap">
+        <i class="fa-regular fa-clock" style="color: var(--text-dim); font-size:13px;"></i>
+        <div class="cooldown-bar-bg">
+            <div class="cooldown-bar-fill" id="cooldownFill" style="width:100%"></div>
+        </div>
+        <span class="cooldown-text" id="cooldownText">15s</span>
+    </div>
+
+    <div class="loader" id="loader">
+        <div class="loader-ring"></div>
+        <p>AI is analyzing...</p>
+        <span>This may take a moment</span>
+    </div>
+
+    <div id="resultArea" style="margin-top: 24px;"></div>
+    <div class="result-header" id="resultHeader">
+        <h3>Results</h3>
+        <span class="result-count" id="resultCount">0</span>
+    </div>
+
+</div>
+
+<script type="module">
+    const COOLDOWN_TIME = 15;
+
+    const fileInput = document.getElementById('fileInput');
+    const previewImg = document.getElementById('previewImg');
+    const searchBtn = document.getElementById('searchBtn');
+    const loader = document.getElementById('loader');
+    const resultArea = document.getElementById('resultArea');
+    const uploadPlaceholder = document.getElementById('uploadPlaceholder');
+    const previewOverlay = document.getElementById('previewOverlay');
+    const uploadZone = document.getElementById('uploadZone');
+    const cooldownWrap = document.getElementById('cooldownWrap');
+    const cooldownFill = document.getElementById('cooldownFill');
+    const cooldownText = document.getElementById('cooldownText');
+    const resultHeader = document.getElementById('resultHeader');
+
+    let base64Image = "";
+    let isCooldown = false;
+
+    fileInput.onchange = (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = () => {
+            base64Image = reader.result.split(',')[1];
+            previewImg.src = reader.result;
+            previewImg.style.display = "block";
+            uploadPlaceholder.style.display = "none";
+            previewOverlay.classList.add('visible');
+            uploadZone.classList.add('has-image');
+            if (!isCooldown) {
+                searchBtn.style.display = "flex";
+            }
+        };
+        reader.readAsDataURL(file);
+    };
+
+    function startCooldown() {
+        isCooldown = true;
+        searchBtn.disabled = true;
+        searchBtn.style.display = "flex";
+        cooldownWrap.classList.add('visible');
+        let timeLeft = COOLDOWN_TIME;
+        cooldownFill.style.width = "100%";
+        cooldownText.textContent = `${timeLeft}s`;
+
+        const timer = setInterval(() => {
+            timeLeft--;
+            const pct = (timeLeft / COOLDOWN_TIME) * 100;
+            cooldownFill.style.width = `${pct}%`;
+            cooldownText.textContent = `${timeLeft}s`;
+
+            if (timeLeft <= 0) {
+                clearInterval(timer);
+                isCooldown = false;
+                searchBtn.disabled = false;
+                searchBtn.innerHTML = `<i class="fa-solid fa-magnifying-glass"></i> Identify Anime`;
+                cooldownWrap.classList.remove('visible');
+            }
+        }, 1000);
+    }
+
+    async function searchOnJikan(name) {
+        try {
+            const res = await fetch(`https://api.jikan.moe/v4/anime?q=${encodeURIComponent(name)}&limit=5`);
+            const json = await res.json();
+            loader.style.display = "none";
+
+            if (json.data && json.data.length > 0) {
+                resultHeader.style.display = "flex";
+                document.getElementById('resultCount').textContent = json.data.length;
+                resultArea.innerHTML = '';
+                json.data.forEach((anime, i) => {
+                    const card = document.createElement('div');
+                    card.className = "result-card";
+                    card.style.animationDelay = `${i * 0.07}s`;
+                    card.innerHTML = `
+                        <div class="result-rank">#${i + 1}</div>
+                        <div class="result-info">
+                            <div class="result-title">${anime.title}</div>
+                            <div class="result-meta">
+                                <span class="result-score">★ ${anime.score || 'N/A'}</span>
+                                <span class="result-type">${anime.type || 'Anime'}</span>
+                            </div>
+                        </div>
+                        <i class="fa-solid fa-chevron-right result-arrow"></i>
+                    `;
+                    card.onclick = () => location.href = `details.html?id=${anime.mal_id}&type=anime`;
+                    resultArea.appendChild(card);
+                });
+            } else {
+                resultHeader.style.display = "none";
+                resultArea.innerHTML = `<div class="empty-state"><i class="fa-regular fa-image"></i><p>No results found</p></div>`;
+            }
+        } catch (e) {
+            loader.style.display = "none";
+            console.error(e);
+            resultHeader.style.display = "none";
+            resultArea.innerHTML = `<div class="empty-state"><i class="fa-solid fa-wifi"></i><p>Network error. Try again.</p></div>`;
+        }
+    }
+
+    searchBtn.onclick = async () => {
+        if (isCooldown) return;
+        if (!base64Image) {
+            alert("Please select an image first.");
+            return;
+        }
+        resultArea.innerHTML = "";
+        resultHeader.style.display = "none";
+        loader.style.display = "flex";
+        searchBtn.disabled = true;
+
+        try {
+            // Call our own Vercel function (no API key in frontend)
+            const response = await fetch('/api/gemini', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ imageBase64: base64Image })
+            });
+            const data = await response.json();
+            if (!response.ok) throw new Error(data.error || 'Proxy error');
+            
+            const animeName = data.animeName;
+            if (animeName) {
+                await searchOnJikan(animeName);
+            } else {
+                loader.style.display = "none";
+                alert("Could not identify anime. Try another image.");
+            }
+            startCooldown();
+        } catch (err) {
+            loader.style.display = "none";
+            searchBtn.disabled = false;
+            searchBtn.innerHTML = `<i class="fa-solid fa-magnifying-glass"></i> Identify Anime`;
+            alert("Error: " + err.message);
+        } finally {
+            searchBtn.disabled = false;
+        }
+    };
+</script>
+</body>
+</html>
