@@ -481,43 +481,45 @@
     }
 
     searchBtn.onclick = async () => {
-        if (isCooldown) return;
-        if (!base64Image) {
-            alert("Please select an image first.");
-            return;
-        }
-        resultArea.innerHTML = "";
-        resultHeader.style.display = "none";
-        loader.style.display = "flex";
-        searchBtn.disabled = true;
+    if (isCooldown) return;
+    if (!base64Image) {
+        alert("Please select an image first.");
+        return;
+    }
+    resultArea.innerHTML = "";
+    resultHeader.style.display = "none";
+    loader.style.display = "flex";
+    searchBtn.disabled = true;
 
-        try {
-            // Call our own Vercel function (no API key in frontend)
-            const response = await fetch('/api/gemini', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ imageBase64: base64Image })
-            });
-            const data = await response.json();
-            if (!response.ok) throw new Error(data.error || 'Proxy error');
-            
-            const animeName = data.animeName;
-            if (animeName) {
-                await searchOnJikan(animeName);
-            } else {
-                loader.style.display = "none";
-                alert("Could not identify anime. Try another image.");
-            }
-            startCooldown();
-        } catch (err) {
-            loader.style.display = "none";
-            searchBtn.disabled = false;
-            searchBtn.innerHTML = `<i class="fa-solid fa-magnifying-glass"></i> Identify Anime`;
-            alert("Error: " + err.message);
-        } finally {
-            searchBtn.disabled = false;
+    try {
+        const response = await fetch('/api/gemini', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ imageBase64: base64Image })
+        });
+        const data = await response.json();
+        
+        if (!response.ok) {
+            throw new Error(data.error || 'Server error');
         }
-    };
+        
+        const animeName = data.animeName;
+        if (animeName) {
+            await searchOnJikan(animeName);
+        } else {
+            throw new Error('No anime name returned');
+        }
+        startCooldown();
+    } catch (err) {
+        console.error(err);
+        loader.style.display = "none";
+        resultArea.innerHTML = `<div style="text-align:center; padding:40px; color:#ff6b6b;"><i class="fa-solid fa-circle-exclamation" style="font-size:24px; margin-bottom:10px; display:block;"></i>${err.message}</div>`;
+        // Don't start cooldown on error
+    } finally {
+        searchBtn.disabled = false;
+        searchBtn.innerHTML = `<i class="fa-solid fa-magnifying-glass"></i> Identify Anime`;
+    }
+};
 </script>
 </body>
 </html>
