@@ -9,8 +9,47 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
     <style>
-        /* --- FILTERS --- */
-        .filter-container { display: flex; gap: 12px; padding: 15px 5px; margin-bottom: 5px; overflow-x: auto; scrollbar-width: none; }
+       
+        .type-switcher {
+            display: flex;
+            background: #1a1c22;
+            margin: 15px;
+            padding: 4px;
+            border-radius: 14px;
+            border: 1px solid #333;
+            position: relative;
+        }
+        .type-btn {
+            flex: 1;
+            padding: 10px;
+            border: none;
+            background: transparent;
+            color: #888;
+            font-size: 13px;
+            font-weight: 700;
+            z-index: 2;
+            cursor: pointer;
+            transition: 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        .type-btn.active { color: white; }
+        .type-indicator {
+            position: absolute;
+            top: 4px; left: 4px;
+            width: calc(50% - 4px);
+            height: calc(100% - 8px);
+            background: #5738B0;
+            border-radius: 10px;
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            z-index: 1;
+        }
+        .type-switcher[data-active="manga"] .type-indicator { transform: translateX(100%); }
+
+
+        .filter-container { display: flex; gap: 12px; padding: 0 15px 15px; overflow-x: auto; scrollbar-width: none; }
         .filter-container::-webkit-scrollbar { display: none; }
         .filter-btn { display: flex; align-items: center; gap: 8px; padding: 8px 18px; background: rgba(255, 255, 255, 0.08); color: #aaa; border-radius: 30px; font-size: 13px; font-weight: 600; white-space: nowrap; border: 1px solid transparent; cursor: pointer; transition: 0.3s; }
         .filter-btn.active { color: white; border-color: rgba(255,255,255,0.2); }
@@ -19,52 +58,185 @@
         .filter-btn[data-filter="completed"].active { background: #00e676; color: black; }
         .filter-btn[data-filter="plan"].active { background: #ffab00; color: black; }
 
-        /* --- CARD --- */
+  
         .mal-card {
-            display: flex; align-items: center; background: var(--bg-card);
-            margin-bottom: 12px; border-radius: 6px; border-left: 4px solid var(--primary);
-            box-shadow: 0 2px 8px rgba(0,0,0,0.3); position: relative; overflow: hidden;
-            padding-right: 10px; transition: transform 0.1s linear;
-            user-select: none; -webkit-user-select: none; touch-action: pan-y;
+            display: flex; 
+            align-items: stretch; 
+            background: var(--bg-card);
+            margin: 10px 8px; 
+            border-radius: 12px; 
+            border-left: 5px solid var(--primary);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.4); 
+            position: relative; 
+            overflow: hidden;
+            min-height: 110px; 
+            transition: 0.2s;
+            width: calc(100% - 2px); 
         }
-        
-        .mal-img { width: 60px; height: 100px; object-fit: cover; pointer-events: none; }
-        .mal-info { flex: 1; padding: 8px 12px; display: flex; flex-direction: column; justify-content: center; pointer-events: none; }
-        .mal-title { font-size: 14px; font-weight: 600; color: white; margin-bottom: 5px; line-height: 1.2; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
-        .mal-meta { font-size: 11px; color: #aaa; display: flex; gap: 10px; align-items: center; }
 
-        .btn-rate { width: 30px; height: 30px; border-radius: 50%; border: 1px solid #333; background: #0f1014; color: #ffd700; display: flex; align-items: center; justify-content: center; cursor: pointer; z-index: 2; font-size: 12px; transition: 0.2s; }
-        
-        .controls-wrapper { display: flex; flex-direction: column; gap: 6px; align-items: flex-end; }
-        .ep-control-box { display: flex; align-items: center; background: #0f1014; border-radius: 6px; border: 1px solid #333; overflow: hidden; z-index: 2; height: 32px; }
-        .ctrl-btn { background: transparent; color: #ccc; border: none; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; cursor: pointer; }
-        .ctrl-btn:active { background: #333; color: white; }
-        
-        .ep-display, .sn-display { font-size: 11px; font-weight: bold; color: white; padding: 0 5px; min-width: 55px; text-align: center; cursor: pointer; }
-        .label-tiny { font-size: 11px; color: #ffff; text-transform: uppercase; margin-right: 2px; }
+        .mal-img { 
+            width: 80px; 
+            height: auto; 
+            object-fit: cover; 
+            flex-shrink: 0; 
+        }
 
-        .edit-input { width: 40px; background: #1a1c22; color: white; border: 1px solid var(--primary); border-radius: 4px; text-align: center; font-size: 11px; font-weight: bold; outline: none; }
+        .mal-info { 
+            flex: 2; 
+            padding: 12px; 
+            display: flex; 
+            flex-direction: column; 
+            justify-content: space-between; 
+            min-width: 0;
+        }
 
-        .progress-line { position: absolute; bottom: 0; left: 0; height: 3px; background: var(--primary); width: 0%; transition: width 0.3s; }
+        .mal-title { 
+            font-size: 15px; 
+            font-weight: 700; 
+            color: white; 
+            line-height: 1.3;
+            display: -webkit-box; 
+            -webkit-line-clamp: 2; 
+            -webkit-box-orient: vertical; 
+            overflow: hidden; 
+        }
 
-        /* --- MODALS --- */
-        .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.85); z-index: 2000; display: flex; justify-content: center; align-items: center; visibility: hidden; opacity: 0; transition: 0.2s; backdrop-filter: blur(5px); }
+        .mal-meta { 
+            display: flex; 
+            align-items: center; 
+            gap: 15px; 
+            margin-top: 8px;
+        }
+
+        .status-label {
+            font-weight: 800;
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .btn-rate { 
+            width: 32px; 
+            height: 32px; 
+            flex-shrink: 0; 
+            border-radius: 50%; 
+            border: 1px solid rgba(255, 215, 0, 0.4); 
+            background: rgba(255, 215, 0, 0.1); 
+            color: #ffd700; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            font-size: 12px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.2s;
+            margin: 0 auto; /* Center in the column */
+        }
+        .controls-wrapper { 
+            display: flex; 
+            flex-direction: column; 
+            justify-content: center; 
+            gap: 6px; 
+            padding: 8px;
+            background: rgba(0,0,0,0.2);
+            border-left: 1px solid rgba(255,255,255,0.05);
+            flex-shrink: 0;
+            align-items: center;
+        }
+
+        .ep-control-box { 
+            display: flex; 
+            align-items: center; 
+            background: #0f1014; 
+            border-radius: 8px; 
+            border: 1px solid #333; 
+            height: 32px;
+            width: 100px; 
+        }
+
+        .ctrl-btn { 
+            flex: 1;
+            background: transparent; 
+            color: #fff; 
+            border: none; 
+            cursor: pointer;
+            font-size: 12px;
+        }
+
+        .ep-display, .sn-display { 
+            flex: 1.5;
+            font-size: 11px; 
+            font-weight: bold; 
+            color: white; 
+            text-align: center; 
+        }
+
+        .progress-line { 
+            position: absolute; 
+            bottom: 0; 
+            left: 0; 
+            height: 4px; 
+            background: var(--primary);
+        }
+
+        .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 2000; display: flex; justify-content: center; align-items: center; visibility: hidden; opacity: 0; transition: 0.2s; backdrop-filter: blur(5px); }
         .modal-overlay.show { visibility: visible; opacity: 1; }
-        .modal-box { background: #1e1e24; width: 85%; max-width: 320px; border-radius: 15px; padding: 25px; text-align: center; transform: scale(0.9); transition: 0.2s; border: 1px solid #333; box-shadow: 0 10px 40px rgba(0,0,0,0.6); }
-        .modal-overlay.show .modal-box { transform: scale(1); }
-
+        .modal-box { background: #1e1e24; width: 85%; max-width: 320px; border-radius: 15px; padding: 25px; text-align: center; border: 1px solid #333; }
         .rating-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; margin: 20px 0; }
-        .rating-item { background: #0f1014; border: 1px solid #333; padding: 10px 0; border-radius: 8px; font-size: 14px; font-weight: bold; color: #888; cursor: pointer; }
-        .rating-item.selected { background: #5738B0; color: white; border-color: #5738B0; }
+        .rating-item { background: #0f1014; border: 1px solid #333; padding: 10px 0; border-radius: 8px; color: #888; cursor: pointer; }
+        .rating-item.selected { background: #5738B0; color: white; }
+        .btn-primary-gold { background: #5738B0; color: white; border: none; padding: 12px; border-radius: 10px; font-weight: bold; width: 100%; }
+        
+        .bottom-nav {
+        background: #161c24 !important;
+        border-radius: 25px 25px 0 0;
+        height: 80px;
+        border-top: 1px solid rgba(255,255,255,0.05) !important;
+        box-shadow: 0 -10px 30px rgba(0,0,0,0.5);
+    }
 
-        .btn-primary-gold { background: #5738B0; color: white; font-weight: bold; border: none; padding: 12px; border-radius: 10px; cursor: pointer; transition: 0.2s; }
+.nav-item {
+    text-decoration: none;
+    color: #94a3b8;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    flex: 1;
+    gap: 4px;
+    transition: 0.2s ease;
+}
 
-        .bottom-nav { position: fixed; bottom: 0; left: 0; width: 100%; height: 70px; display: flex; justify-content: space-around; align-items: center; background: #1a1c22; border-top: 1px solid rgba(255, 255, 255, 0.1); padding-bottom: env(safe-area-inset-bottom); z-index: 5000; }
-        .nav-item { text-decoration: none; color: #94a3b8; display: flex; flex-direction: column; align-items: center; justify-content: center; flex: 1; gap: 4px; transition: 0.2s ease; }
-        .nav-item i { font-size: 20px; }
-        .nav-item span { font-size: 10px; font-weight: 600; }
-        .nav-item.active { color: #5738B0; }
-        .hidden { display: none !important; }
+.nav-item i {
+    font-size: 20px; /* Standard Icon Size */
+}
+
+.nav-item span {
+    font-size: 10px; /* Standard Text Size */
+    font-weight: 600;
+}
+.nav-item.active {
+    color: #5738B0; /* Your Brand Purple */
+}
+
+.nav-item:active {
+    transform: scale(0.9);
+}
+.edit-input {
+    width: 100%;
+    height: 100%;
+    background: #5738B0;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    text-align: center;
+    font-size: 13px;
+    font-weight: 800;
+    outline: none;
+    box-shadow: 0 0 12px rgba(87, 56, 176, 0.7);
+    animation: bounceIn 0.2s ease-out;
+}
+.edit-input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
     </style>
 </head>
 <body>
@@ -74,6 +246,12 @@
     </header>
 
     <div class="container" style="padding-bottom: 90px;">
+        <div class="type-switcher" id="typeSwitcher" data-active="anime">
+            <div class="type-indicator"></div>
+            <button class="type-btn active" onclick="switchType('anime')"><i class="fa-solid fa-tv"></i> Anime</button>
+            <button class="type-btn" onclick="switchType('manga')"><i class="fa-solid fa-book-open"></i> Manga</button>
+        </div>
+
         <div class="filter-container">
             <button class="filter-btn active" data-filter="all" onclick="filterList('all', this)"><i class="fa-solid fa-layer-group"></i> All</button>
             <button class="filter-btn" data-filter="watching" onclick="filterList('watching', this)"><i class="fa-solid fa-eye"></i> Watching</button>
@@ -87,38 +265,31 @@
     </div>
 
     <div id="rateModal" class="modal-overlay">
-        <div class="modal-box" style="border-top: 4px solid #5738B0;">
-            <div style="color: #ffd700; font-size: 30px; margin-bottom: 10px;"><i class="fa-solid fa-star"></i></div>
+        <div class="modal-box">
             <h3 id="rateTitle" style="color:white; font-size:16px;">Title</h3>
-            <p style="color: #aaa; font-size: 12px;">Rate your experience</p>
             <input type="hidden" id="rateId">
             <div class="rating-grid" id="ratingOptions"></div>
-            <div style="display: flex; gap: 10px;">
-                <button class="btn-primary-gold" onclick="saveRating()" style="flex:2;">Save Rating</button>
-                <button onclick="closeModal('rateModal')" style="flex:1; background: transparent; color: #aaa; border: 1px solid #333; border-radius: 10px;">Close</button>
-            </div>
+            <button class="btn-primary-gold" onclick="saveRating()">Save Rating</button>
+            <button onclick="closeModal('rateModal')" style="margin-top:10px; background:none; border:none; color:#aaa;">Close</button>
         </div>
     </div>
 
     <div id="completedModal" class="modal-overlay">
         <div class="modal-box">
-            <div style="width:60px; height:60px; background:rgba(0,230,118,0.1); border-radius:50%; display:flex; align-items:center; justify-content:center; margin:0 auto 15px; color:#00e676;"><i class="fa-solid fa-circle-check" style="font-size: 24px;"></i></div>
-            <h3 style="color: white; margin-bottom: 10px;">Finished Watching?</h3>
-            <p id="completedTitle" style="color: #aaa; font-size: 13px; margin-bottom: 25px;">Mark as Completed?</p>
-            <input type="hidden" id="pendingCompId">
-            <input type="hidden" id="pendingCompVal">
+            <h3 style="color: white;">Finished?</h3>
+            <p id="completedTitle" style="color: #aaa; font-size: 13px; margin: 15px 0;"></p>
+            <input type="hidden" id="pendingCompId"><input type="hidden" id="pendingCompVal">
             <div style="display: flex; gap: 10px;">
-                <button onclick="confirmCompletion()" style="flex:1; padding: 12px; border-radius: 8px; background: #00e676; color: black; border: none; font-weight: bold;">Yes, Done!</button>
-                <button onclick="closeModal('completedModal')" style="flex:1; background: transparent; color: #aaa; border: 1px solid #333; border-radius: 8px;">Not Yet</button>
+                <button onclick="confirmCompletion()" style="flex:1; padding: 12px; border-radius: 8px; background: #00e676; border: none; font-weight: bold;">Yes</button>
+                <button onclick="closeModal('completedModal')" style="flex:1; background: transparent; color: #aaa; border: 1px solid #333; border-radius: 8px;">No</button>
             </div>
         </div>
     </div>
 
     <div id="deleteModal" class="modal-overlay">
         <div class="modal-box">
-            <div style="width:60px; height:60px; background:rgba(255,82,82,0.1); border-radius:50%; display:flex; align-items:center; justify-content:center; margin:0 auto 15px; color:#ff5252;"><i class="fa-solid fa-trash" style="font-size: 24px;"></i></div>
-            <h3 style="color: white; margin-bottom: 10px;">Remove Anime?</h3>
-            <p id="deleteTitle" style="color: #aaa; font-size: 13px; margin-bottom: 25px;">Remove from your list?</p>
+            <h3 style="color: white;">Remove?</h3>
+            <p id="deleteTitle" style="color: #aaa; font-size: 13px; margin: 15px 0;"></p>
             <input type="hidden" id="deleteId">
             <div style="display: flex; gap: 10px;">
                 <button onclick="confirmDelete()" style="flex:1; padding: 12px; border-radius: 8px; background: #ff5252; color: white; border: none; font-weight: bold;">Delete</button>
@@ -128,12 +299,50 @@
     </div>
 
     <nav class="bottom-nav">
-        <a href="index.html" class="nav-item"><i class="fa-solid fa-compass"></i><span>Home</span></a>
-        <a href="watchlist.html" class="nav-item active"><i class="fa-solid fa-bookmark"></i><span>List</span></a>
-        <a href="poll.html" class="nav-item"><i class="fa-solid fa-chart-simple"></i><span>Polls</span></a>
-        <a href="chat.html" class="nav-item"><i class="fa-solid fa-comments"></i><span>Chat</span></a>
-        <a href="profile.html" class="nav-item"><i class="fa-solid fa-user"></i><span>Profile</span></a>
-    </nav>
+    <a href="index.html" class="nav-item ">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" style="width: 24px; height: 24px;">
+            <path d="M11.47 3.841a.75.75 0 0 1 1.06 0l8.69 8.69a.75.75 0 1 0 1.06-1.061l-8.689-8.69a2.25 2.25 0 0 0-3.182 0l-8.69 8.69a.75.75 0 1 0 1.061 1.06l8.69-8.689Z" />
+            <path d="m12 5.432 8.159 8.159c.03.03.06.058.091.086v6.198c0 1.035-.84 1.875-1.875 1.875H15a.75.75 0 0 1-.75-.75v-4.5a.75.75 0 0 0-.75-.75h-3a.75.75 0 0 0-.75.75V21a.75.75 0 0 1-.75.75H5.625a1.875 1.875 0 0 1-1.875-1.875v-6.198a2.29 2.29 0 0 0 .091-.086L12 5.432Z" />
+        </svg>
+        <span>Home</span>
+    </a>
+
+    <a href="watchlist.html" class="nav-item active">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" style="width: 24px; height: 24px;">
+            <path fill-rule="evenodd" d="M6.32 2.577a49.255 49.255 0 0 1 11.36 0c1.497.174 2.57 1.46 2.57 2.93V21a.75.75 0 0 1-1.085.67L12 18.089l-7.165 3.583A.75.75 0 0 1 3.75 21V5.507c0-1.47 1.073-2.756 2.57-2.93Z" clip-rule="evenodd" />
+        </svg>
+        <span>List</span>
+    </a>
+
+    <a href="poll.html" class="nav-item">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" style="width: 24px; height: 24px;">
+            <path d="M18.375 2.25c-1.035 0-1.875.84-1.875 1.875v15.75c0 1.035.84 1.875 1.875 1.875h.75c1.035 0 1.875-.84 1.875-1.875V4.125c0-1.036-.84-1.875-1.875-1.875h-.75ZM9.75 8.625c0-1.036.84-1.875 1.875-1.875h.75c1.036 0 1.875.84 1.875 1.875v11.25c0 1.035-.84 1.875-1.875 1.875h-.75a1.875 1.875 0 0 1-1.875-1.875V8.625ZM3 13.125c0-1.036.84-1.875 1.875-1.875h.75c1.036 0 1.875.84 1.875 1.875v6.75c0 1.035-.84 1.875-1.875 1.875h-.75A1.875 1.875 0 0 1 3 19.875v-6.75Z" />
+        </svg>
+        <span>Polls</span>
+    </a>
+
+    <a href="chat.html" class="nav-item">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" style="width: 24px; height: 24px;">
+            <path fill-rule="evenodd" d="M4.848 2.771A49.144 49.144 0 0 1 12 2.25c2.43 0 4.817.178 7.152.52 1.978.292 3.348 2.024 3.348 3.97v6.02c0 1.946-1.37 3.678-3.348 3.97a48.901 48.901 0 0 1-3.476.383.39.39 0 0 0-.297.17l-2.755 4.133a.75.75 0 0 1-1.248 0l-2.755-4.133a.39.39 0 0 0-.297-.17 48.9 48.9 0 0 1-3.476-.384c-1.978-.29-3.348-2.024-3.348-3.97V6.741c0-1.946 1.37-3.68 3.348-3.97Z" clip-rule="evenodd" />
+        </svg>
+        <span>Chat</span>
+    </a>
+
+    <a href="profile.html" class="nav-item">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" style="width: 24px; height: 24px;">
+            <path fill-rule="evenodd" d="M7.5 6a4.5 4.5 0 1 1 9 0 4.5 4.5 0 0 1-9 0ZM3.751 20.105a8.25 8.25 0 0 1 16.498 0 .75.75 0 0 1-.437.695A18.683 18.683 0 0 1 12 22.5c-2.786 0-5.433-.608-7.812-1.7a.75.75 0 0 1-.437-.695Z" clip-rule="evenodd" />
+        </svg>
+        <span>Profile</span>
+    </a>
+
+    <a href="admin.html" class="nav-item" id="adminTab" style="display: none;">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" style="width: 24px; height: 24px;">
+            <path fill-rule="evenodd" d="M10.788 3.21c.448-1.077 1.976-1.077 2.424 0l2.082 5.007 5.404.433c1.164.093 1.636 1.545.749 2.305l-4.117 3.527 1.257 5.273c.271 1.136-.964 2.033-1.96 1.425L12 18.354 7.373 21.18c-.996.608-2.231-.29-1.96-1.425l1.257-5.273-4.117-3.527c-.887-.76-.415-2.212.749-2.305l5.404-.433 2.082-5.006z" clip-rule="evenodd" />
+        </svg>
+        <span>Admin</span>
+    </a>
+</nav>
+
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
@@ -152,8 +361,15 @@
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getFirestore(app);
+        
+const triggerFeedback = () => {
+    if (window.navigator && window.navigator.vibrate) {
+        window.navigator.vibrate(90); // 20ms ka light vibration
+    }
+};
 
         let allAnime = [];
+        let currentType = 'anime';
         let tempSelectedScore = 0;
         const container = document.getElementById('listContainer');
 
@@ -167,18 +383,34 @@
                 const snapshot = await getDocs(collection(db, "users", uid, "watchlist"));
                 allAnime = [];
                 snapshot.forEach(doc => allAnime.push(doc.data()));
-                document.getElementById('loading').classList.add('hidden');
+               allAnime.sort((a, b) => (b.addedAt?.seconds || 0) - (a.addedAt?.seconds || 0)); document.getElementById('loading').classList.add('hidden');
                 renderList('all');
             } catch (error) { 
-                console.error("Fetch error:", error);
                 document.getElementById('loading').classList.add('hidden');
             }
         }
 
-        window.renderList = function(filter) {
-            container.innerHTML = '';
-            allAnime.sort((a, b) => (b.addedAt?.seconds || 0) - (a.addedAt?.seconds || 0));
-            const filtered = filter === 'all' ? allAnime : allAnime.filter(a => a.status === filter);
+        window.switchType = (type) => {
+            currentType = type;
+            document.getElementById('typeSwitcher').setAttribute('data-active', type);
+            document.querySelectorAll('.type-btn').forEach(btn => {
+                btn.classList.toggle('active', btn.innerText.toLowerCase().includes(type));
+            });
+            const activeFilter = document.querySelector('.filter-btn.active').dataset.filter;
+            renderList(activeFilter);
+        };
+
+        function renderList(filter) {
+            container.innerHTML = '';                 
+            const filtered = allAnime.filter(a => {
+                const typeMatch = (a.type || 'anime') === currentType;
+                const sl = (a.status || '').toLowerCase();
+const statusMatch = filter === 'all' 
+    || (filter === 'completed' && sl.includes('complet'))
+    || (filter === 'watching'  && sl.includes('watch') && !sl.includes('plan'))
+    || (filter === 'plan'      && sl.includes('plan'));
+                return typeMatch && statusMatch;
+            });
 
             if(filtered.length === 0) {
                 document.getElementById('emptyState').classList.remove('hidden');
@@ -191,64 +423,59 @@
                 const total = anime.totalEpisodes || anime.episodes || 0;
                 const score = anime.userScore || 0;
                 const season = anime.season || 1;
+                const labelText = currentType === 'manga' ? 'V' : 'S';
                 
-                let statusColor = '#2979ff';
-                if(anime.status === 'completed') statusColor = '#00e676';
-                if(anime.status === 'plan') statusColor = '#ffab00';
-                let progressWidth = (total > 0) ? (watched / total) * 100 : 0;
+                const s = (anime.status || '').toLowerCase();
+let statusColor = '#2979ff'; // Watching — blue
+if(s.includes('complet')) { statusColor = '#00e676'; } // Completed — green
+if(s.includes('plan'))    { statusColor = '#ffab00'; } // Plan to Watch — orange
+
+// Completed ho to progress 100%
+let progressWidth = 0;
+if(s.includes('complet')) {
+    progressWidth = 100;
+} else if(total > 0) {
+    progressWidth = (watched / total) * 100;
+}
 
                 const div = document.createElement('div');
                 div.className = 'mal-card';
                 div.style.borderLeftColor = statusColor;
                 
+                
+                let touchStartY = 0;
                 let pressTimer;
-                let isMoving = false;
-
-                div.addEventListener('touchstart', (e) => {
-                    if (e.target.closest('button') || e.target.closest('.sn-display') || e.target.closest('.ep-display')) return;
-                    isMoving = false;
-                    pressTimer = setTimeout(() => {
-                        if (!isMoving) {
-                            if (navigator.vibrate) navigator.vibrate(50);
-                            openDeleteModal(anime.id, anime.title);
-                        }
-                    }, 800);
-                });
-
-                div.addEventListener('touchmove', () => {
-                    isMoving = true;
-                    clearTimeout(pressTimer);
-                });
-
-                div.addEventListener('touchend', () => clearTimeout(pressTimer));
-
-                div.addEventListener('click', (e) => {
-                    if (e.target.closest('button') || e.target.closest('.sn-display') || e.target.closest('.ep-display')) return;
-                    if (!isMoving) window.location.href = `details.html?id=${anime.id}`;
-                });
+                div.ontouchstart = (e) => {
+    touchStartY = e.touches[0].clientY;
+    pressTimer = setTimeout(() => { openDeleteModal(anime.malId, anime.title); }, 800);
+                };
+                div.ontouchmove = (e) => {
+                    if (Math.abs(e.touches[0].clientY - touchStartY) > 10) clearTimeout(pressTimer);
+                };
+                div.ontouchend = () => clearTimeout(pressTimer);
 
                 div.innerHTML = `
-                    <img src="${anime.image}" class="mal-img">
-                    <div class="mal-info">
+                   <img src="${anime.image}" class="mal-img" onclick="window.location.href='details.html?id=${anime.malId}&type=${anime.type||`anime`}'">
+<div class="mal-info" onclick="window.location.href='details.html?id=${anime.malId}&type=${anime.type||`anime`}'">
                         <div class="mal-title">${anime.title}</div>
                         <div class="mal-meta">
-                            <span style="color:${statusColor}; text-transform:capitalize; font-weight:bold;">${anime.status}</span>
-                            <button class="btn-rate" onclick="event.stopPropagation(); openRateModal('${anime.id}')" style="${score > 0 ? 'border-color:#ffd700; color:#ffd700; background:rgba(255,215,0,0.1);' : ''}">
-                                ${score > 0 ? score : '<i class="fa-regular fa-star"></i>'}
-                            </button>
+                            <span class="status-label" style="color:${statusColor};">${anime.status}</span>
                         </div>
                     </div>
                     <div class="controls-wrapper">
-                        <div class="ep-control-box" style="border-color: #444;">
-                            <button class="ctrl-btn" onclick="event.stopPropagation(); updateSeason('${anime.id}', -1)"><i class="fa-solid fa-minus"></i></button>
-                            <div class="sn-display" onclick="event.stopPropagation(); startEdit('${anime.id}', 'season', this)"><span class="label-tiny">S</span>${season}</div>
-                            <button class="ctrl-btn" onclick="event.stopPropagation(); updateSeason('${anime.id}', 1)"><i class="fa-solid fa-plus"></i></button>
-                        </div>
-                        <div class="ep-control-box">
-                            <button class="ctrl-btn" onclick="event.stopPropagation(); updateEp('${anime.id}', -1)"><i class="fa-solid fa-minus"></i></button>
-                            <div class="ep-display" onclick="event.stopPropagation(); startEdit('${anime.id}', 'watchedEpisodes', this)">${watched} <span style="font-size:10px; color:#aaa;">/ ${total > 0 ? total : '?'}</span></div>
-                            <button class="ctrl-btn" onclick="event.stopPropagation(); updateEp('${anime.id}', 1)"><i class="fa-solid fa-plus"></i></button>
-                        </div>
+                        <div class="btn-rate" onclick="event.stopPropagation(); openRateModal('${anime.malId}')">
+    ${score > 0 ? score : '<i class="fa-regular fa-star"></i>'}
+</div>
+<div class="ep-control-box" style="border-color: #444;">
+    <button class="ctrl-btn" onclick="updateSeason('${anime.malId}', -1)"><i class="fa-solid fa-minus"></i></button>
+    <div class="sn-display" onclick="startEdit('${anime.malId}', 'season', this)"><span class="label-tiny">${labelText}</span>${season}</div>
+    <button class="ctrl-btn" onclick="updateSeason('${anime.malId}', 1)"><i class="fa-solid fa-plus"></i></button>
+</div>
+<div class="ep-control-box">
+    <button class="ctrl-btn" onclick="updateEp('${anime.malId}', -1)"><i class="fa-solid fa-minus"></i></button>
+    <div class="ep-display" onclick="startEdit('${anime.malId}', 'watchedEpisodes', this)">${watched}/${total || '?'}</div>
+    <button class="ctrl-btn" onclick="updateEp('${anime.malId}', 1)"><i class="fa-solid fa-plus"></i></button>
+</div>
                     </div>
                     <div class="progress-line" style="width: ${progressWidth}%; background:${statusColor};"></div>
                 `;
@@ -256,91 +483,59 @@
             });
         };
 
-        window.startEdit = function(id, field, element) {
-            const anime = allAnime.find(a => String(a.id) === String(id));
-            if (!anime) return;
-            const currentVal = field === 'season' ? (anime.season || 1) : (anime.watchedEpisodes || 0);
-            
-            const input = document.createElement('input');
-            input.type = 'number';
-            input.className = 'edit-input';
-            input.value = currentVal;
-            input.inputMode = 'numeric';
-
-            element.innerHTML = '';
-            element.appendChild(input);
-            input.focus();
-            input.select();
-
-            const saveEdit = async () => {
-                let newVal = parseInt(input.value);
-                const total = anime.totalEpisodes || anime.episodes || 0;
-                if (isNaN(newVal) || newVal < 0) newVal = currentVal;
-                if (field === 'watchedEpisodes' && total > 0 && newVal > total) newVal = total;
-                if (field === 'season' && newVal < 1) newVal = 1;
-
-                if (newVal !== currentVal) {
-                    const updateData = {};
-                    updateData[field] = newVal;
-                    if (field === 'watchedEpisodes' && total > 0 && newVal === total) {
-                        updateData.status = 'completed';
-                        anime.status = 'completed';
-                    }
-                    await updateDoc(doc(db, "users", auth.currentUser.uid, "watchlist", String(id)), updateData);
-                    anime[field] = newVal;
-                }
-                renderList(document.querySelector('.filter-btn.active').dataset.filter);
-            };
-
-            input.onblur = saveEdit;
-            input.onkeydown = (e) => { if(e.key === 'Enter') input.blur(); };
+       
+        window.filterList = (status, btn) => {
+            document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            renderList(status);
         };
 
-        window.updateSeason = async function(id, change) {
-            const anime = allAnime.find(a => String(a.id) === String(id));
-            if(!anime) return;
-            let newVal = (anime.season || 1) + change;
-            if(newVal < 1) return;
-            if (navigator.vibrate) navigator.vibrate(40); 
-            await updateDoc(doc(db, "users", auth.currentUser.uid, "watchlist", String(id)), { season: newVal });
-            anime.season = newVal;
-            renderList(document.querySelector('.filter-btn.active').dataset.filter);
-        };
+window.updateSeason = async (id, change) => {
+    triggerFeedback();
+    const anime = allAnime.find(a => String(a.malId) === String(id));
+    let newVal = (anime.season || 1) + change;
+    if(newVal < 1) return;
+    // Agar plan to watch tha aur ep badhaya toh watching kar do
+const isPlan = (anime.status || '').toLowerCase().includes('plan');
+const updateData = { watchedEpisodes: newVal };
+if (isPlan && newVal > 0) {
+    updateData.status = 'Watching';
+    anime.status = 'Watching';
+}
 
-        window.updateEp = async function(id, change) {
-            const anime = allAnime.find(a => String(a.id) === String(id));
-            if(!anime) return;
-            let current = anime.watchedEpisodes || 0;
-            const total = anime.totalEpisodes || anime.episodes || 0;
-            let newVal = current + change;
-            if(newVal < 0 || (total > 0 && newVal > total)) return;
-            if (navigator.vibrate) navigator.vibrate(40);
-            
-            if (total > 0 && newVal === total && anime.status !== 'completed') {
-                document.getElementById('pendingCompId').value = id;
-                document.getElementById('pendingCompVal').value = newVal;
-                document.getElementById('completedTitle').innerText = `Mark "${anime.title}" as Completed?`;
-                document.getElementById('completedModal').classList.add('show');
-                return;
-            }
-            await updateDoc(doc(db, "users", auth.currentUser.uid, "watchlist", String(id)), { watchedEpisodes: newVal });
-            anime.watchedEpisodes = newVal;
-            renderList(document.querySelector('.filter-btn.active').dataset.filter);
-        };
+await updateDoc(doc(db, "users", auth.currentUser.uid, "watchlist", String(id)), updateData);
+anime.watchedEpisodes = newVal;
+    renderList(document.querySelector('.filter-btn.active').dataset.filter);
+};
 
+window.updateEp = async (id, change) => {
+    triggerFeedback();
+    const anime = allAnime.find(a => String(a.malId) === String(id));
+    const total = anime.totalEpisodes || anime.episodes || 0;
+    let newVal = (anime.watchedEpisodes || 0) + change;
+    if(newVal < 0 || (total > 0 && newVal > total)) return;
+    
+    if (total > 0 && newVal === total && anime.status !== 'completed') {
+        document.getElementById('pendingCompId').value = id;
+        document.getElementById('pendingCompVal').value = newVal;
+        document.getElementById('completedTitle').innerText = `Mark "${anime.title}" as Completed?`;
+        document.getElementById('completedModal').classList.add('show');
+        return;
+    }
+    await updateDoc(doc(db, "users", auth.currentUser.uid, "watchlist", String(id)), { watchedEpisodes: newVal });
+    anime.watchedEpisodes = newVal;
+    renderList(document.querySelector('.filter-btn.active').dataset.filter);
+};
         window.confirmCompletion = async () => {
             const id = document.getElementById('pendingCompId').value;
             const newVal = parseInt(document.getElementById('pendingCompVal').value);
-            const anime = allAnime.find(a => String(a.id) === String(id));
+            const anime = allAnime.find(a => String(a.malId) === String(id));
             await updateDoc(doc(db, "users", auth.currentUser.uid, "watchlist", String(id)), { watchedEpisodes: newVal, status: 'completed' });
-            anime.watchedEpisodes = newVal;
-            anime.status = 'completed';
-            closeModal('completedModal');
-            renderList(document.querySelector('.filter-btn.active').dataset.filter);
+            anime.watchedEpisodes = newVal; anime.status = 'completed';
+            closeModal('completedModal'); renderList(document.querySelector('.filter-btn.active').dataset.filter);
         };
-
         window.openRateModal = (id) => {
-            const anime = allAnime.find(a => String(a.id) === String(id));
+    const anime = allAnime.find(a => String(a.malId) === String(id));
             document.getElementById('rateId').value = id;
             document.getElementById('rateTitle').innerText = anime.title;
             tempSelectedScore = anime.userScore || 0;
@@ -363,10 +558,8 @@
         window.saveRating = async () => {
             const id = document.getElementById('rateId').value;
             await updateDoc(doc(db, "users", auth.currentUser.uid, "watchlist", String(id)), { userScore: tempSelectedScore });
-            const anime = allAnime.find(a => String(a.id) === String(id));
-            if(anime) anime.userScore = tempSelectedScore;
-            closeModal('rateModal');
-            renderList(document.querySelector('.filter-btn.active').dataset.filter);
+            allAnime.find(a => String(a.malId) === String(id)).userScore = tempSelectedScore;
+            closeModal('rateModal'); renderList(document.querySelector('.filter-btn.active').dataset.filter);
         };
 
         window.openDeleteModal = (id, title) => {
@@ -379,16 +572,26 @@
             const id = document.getElementById('deleteId').value;
             await deleteDoc(doc(db, "users", auth.currentUser.uid, "watchlist", String(id)));
             allAnime = allAnime.filter(a => String(a.id) !== String(id));
-            closeModal('deleteModal');
-            renderList('all');
+            closeModal('deleteModal'); renderList('all');
         };
-
         window.closeModal = (id) => document.getElementById(id).classList.remove('show');
-        window.filterList = (status, btn) => {
-            document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
-            btn.classList.add('active');
-            renderList(status);
+        
+        window.startEdit = function(id, field, element) {
+        triggerFeedback();
+            const anime = allAnime.find(a => String(a.id) === String(id));
+            const currentVal = field === 'season' ? (anime.season || 1) : (anime.watchedEpisodes || 0);
+            const input = document.createElement('input');
+            input.type = 'number'; input.className = 'edit-input'; input.value = currentVal;
+            element.innerHTML = ''; element.appendChild(input);
+            input.focus();
+            input.onblur = async () => {
+                let newVal = parseInt(input.value) || currentVal;
+                await updateDoc(doc(db, "users", auth.currentUser.uid, "watchlist", String(id)), { [field]: newVal });
+                anime[field] = newVal;
+                renderList(document.querySelector('.filter-btn.active').dataset.filter);
+            };
         };
     </script>
 </body>
 </html>
+
