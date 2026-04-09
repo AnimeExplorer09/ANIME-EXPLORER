@@ -81,7 +81,7 @@
 
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-    import { getAuth, signInWithEmailAndPassword, signOut, sendEmailVerification } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+    import { getAuth, signInWithEmailAndPassword, signOut, sendEmailVerification, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
     import { getFirestore, doc, getDoc, setDoc, updateDoc, serverTimestamp, runTransaction } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
     const firebaseConfig = {
@@ -97,6 +97,15 @@
     const db = getFirestore(app);
 
     let lastEmail = "";
+
+    // ========== AUTO-REDIRECT IF ALREADY LOGGED IN ==========
+    onAuthStateChanged(auth, (user) => {
+        if (user) {
+            // User already logged in, redirect to home page
+            window.location.href = "index.html";
+        }
+    });
+    // ========================================================
 
     document.getElementById('loginBtn').onclick = async () => {
         const email = document.getElementById('email').value.trim();
@@ -189,7 +198,6 @@
             return;
         }
         try {
-            // We need to sign in temporarily to get user object, then send verification, then sign out
             const password = document.getElementById('password').value;
             if (!password) {
                 status.innerText = "Please enter your password to resend verification.";
