@@ -1,14 +1,13 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Login - AnimeExplorer</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-<link rel="manifest" href="manifest.json">
-<meta name="theme-color" content="#7c4dff">
-<meta name="apple-mobile-web-app-capable" content="yes">
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#7c4dff">
+    <meta name="apple-mobile-web-app-capable" content="yes">
 
     <style>
         :root {
@@ -86,8 +85,24 @@
 
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-    import { getAuth, signInWithEmailAndPassword, signOut, sendEmailVerification, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-    import { getFirestore, doc, getDoc, setDoc, updateDoc, serverTimestamp, runTransaction } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+    import {
+        getAuth,
+        setPersistence,
+        browserLocalPersistence,
+        signInWithEmailAndPassword,
+        signOut,
+        sendEmailVerification,
+        onAuthStateChanged
+    } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+    import {
+        getFirestore,
+        doc,
+        getDoc,
+        setDoc,
+        updateDoc,
+        serverTimestamp,
+        runTransaction
+    } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
     const firebaseConfig = {
         apiKey: "AIzaSyDLd3TW-y89lwShUmcIHw3YGzDjo4cg3y4",
@@ -97,6 +112,7 @@
         messagingSenderId: "673605765684",
         appId: "1:673605765684:web:a6f851e0d79836b79b1861"
     };
+
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
     const db = getFirestore(app);
@@ -105,12 +121,12 @@
 
     // ========== AUTO-REDIRECT IF ALREADY LOGGED IN ==========
     onAuthStateChanged(auth, (user) => {
-        if (user) {
-            // User already logged in, redirect to home page
+        if (user && user.emailVerified) {
+            // Sirf verified user ko redirect karo
             window.location.href = "index.html";
         }
     });
-    // ========================================================
+    // =========================================================
 
     document.getElementById('loginBtn').onclick = async () => {
         const email = document.getElementById('email').value.trim();
@@ -133,6 +149,9 @@
         resendInfo.style.display = "none";
 
         try {
+            // ✅ FIX: localStorage mein session save karo taaki back karne pe logout na ho
+            await setPersistence(auth, browserLocalPersistence);
+
             const cred = await signInWithEmailAndPassword(auth, email, password);
             const user = cred.user;
 
@@ -185,6 +204,7 @@
             status.innerText = "Login successful! Redirecting...";
             status.className = "success";
             setTimeout(() => window.location.href = "index.html", 1000);
+
         } catch (err) {
             console.error(err);
             status.innerText = "Invalid email or password.";
