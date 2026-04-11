@@ -1347,7 +1347,7 @@ async function checkIfWatchlisted(malId) {
 <script>
       if ('serviceWorker' in navigator) {
         window.addEventListener('load', () => {
-          navigator.serviceWorker.register('/sw.js')
+          navigator.serviceWorker.register('sw.js')
             .then(reg => console.log('PWA Active!'))
             .catch(err => console.log('PWA Error', err));
         });
