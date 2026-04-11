@@ -1,0 +1,16 @@
+{
+  "name": "Anime Explorer",
+  "short_name": "AnimeA2Z",
+  "start_url": "/index.html",
+  "display": "standalone",
+  "background_color": "#0b0c10",
+  "theme_color": "#7c4dff",
+  "icons": [
+    {
+      "src": "https://cdn-icons-png.flaticon.com/512/1409/1409046.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
