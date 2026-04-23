@@ -573,6 +573,39 @@
     align-items: center;
     gap: 4px;
 }
+
+/* ── RECOMMENDED FOR YOU ── */
+#recommendations-section { margin: 0 5px 20px 5px; }
+#recFeed {
+    display: flex; gap: 12px; overflow-x: auto;
+    padding-bottom: 10px; scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+}
+#recFeed::-webkit-scrollbar { display: none; }
+.rec-card {
+    min-width: 110px; max-width: 110px;
+    cursor: pointer; flex-shrink: 0;
+    transition: transform 0.2s ease;
+}
+.rec-card:active { transform: scale(0.95); }
+.rec-card-img {
+    width: 110px; height: 155px; border-radius: 10px;
+    overflow: hidden; position: relative; background: #1a1c22;
+    border: 1px solid rgba(255,255,255,0.05);
+}
+.rec-card-img img { width: 100%; height: 100%; object-fit: cover; opacity: 0.9; }
+.rec-card-score {
+    position: absolute; bottom: 0; left: 0; right: 0;
+    background: linear-gradient(transparent, rgba(0,0,0,0.85));
+    padding: 8px 6px 6px; font-size: 10px; font-weight: 700; color: #FFB800;
+}
+.rec-card-title {
+    font-size: 11px; font-weight: 600; color: #ddd; margin-top: 5px;
+    overflow: hidden; text-overflow: ellipsis;
+    display: -webkit-box; -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical; line-height: 1.3;
+}
+.rec-skel { min-width: 110px; height: 155px; border-radius: 10px; flex-shrink: 0; }
       </style>
 </head>
 <body>
@@ -663,6 +696,24 @@
             </div>
         </div>
 
+        <!-- RECOMMENDED FOR YOU -->
+        <div id="recommendations-section">
+            <div style="display: flex; align-items: center; margin-bottom: 10px; padding: 0 5px;">
+                <h3 style="color: #5738B0; font-size: 16px; display: flex; align-items: center; gap: 8px; margin: 0;">
+                    <i class="fa-solid fa-wand-magic-sparkles" style="color: #8261ee;"></i>
+                    RECOMMENDED FOR YOU
+                </h3>
+            </div>
+            <div id="recFeed">
+                <div class="rec-skel skeleton"></div>
+                <div class="rec-skel skeleton"></div>
+                <div class="rec-skel skeleton"></div>
+                <div class="rec-skel skeleton"></div>
+                <div class="rec-skel skeleton"></div>
+                <div class="rec-skel skeleton"></div>
+            </div>
+        </div>
+
         <h3 id="listTitle" style="margin: 10px 0 10px 5px; color: #5738B0;">Trending Now</h3>
         <div id="animeGrid" class="grid-container"></div>
         
@@ -747,7 +798,7 @@
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
     import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-    import { getFirestore, collection, query, orderBy, limit, onSnapshot } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+    import { getFirestore, collection, query, orderBy, limit, onSnapshot, getDocs } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
     
     const firebaseConfig = { 
         apiKey: "AIzaSyDLd3TW-y89lwShUmcIHw3YGzDjo4cg3y4", 
@@ -782,6 +833,7 @@ onAuthStateChanged(auth, async (user) => {
         } catch (err) {
             console.error("Admin check error:", err);
         }
+        loadRecommendations(user.uid);
     }
 });
 
@@ -1340,6 +1392,120 @@ async function checkIfWatchlisted(malId) {
         }
     } catch(err) {
         console.error("Watchlist check error:", err);
+    }
+}
+
+// ── RECOMMENDED FOR YOU ──
+async function loadRecommendations(uid) {
+    const recFeed = document.getElementById('recFeed');
+    if (!recFeed) return;
+
+    recFeed.innerHTML = Array(6).fill('<div class="rec-skel skeleton"></div>').join('');
+
+    try {
+        const snapshot = await getDocs(collection(db, "users", uid, "watchlist"));
+        const watchedIds = new Set();
+        snapshot.forEach(d => watchedIds.add(String(d.data().malId)));
+
+        // Use 1-hour cache
+        const cacheKey = `anime_rec_${uid}`;
+        const cached = localStorage.getItem(cacheKey);
+        const cacheAge = parseInt(localStorage.getItem(cacheKey + '_t') || '0');
+        if (cached && Date.now() - cacheAge < 3600000) {
+            const recs = JSON.parse(cached).filter(a => !watchedIds.has(String(a.mal_id)));
+            renderRecommendations(recs.slice(0, 8));
+            return;
+        }
+
+        // Fetch by top preferred genre, then supplement with trending
+        const genrePrefs = JSON.parse(localStorage.getItem('anime_genre_prefs') || '[]');
+        let animeList = [];
+        if (genrePrefs.length > 0) {
+            const res = await fetch(`https://api.jikan.moe/v4/anime?genres=${genrePrefs[0]}&order_by=score&sort=desc&limit=20&sfw`);
+            const data = await res.json();
+            animeList = data.data || [];
+        }
+        if (animeList.length < 8) {
+            const res = await fetch('https://api.jikan.moe/v4/top/anime?filter=bypopularity&limit=20');
+            const data = await res.json();
+            const trending = data.data || [];
+            const existingIds = new Set(animeList.map(a => a.mal_id));
+            trending.forEach(a => { if (!existingIds.has(a.mal_id)) animeList.push(a); });
+        }
+
+        const filtered = animeList.filter(a => !watchedIds.has(String(a.mal_id)));
+        localStorage.setItem(cacheKey, JSON.stringify(filtered.slice(0, 20)));
+        localStorage.setItem(cacheKey + '_t', String(Date.now()));
+        renderRecommendations(filtered.slice(0, 8));
+
+        // Build genre preferences in background (5s delay to avoid API rate limits)
+        setTimeout(() => updateGenrePrefs(uid), 5000);
+
+    } catch (err) {
+        console.error('Recommendations error:', err);
+        try {
+            const res = await fetch('https://api.jikan.moe/v4/top/anime?filter=bypopularity&limit=8');
+            const data = await res.json();
+            renderRecommendations(data.data || []);
+        } catch (e) {
+            if (recFeed) recFeed.innerHTML = '<p style="font-size:12px;color:#666;padding:10px 0;">Recommendations unavailable</p>';
+        }
+    }
+}
+
+function renderRecommendations(list) {
+    const recFeed = document.getElementById('recFeed');
+    if (!recFeed) return;
+    if (!list || list.length === 0) {
+        recFeed.innerHTML = '<p style="font-size:12px;color:#666;padding:10px 0;">No recommendations available.</p>';
+        return;
+    }
+    recFeed.innerHTML = list.map(anime => {
+        const title = anime.title_english || anime.title;
+        const score = anime.score ? Number(anime.score).toFixed(1) : 'N/A';
+        return `
+            <div class="rec-card" onclick="location.href='details.html?id=${anime.mal_id}&type=anime'">
+                <div class="rec-card-img">
+                    <img src="${anime.images.jpg.image_url}" loading="lazy" alt="">
+                    <div class="rec-card-score">⭐ ${score}</div>
+                </div>
+                <div class="rec-card-title">${title}</div>
+            </div>`;
+    }).join('');
+}
+
+async function updateGenrePrefs(uid) {
+    try {
+        const snapshot = await getDocs(collection(db, "users", uid, "watchlist"));
+        const animeIds = [];
+        snapshot.forEach(d => {
+            const item = d.data();
+            if (item.type === 'anime') animeIds.push(item.malId);
+        });
+        if (animeIds.length === 0) return;
+
+        const genreCount = {};
+        const sample = animeIds.slice(0, 3);
+        for (const malId of sample) {
+            await new Promise(r => setTimeout(r, 500)); // Respect Jikan rate limit
+            try {
+                const res = await fetch(`https://api.jikan.moe/v4/anime/${malId}`);
+                const data = await res.json();
+                (data.data?.genres || []).forEach(g => {
+                    genreCount[g.mal_id] = (genreCount[g.mal_id] || 0) + 1;
+                });
+            } catch (e) { /* continue on individual failures */ }
+        }
+        if (Object.keys(genreCount).length > 0) {
+            const sorted = Object.entries(genreCount)
+                .sort((a, b) => b[1] - a[1])
+                .map(([id]) => parseInt(id));
+            localStorage.setItem('anime_genre_prefs', JSON.stringify(sorted));
+            // Invalidate rec cache so next load uses updated preferences
+            localStorage.removeItem(`anime_rec_${uid}`);
+        }
+    } catch (e) {
+        console.error('Genre pref update error:', e);
     }
 }
 </script>
