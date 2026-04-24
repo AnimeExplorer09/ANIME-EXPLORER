@@ -58,8 +58,10 @@
             width:100%;
             margin-top:10px;
         }
-        #status { margin-top:20px; font-size:13px; }
+        .login-btn:disabled { opacity: 0.6; cursor: not-allowed; }
+        #status { margin-top:20px; font-size:13px; min-height:20px; }
         .error { color:#ff6b6b; }
+        .warning { color:#FFB800; }
         .success { color:#4caf50; }
         .info { color:#b39dff; }
         .footer-link { margin-top:30px; font-size:14px; color:#888; }
@@ -119,15 +121,108 @@
 
     let lastEmail = "";
 
-    // ========== AUTO-REDIRECT IF ALREADY LOGGED IN ==========
-    onAuthStateChanged(auth, (user) => {
-        if (user && user.emailVerified) {
-            // Sirf verified user ko redirect karo
-            window.location.href = "index.html";
+    // ========== AUTO-REDIRECT IF ALREADY LOGGED IN & VERIFIED ==========
+    onAuthStateChanged(auth, async (user) => {
+        if (user) {
+            // ✅ Refresh user state to get latest emailVerified status
+            await user.reload();
+            
+            if (user.emailVerified) {
+                window.location.href = "index.html";
+            } else {
+                // ⚠️ Don't sign out! Just show verification screen
+                showVerificationScreen(user);
+            }
         }
     });
-    // =========================================================
 
+    function showVerificationScreen(user) {
+        document.getElementById('email').style.display = 'none';
+        document.getElementById('password').style.display = 'none';
+        document.querySelector('.input-group:nth-child(1)').style.display = 'none';
+        document.querySelector('.input-group:nth-child(2)').style.display = 'none';
+        document.getElementById('loginBtn').style.display = 'none';
+        
+        const status = document.getElementById('status');
+        status.innerHTML = `
+            <div style="text-align: center; margin-top: 20px;">
+                <p style="color: #FFB800; margin-bottom: 10px; font-size: 14px;">📧 Email Verification Required</p>
+                <p style="color: #94a3b8; font-size: 12px; margin-bottom: 15px; line-height: 1.5;">
+                    Check your inbox/spam and click the verification link to activate your account.
+                </p>
+                <button id="checkVerificationBtn" style="
+                    background: #5738B0; color: white; border: none; padding: 12px 24px;
+                    border-radius: 18px; font-weight: 700; cursor: pointer; width: 100%;
+                    font-size: 14px; transition: 0.2s;
+                " onmouseover="this.style.opacity='0.9'" onmouseout="this.style.opacity='1'">
+                    ✓ Check Verification Status
+                </button>
+            </div>
+        `;
+        
+        document.getElementById('checkVerificationBtn').onclick = checkVerification;
+        document.getElementById('resendInfo').style.display = 'block';
+    }
+
+    async function checkVerification() {
+        const user = auth.currentUser;
+        if (!user) {
+            alert("Session expired. Please login again.");
+            location.reload();
+            return;
+        }
+
+        // ✅ Refresh user state to get the latest emailVerified status
+        await user.reload();
+
+        if (user.emailVerified) {
+            // ✅ Email is now verified! Create/update user document
+            await setupUserDocument(user);
+            
+            const status = document.getElementById('status');
+            status.innerHTML = '<p style="color: #4caf50;">✅ Email verified! Redirecting...</p>';
+            
+            setTimeout(() => window.location.href = "index.html", 1000);
+        } else {
+            alert("❌ Email not verified yet. Please check your inbox/spam folder and click the verification link.");
+        }
+    }
+
+    async function setupUserDocument(user) {
+        const userRef = doc(db, "users", user.uid);
+        const userSnap = await getDoc(userRef);
+
+        if (!userSnap.exists()) {
+            let customId = Date.now().toString().slice(-7);
+            try {
+                customId = await runTransaction(db, async (transaction) => {
+                    const counterRef = doc(db, "userCounter", "counter");
+                    const snap = await transaction.get(counterRef);
+                    let next = 1000000001;
+                    if (snap.exists()) next = (snap.data().count || 1000000000) + 1;
+                    transaction.set(counterRef, { count: next });
+                    return String(next);
+                });
+            } catch(e) { console.warn("Counter fallback", e); }
+
+            const username = user.displayName || user.email.split('@')[0];
+            await setDoc(userRef, {
+                uid: user.uid,
+                customId: customId,
+                username: username,
+                email: user.email,
+                avatar: `https://ui-avatars.com/api/?name=${encodeURIComponent(username)}&background=7c4dff&color=fff`,
+                coins: 0,
+                isVerified: true,
+                joinedAt: new Date().toLocaleDateString(),
+                lastLogin: serverTimestamp()
+            });
+        } else {
+            await updateDoc(userRef, { lastLogin: serverTimestamp() });
+        }
+    }
+
+    // ========== LOGIN BUTTON ==========
     document.getElementById('loginBtn').onclick = async () => {
         const email = document.getElementById('email').value.trim();
         const password = document.getElementById('password').value;
@@ -149,59 +244,53 @@
         resendInfo.style.display = "none";
 
         try {
-            // ✅ FIX: localStorage mein session save karo taaki back karne pe logout na ho
+            // ✅ Set persistence to LOCAL (survives tab close)
             await setPersistence(auth, browserLocalPersistence);
 
             const cred = await signInWithEmailAndPassword(auth, email, password);
             const user = cred.user;
 
-            // Check email verification
+            // ✅ Refresh to get latest emailVerified status
+            await user.reload();
+
             if (!user.emailVerified) {
-                await signOut(auth);
-                status.innerText = "❌ Email not verified. Please check your inbox/spam and click the verification link.";
-                status.className = "error";
+                // ⚠️ DON'T sign out! Keep session alive in localStorage
+                status.innerHTML = `
+                    <div style="text-align: center;">
+                        <p style="color: #FFB800; margin-bottom: 8px;">📧 Email Not Verified</p>
+                        <p style="color: #94a3b8; font-size: 12px; line-height: 1.5;">
+                            Check your inbox/spam for the verification link.
+                        </p>
+                    </div>
+                `;
+                status.className = "warning";
                 resendInfo.style.display = "block";
                 loginBtn.disabled = false;
                 loginBtn.innerText = "Sign In";
+                
+                // Show verification screen
+                document.getElementById('email').style.display = 'none';
+                document.getElementById('password').style.display = 'none';
+                document.querySelector('.input-group:nth-child(1)').style.display = 'none';
+                document.querySelector('.input-group:nth-child(2)').style.display = 'none';
+                
+                const checkBtn = document.createElement('button');
+                checkBtn.textContent = '✓ Check Verification Status';
+                checkBtn.style.cssText = `
+                    background: #5738B0; color: white; border: none; padding: 12px 24px;
+                    border-radius: 18px; font-weight: 700; cursor: pointer; width: 100%;
+                    font-size: 14px; margin-top: 15px;
+                `;
+                checkBtn.onclick = checkVerification;
+                status.appendChild(checkBtn);
+                
                 return;
             }
 
-            // Ensure Firestore document exists for this verified user
-            const userRef = doc(db, "users", user.uid);
-            const userSnap = await getDoc(userRef);
+            // ✅ User is verified! Setup document
+            await setupUserDocument(user);
 
-            if (!userSnap.exists()) {
-                // Create new user document with custom sequential ID
-                let customId = Date.now().toString().slice(-7);
-                try {
-                    customId = await runTransaction(db, async (transaction) => {
-                        const counterRef = doc(db, "userCounter", "counter");
-                        const snap = await transaction.get(counterRef);
-                        let next = 1000000001;
-                        if (snap.exists()) next = (snap.data().count || 1000000000) + 1;
-                        transaction.set(counterRef, { count: next });
-                        return String(next);
-                    });
-                } catch(e) { console.warn("Counter fallback", e); }
-
-                const username = user.displayName || user.email.split('@')[0];
-                await setDoc(userRef, {
-                    uid: user.uid,
-                    customId: customId,
-                    username: username,
-                    email: user.email,
-                    avatar: `https://ui-avatars.com/api/?name=${encodeURIComponent(username)}&background=7c4dff&color=fff`,
-                    coins: 0,
-                    isVerified: true,
-                    joinedAt: new Date().toLocaleDateString(),
-                    lastLogin: serverTimestamp()
-                });
-            } else {
-                // Update last login time
-                await updateDoc(userRef, { lastLogin: serverTimestamp() });
-            }
-
-            status.innerText = "Login successful! Redirecting...";
+            status.innerText = "✅ Login successful! Redirecting...";
             status.className = "success";
             setTimeout(() => window.location.href = "index.html", 1000);
 
@@ -214,7 +303,7 @@
         }
     };
 
-    // Resend verification email
+    // ========== RESEND VERIFICATION EMAIL ==========
     document.getElementById('resendLink').onclick = async () => {
         const status = document.getElementById('status');
         if (!lastEmail) {
@@ -231,8 +320,9 @@
             }
             const cred = await signInWithEmailAndPassword(auth, lastEmail, password);
             await sendEmailVerification(cred.user);
-            await signOut(auth);
-            status.innerText = "Verification email resent! Check your inbox/spam.";
+            
+            // ⚠️ Keep user logged in! Don't sign out
+            status.innerText = "✅ Verification email resent! Check your inbox/spam.";
             status.className = "success";
         } catch (err) {
             status.innerText = "Failed to resend. Please try again.";
