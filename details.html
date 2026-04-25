@@ -1,15 +1,10 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Anime Details</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-<link rel="manifest" href="manifest.json">
-<meta name="theme-color" content="#7c4dff">
-<meta name="apple-mobile-web-app-capable" content="yes">
-
     <style>
         :root {
             --primary: #5738B0;
@@ -132,17 +127,6 @@
             font-size: 10px; font-weight: 600;
         }
 
-        .btn-user-rate {
-            background: var(--primary-soft);
-            border: 1px solid var(--border-p);
-            color: white; padding: 7px 13px; border-radius: 20px;
-            font-size: 12px; font-weight: 700; cursor: pointer;
-            display: inline-flex; align-items: center; gap: 6px;
-            transition: 0.2s;
-        }
-        .btn-user-rate:active { transform: scale(0.95); background: var(--primary); }
-        .btn-user-rate i { color: #ffd700; }
-
         /* ── STATS BOX ── */
         .stats-box {
             display: flex;
@@ -169,6 +153,180 @@
         .stat-label {
             font-size: 10px; color: var(--dim);
             text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600;
+        }
+
+        /* ══════════════════════════════════════
+           ── COMPACT RATING CARD (REDESIGNED) ──
+        ══════════════════════════════════════ */
+
+        .rating-card {
+            background: var(--card);
+            border: 1px solid var(--border-p);
+            border-radius: 16px;
+            margin-bottom: 16px;
+            overflow: hidden;
+        }
+
+        /* Top row: MAL + Community scores + Rate button */
+        .rating-top {
+            display: flex;
+            align-items: stretch;
+            padding: 12px 14px;
+            gap: 10px;
+        }
+
+        /* Score chip */
+        .score-chip {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 1px;
+            min-width: 60px;
+        }
+        .score-chip-label {
+            font-size: 9px;
+            font-weight: 800;
+            letter-spacing: 0.6px;
+            text-transform: uppercase;
+            color: var(--dim);
+        }
+        .score-chip-val {
+            font-size: 22px;
+            font-weight: 900;
+            color: white;
+            line-height: 1;
+        }
+        .score-chip-val.na { font-size: 14px; color: var(--dim); }
+        .score-chip-sub {
+            font-size: 9px;
+            color: var(--dim);
+            text-align: center;
+        }
+        .score-chip-stars {
+            display: flex; gap: 1px; margin-top: 1px;
+        }
+        .score-chip-stars i { font-size: 7px; }
+
+        .score-chip.mal .score-chip-label { color: #6a8fd8; }
+        .score-chip.comm .score-chip-label { color: #a78bfa; }
+        .score-chip.comm .score-chip-val { color: #c4b5fd; }
+
+        /* Vertical separator */
+        .v-sep {
+            width: 1px;
+            background: var(--border);
+            align-self: stretch;
+            flex-shrink: 0;
+        }
+
+        /* Rate button (right side, vertical) */
+        .rate-btn-compact {
+            flex: 1;
+            background: var(--primary-soft);
+            border: 1px solid var(--border-p);
+            border-radius: 10px;
+            color: white;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 4px;
+            cursor: pointer;
+            font-family: inherit;
+            padding: 10px 8px;
+            transition: 0.2s;
+            position: relative;
+            overflow: hidden;
+        }
+        .rate-btn-compact:active { background: var(--primary); transform: scale(0.97); }
+        .rate-btn-compact i { font-size: 16px; color: #ffd700; }
+        .rate-btn-compact .rbtn-label {
+            font-size: 10px;
+            font-weight: 800;
+            letter-spacing: 0.3px;
+        }
+        .rate-btn-compact.user-rated {
+            background: #ffd70010;
+            border-color: #ffd70035;
+        }
+        .rate-btn-compact.user-rated i { color: #ffd700; }
+        .user-score-chip {
+            background: var(--primary);
+            color: white;
+            font-size: 9px;
+            font-weight: 800;
+            padding: 2px 6px;
+            border-radius: 20px;
+        }
+
+        /* Votes badge row */
+        .rating-meta-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 14px 10px;
+        }
+        .votes-pill {
+            background: var(--primary-soft);
+            border: 1px solid var(--border-p);
+            color: #a78bfa;
+            font-size: 9px;
+            font-weight: 800;
+            padding: 3px 8px;
+            border-radius: 20px;
+            letter-spacing: 0.4px;
+            display: flex; align-items: center; gap: 4px;
+        }
+        .votes-pill i { font-size: 8px; }
+
+        /* Distribution — horizontal mini bars */
+        .dist-mini-wrap {
+            border-top: 1px solid var(--border);
+            padding: 10px 14px 12px;
+        }
+        .dist-mini-title {
+            font-size: 9px;
+            font-weight: 800;
+            color: var(--dim);
+            text-transform: uppercase;
+            letter-spacing: 0.7px;
+            margin-bottom: 8px;
+        }
+        .dist-mini-grid {
+            display: flex;
+            align-items: flex-end;
+            gap: 3px;
+            height: 36px;
+        }
+        .dist-col {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-end;
+            gap: 3px;
+            height: 100%;
+        }
+        .dist-col-bar-bg {
+            width: 100%;
+            flex: 1;
+            border-radius: 3px 3px 0 0;
+            display: flex;
+            align-items: flex-end;
+            overflow: hidden;
+        }
+        .dist-col-bar-fill {
+            width: 100%;
+            border-radius: 3px 3px 0 0;
+            transition: height 0.7s cubic-bezier(.4,0,.2,1);
+            height: 0%;
+        }
+        .dist-col-num {
+            font-size: 8px;
+            font-weight: 700;
+            color: var(--dim);
+            line-height: 1;
         }
 
         /* ── ACTION CARD ── */
@@ -374,7 +532,7 @@
         .modal-box {
             background: var(--card);
             width: 90%; max-width: 340px;
-            border-radius: 22px; padding: 28px 20px;
+            border-radius: 22px; padding: 24px 20px;
             text-align: center;
             border: 1px solid var(--border-p);
             transform: scale(0.85); transition: 0.25s;
@@ -383,25 +541,38 @@
         .modal-overlay.show .modal-box { transform: scale(1); }
 
         .modal-icon {
-            width: 52px; height: 52px;
+            width: 48px; height: 48px;
             background: var(--primary-soft);
             border: 1px solid var(--border-p);
-            border-radius: 16px;
+            border-radius: 14px;
             display: flex; align-items: center; justify-content: center;
-            font-size: 22px; color: #ffd700;
-            margin: 0 auto 14px;
+            font-size: 20px; color: #ffd700;
+            margin: 0 auto 12px;
         }
-        .modal-box h3 { font-size: 17px; font-weight: 800; color: white; margin-bottom: 5px; }
+        .modal-box h3 { font-size: 16px; font-weight: 800; color: white; margin-bottom: 4px; }
         .modal-box p { font-size: 12px; color: var(--dim); }
+
+        .star-row {
+            display: flex; justify-content: center; gap: 4px;
+            margin: 16px 0 6px;
+        }
+        .star-item {
+            font-size: 22px; cursor: pointer;
+            color: #ffffff20;
+            transition: transform 0.15s, color 0.15s;
+            line-height: 1;
+        }
+        .star-item.lit { color: #ffd700; }
+        .star-item:active { transform: scale(1.25); }
 
         .rating-grid {
             display: grid; grid-template-columns: repeat(5, 1fr);
-            gap: 8px; margin: 20px 0;
+            gap: 6px; margin: 12px 0;
         }
         .rating-item {
             background: var(--card2);
             border: 1px solid var(--border);
-            padding: 12px 5px; border-radius: 10px;
+            padding: 10px 5px; border-radius: 10px;
             font-size: 14px; font-weight: 800; color: var(--dim);
             cursor: pointer; transition: 0.2s;
         }
@@ -412,22 +583,27 @@
             box-shadow: 0 4px 16px var(--primary-glow);
         }
 
+        .selected-rating-label {
+            font-size: 12px; color: var(--dim); margin-bottom: 14px;
+            min-height: 18px;
+        }
+        .selected-rating-label span { color: white; font-weight: 700; }
+
         .btn-save-rate {
             background: var(--primary); color: white;
-            font-weight: 800; border: none; padding: 14px;
-            border-radius: 14px; width: 100%; font-size: 14px;
+            font-weight: 800; border: none; padding: 13px;
+            border-radius: 12px; width: 100%; font-size: 14px;
             cursor: pointer; font-family: inherit;
             transition: 0.2s;
         }
         .btn-save-rate:active { opacity: 0.85; transform: scale(0.98); }
         .btn-cancel-rate {
-            margin-top: 12px; background: transparent;
+            margin-top: 10px; background: transparent;
             color: var(--dim); border: none;
             font-size: 13px; font-weight: 600;
             cursor: pointer; width: 100%; font-family: inherit;
         }
 
-        /* ── COMMENTS GAP ── */
         #commentsList { display: flex; flex-direction: column; gap: 10px; }
     </style>
 </head>
@@ -461,10 +637,6 @@
             <div class="header-info">
                 <div id="title" class="title">Loading...</div>
                 <div id="genres" class="genres"></div>
-                <button id="userRateBtn" class="btn-user-rate">
-                    <i class="fa-solid fa-star"></i>
-                    <span id="userScoreText">Rate Anime</span>
-                </button>
             </div>
         </div>
 
@@ -475,7 +647,7 @@
                     <i class="fa-solid fa-star" style="color:#ffd700; font-size:11px;"></i>
                     <span id="score">—</span>
                 </span>
-                <span class="stat-label">Score</span>
+                <span class="stat-label">MAL</span>
             </div>
             <div class="stat-item">
                 <span class="stat-val" id="episodes">—</span>
@@ -495,6 +667,54 @@
             </div>
         </div>
 
+        <!-- ══ COMPACT RATING CARD ══ -->
+        <div class="rating-card" id="ratingPanel">
+
+            <!-- Top: Scores + Rate button -->
+            <div class="rating-top">
+                <!-- MAL Score -->
+                <div class="score-chip mal">
+                    <span class="score-chip-label">MAL Score</span>
+                    <span class="score-chip-val" id="malBigScore">—</span>
+                    <div class="score-chip-stars" id="malStars"></div>
+                    <span class="score-chip-sub" id="malScoredBy">—</span>
+                </div>
+
+                <div class="v-sep"></div>
+
+                <!-- Community Score -->
+                <div class="score-chip comm">
+                    <span class="score-chip-label">Community</span>
+                    <span class="score-chip-val na" id="commBigScore">N/A</span>
+                    <div class="score-chip-stars" id="commStars"></div>
+                    <span class="score-chip-sub" id="commRatedBy">No ratings yet</span>
+                </div>
+
+                <div class="v-sep"></div>
+
+                <!-- Rate Button -->
+                <button class="rate-btn-compact" id="rateThisBtn" onclick="openRateModal()">
+                    <i class="fa-solid fa-star"></i>
+                    <span class="rbtn-label" id="rateThisText">Rate</span>
+                    <span class="user-score-chip hidden" id="userScoreChip"></span>
+                </button>
+            </div>
+
+            <!-- Votes badge -->
+            <div class="rating-meta-row">
+                <span class="votes-pill">
+                    <i class="fa-solid fa-users"></i>
+                    <span id="totalVotesBadge">0 Votes</span>
+                </span>
+                <span style="font-size:9px; color:var(--dim); font-weight:600; letter-spacing:0.4px; text-transform:uppercase;">Score Distribution</span>
+            </div>
+
+            <!-- Mini vertical bar chart -->
+            <div class="dist-mini-wrap">
+                <div class="dist-mini-grid" id="distBars"></div>
+            </div>
+        </div>
+
         <!-- ADD TO LIST -->
         <div class="action-card" id="actionCard">
             <div class="action-card-label">
@@ -502,11 +722,11 @@
             </div>
             <div class="form-group">
                 <select id="statusSelect">
-    <option value="Watching">Watching</option>
-    <option value="Completed">Completed</option>
-    <option value="Plan to Watch">Plan to Watch</option>
-    <option value="Dropped">Dropped</option>
-</select>
+                    <option value="Watching">Watching</option>
+                    <option value="Completed">Completed</option>
+                    <option value="Plan to Watch">Plan to Watch</option>
+                    <option value="Dropped">Dropped</option>
+                </select>
                 <button id="addBtn" class="add-btn">
                     <i class="fa-solid fa-plus" id="addIcon"></i>
                     <span id="addText">Add</span>
@@ -572,8 +792,25 @@
     <div class="modal-box">
         <div class="modal-icon"><i class="fa-solid fa-star"></i></div>
         <h3>Rate this Anime</h3>
-        <p>Your rating helps us recommend better</p>
+        <p>Your rating helps the community</p>
+
+        <div class="star-row" id="starRow">
+            <span class="star-item" data-v="1">★</span>
+            <span class="star-item" data-v="2">★</span>
+            <span class="star-item" data-v="3">★</span>
+            <span class="star-item" data-v="4">★</span>
+            <span class="star-item" data-v="5">★</span>
+            <span class="star-item" data-v="6">★</span>
+            <span class="star-item" data-v="7">★</span>
+            <span class="star-item" data-v="8">★</span>
+            <span class="star-item" data-v="9">★</span>
+            <span class="star-item" data-v="10">★</span>
+        </div>
+
         <div class="rating-grid" id="ratingOptions"></div>
+
+        <div class="selected-rating-label" id="ratingLabelText">Tap a score above</div>
+
         <button class="btn-save-rate" id="saveRateBtn">Save Rating</button>
         <button class="btn-cancel-rate" id="closeModalBtn">Maybe Later</button>
     </div>
@@ -584,7 +821,8 @@
     import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
     import {
         getFirestore, doc, setDoc, getDoc, updateDoc, collection,
-        addDoc, query, orderBy, onSnapshot, serverTimestamp, deleteDoc
+        addDoc, query, orderBy, onSnapshot, serverTimestamp, deleteDoc,
+        increment, runTransaction, getDocs
     } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
     const firebaseConfig = {
@@ -604,12 +842,18 @@
     const malId       = params.get('id');
     const contentType = params.get('type') || 'anime';
 
-    let currentData   = null;
+    let currentData    = null;
     let selectedRating = 0;
+    let userPrevRating = 0;
+
+    const RATING_LABELS = {
+        1: '😞 Appalling', 2: '😑 Horrible', 3: '😕 Very Bad',
+        4: '🙁 Bad', 5: '😐 Average', 6: '🙂 Fine',
+        7: '😊 Good', 8: '😃 Very Good', 9: '🤩 Great', 10: '⚡ Absolutely Cinema '
+    };
 
     if (malId) fetchDetails();
 
-    // ── TIME AGO ──
     function timeAgo(date) {
         const diff = Date.now() - date.getTime();
         const mins  = Math.floor(diff / 60000);
@@ -622,7 +866,6 @@
         return date.toLocaleDateString('en-GB', { day:'numeric', month:'short' });
     }
 
-    // ── FETCH DETAILS ──
     async function fetchDetails() {
         try {
             const apiPath = contentType === 'char'
@@ -639,17 +882,27 @@
             document.getElementById('title').innerText = title;
             document.getElementById('banner').src = data.images.jpg.large_image_url || data.images.jpg.image_url;
             document.getElementById('poster').src = data.images.jpg.image_url;
-            document.getElementById('score').innerText = data.score || '—';
             document.getElementById('synopsis').innerText = data.synopsis || data.about || 'No description available.';
 
-            // Status badge on poster
+            const malScore = data.score || null;
+            document.getElementById('score').innerText = malScore || '—';
+            document.getElementById('malBigScore').innerText = malScore || '—';
+            if (malScore) {
+                const fullStars = Math.round(malScore / 2);
+                document.getElementById('malStars').innerHTML =
+                    Array.from({length:5}, (_,i) =>
+                        `<i class="fa-solid fa-star" style="color:${i < fullStars ? '#ffd700' : '#ffffff20'}"></i>`
+                    ).join('');
+                document.getElementById('malScoredBy').innerText =
+                    data.scored_by ? `${(data.scored_by/1000).toFixed(1)}K users` : 'MAL Score';
+            }
+
             if (data.status) {
                 const badge = document.getElementById('statusBadge');
                 badge.innerText = data.status.replace('Currently Airing','Airing').replace('Finished Airing','Finished');
                 badge.classList.remove('hidden');
             }
 
-            // Airing status stat
             const airingEl = document.getElementById('airing');
             if (data.status) {
                 const isAiring = data.status.toLowerCase().includes('airing');
@@ -665,6 +918,7 @@
                 document.getElementById('year').innerText = data.published?.prop?.from?.year || '—';
             } else if (contentType === 'char') {
                 document.getElementById('actionCard').classList.add('hidden');
+                document.getElementById('ratingPanel').classList.add('hidden');
                 document.getElementById('episodes').innerText = 'N/A';
                 document.getElementById('year').innerText = 'N/A';
             } else {
@@ -678,7 +932,6 @@
                     .map(g => `<span class="genre-tag">${g.name}</span>`).join('');
             }
 
-            // Trailer
             if (data.trailer?.embed_url) {
                 const sec   = document.getElementById('trailer-section');
                 const video = document.getElementById('trailer-video');
@@ -690,27 +943,209 @@
                 sec.classList.remove('hidden');
             }
 
-            // Auth
+            buildDistBars({});
+
             onAuthStateChanged(auth, async (user) => {
                 if (user) {
                     if (contentType !== 'char') {
                         const snap = await getDoc(doc(db, "users", user.uid, "watchlist", String(malId)));
-                        if (snap.exists()) {
-                            setAddedState(snap.data().status);
-                        }
+                        if (snap.exists()) setAddedState(snap.data().status);
                     }
                     fetchUserRating(user.uid);
                 }
             });
 
             if (contentType !== 'char') {
-    fetchCharacters();
-    setTimeout(() => fetchRecommendations(), 1000);
-    setTimeout(() => loadComments(), 500);
-}
+                listenCommunityRatings();
+                fetchCharacters();
+                setTimeout(() => fetchRecommendations(), 1000);
+                setTimeout(() => loadComments(), 500);
+            }
 
         } catch(e) { console.error(e); }
     }
+
+    // ── BUILD MINI VERTICAL BAR CHART ──
+    function buildDistBars(dist) {
+        const container = document.getElementById('distBars');
+        const maxVal = Math.max(1, ...Object.values(dist));
+        container.innerHTML = Array.from({length:10}, (_,i) => {
+            const num = i + 1; // 1 to 10 left to right
+            const count = dist[num] || 0;
+            const pct = Math.round((count / maxVal) * 100);
+            const color = num >= 9 ? '#a78bfa' : num >= 7 ? '#5738B0' : num >= 5 ? '#3d2a8a' : '#ffffff18';
+            return `
+                <div class="dist-col">
+                    <div class="dist-col-bar-bg">
+                        <div class="dist-col-bar-fill" id="bar${num}" style="background:${color}; height:${pct}%"></div>
+                    </div>
+                    <span class="dist-col-num">${num}</span>
+                </div>`;
+        }).join('');
+    }
+
+    function updateDistBars(dist) {
+        const maxVal = Math.max(1, ...Object.values(dist));
+        for (let num = 1; num <= 10; num++) {
+            const count = dist[num] || 0;
+            const pct = Math.round((count / maxVal) * 100);
+            const bar = document.getElementById('bar' + num);
+            if (bar) bar.style.height = pct + '%';
+        }
+    }
+
+    function listenCommunityRatings() {
+        const ratingDocRef = doc(db, "anime_ratings", String(malId));
+        onSnapshot(ratingDocRef, (snap) => {
+            if (!snap.exists()) {
+                document.getElementById('commBigScore').innerText = 'N/A';
+                document.getElementById('commBigScore').className = 'score-chip-val na';
+                document.getElementById('commRatedBy').innerText = 'No ratings yet';
+                document.getElementById('totalVotesBadge').innerText = '0 Votes';
+                buildDistBars({});
+                return;
+            }
+            const d = snap.data();
+            const totalVotes = d.totalVotes || 0;
+            const totalSum   = d.totalSum   || 0;
+            const dist       = d.distribution || {};
+            const avg = totalVotes > 0 ? (totalSum / totalVotes).toFixed(1) : null;
+
+            document.getElementById('totalVotesBadge').innerText =
+                totalVotes === 1 ? '1 Vote' : `${totalVotes} Votes`;
+
+            if (avg) {
+                const scoreEl = document.getElementById('commBigScore');
+                scoreEl.innerText = avg;
+                scoreEl.className = 'score-chip-val';
+                document.getElementById('commRatedBy').innerText = `${totalVotes} votes`;
+
+                const fullStars = Math.round(parseFloat(avg) / 2);
+                document.getElementById('commStars').innerHTML =
+                    Array.from({length:5}, (_,i) =>
+                        `<i class="fa-solid fa-star" style="color:${i < fullStars ? '#a78bfa' : '#ffffff20'}"></i>`
+                    ).join('');
+            }
+
+            updateDistBars(dist);
+        });
+    }
+
+    async function fetchUserRating(uid) {
+        const snap = await getDoc(doc(db, "anime_ratings", String(malId), "userRatings", uid));
+        if (snap.exists()) {
+            userPrevRating = snap.data().rating;
+            selectedRating = userPrevRating;
+            updateRateButton(userPrevRating);
+            highlightStars(userPrevRating);
+            highlightGrid(userPrevRating);
+        }
+    }
+
+    function updateRateButton(val) {
+        const btn  = document.getElementById('rateThisBtn');
+        const txt  = document.getElementById('rateThisText');
+        const chip = document.getElementById('userScoreChip');
+        btn.classList.add('user-rated');
+        txt.innerText = 'Rated';
+        chip.innerText = `${val}/10`;
+        chip.classList.remove('hidden');
+    }
+
+    window.openRateModal = function() {
+        document.getElementById('rateModal').classList.add('show');
+    };
+
+    const starItems = document.querySelectorAll('.star-item');
+    starItems.forEach(star => {
+        star.addEventListener('click', () => {
+            const val = parseInt(star.dataset.v);
+            selectedRating = val;
+            highlightStars(val);
+            highlightGrid(val);
+            document.getElementById('ratingLabelText').innerHTML =
+                `<span>${val}/10</span> — ${RATING_LABELS[val]}`;
+        });
+    });
+
+    function highlightStars(val) {
+        starItems.forEach(s => {
+            s.classList.toggle('lit', parseInt(s.dataset.v) <= val);
+        });
+    }
+
+    const ratingGrid = document.getElementById('ratingOptions');
+    ratingGrid.innerHTML = Array.from({length:10}, (_,i) => i+1)
+        .map(n => `<div class="rating-item" data-value="${n}">${n}</div>`).join('');
+
+    ratingGrid.addEventListener('click', (e) => {
+        const item = e.target.closest('.rating-item');
+        if (!item) return;
+        const val = parseInt(item.dataset.value);
+        selectedRating = val;
+        highlightGrid(val);
+        highlightStars(val);
+        document.getElementById('ratingLabelText').innerHTML =
+            `<span>${val}/10</span> — ${RATING_LABELS[val]}`;
+    });
+
+    function highlightGrid(val) {
+        document.querySelectorAll('.rating-item').forEach(el => {
+            el.classList.toggle('selected', parseInt(el.dataset.value) === val);
+        });
+    }
+
+    document.getElementById('closeModalBtn').onclick = () =>
+        document.getElementById('rateModal').classList.remove('show');
+
+    document.getElementById('saveRateBtn').onclick = async () => {
+        const user = auth.currentUser;
+        if (!user) return alert("Please login to rate");
+        if (!selectedRating) return alert("Please select a rating");
+
+        const ratingDocRef  = doc(db, "anime_ratings", String(malId));
+        const userRatingRef = doc(db, "anime_ratings", String(malId), "userRatings", user.uid);
+
+        try {
+            await runTransaction(db, async (tx) => {
+                const ratingSnap   = await tx.get(ratingDocRef);
+                const userSnap     = await tx.get(userRatingRef);
+                const prevRating   = userSnap.exists() ? userSnap.data().rating : 0;
+                const isNew        = !userSnap.exists();
+
+                let totalVotes = ratingSnap.exists() ? (ratingSnap.data().totalVotes || 0) : 0;
+                let totalSum   = ratingSnap.exists() ? (ratingSnap.data().totalSum   || 0) : 0;
+                let dist       = ratingSnap.exists() ? (ratingSnap.data().distribution || {}) : {};
+
+                if (!isNew) {
+                    totalSum -= prevRating;
+                    dist[prevRating] = Math.max(0, (dist[prevRating] || 1) - 1);
+                } else {
+                    totalVotes += 1;
+                }
+
+                totalSum += selectedRating;
+                dist[selectedRating] = (dist[selectedRating] || 0) + 1;
+
+                tx.set(ratingDocRef, {
+                    totalVotes, totalSum, distribution: dist,
+                    animeTitle: document.getElementById('title').innerText,
+                    lastUpdated: serverTimestamp()
+                }, { merge: true });
+
+                tx.set(userRatingRef, {
+                    rating: selectedRating,
+                    uid: user.uid,
+                    timestamp: serverTimestamp()
+                });
+            });
+
+            userPrevRating = selectedRating;
+            updateRateButton(selectedRating);
+            document.getElementById('rateModal').classList.remove('show');
+
+        } catch(e) { console.error(e); alert("Failed to save rating. Try again."); }
+    };
 
     function setAddedState(status) {
         const btn = document.getElementById('addBtn');
@@ -719,7 +1154,6 @@
         document.getElementById('statusSelect').value = status || 'watching';
     }
 
-    // ── READ MORE ──
     const synopsisEl  = document.getElementById('synopsis');
     const readMoreBtn = document.getElementById('readMoreBtn');
     let expanded = false;
@@ -731,52 +1165,6 @@
             : '<i class="fa-solid fa-chevron-down"></i> Read More';
     };
 
-    // ── RATING MODAL ──
-    const rateModal    = document.getElementById('rateModal');
-    const ratingGrid   = document.getElementById('ratingOptions');
-    const userScoreTxt = document.getElementById('userScoreText');
-
-    ratingGrid.innerHTML = Array.from({length:10}, (_,i) => i+1)
-        .map(n => `<div class="rating-item" data-value="${n}">${n}</div>`).join('');
-
-    document.getElementById('userRateBtn').onclick = () => rateModal.classList.add('show');
-    document.getElementById('closeModalBtn').onclick = () => rateModal.classList.remove('show');
-
-    ratingGrid.addEventListener('click', (e) => {
-        const item = e.target.closest('.rating-item');
-        if (!item) return;
-        document.querySelectorAll('.rating-item').forEach(el => el.classList.remove('selected'));
-        item.classList.add('selected');
-        selectedRating = parseInt(item.dataset.value);
-    });
-
-    document.getElementById('saveRateBtn').onclick = async () => {
-        const user = auth.currentUser;
-        if (!user) return alert("Please login to rate");
-        if (!selectedRating) return alert("Please select a rating");
-        await setDoc(doc(db, "users", user.uid, "ratings", String(malId)), {
-            rating: selectedRating,
-            title: document.getElementById('title').innerText,
-            type: contentType,
-            timestamp: new Date()
-        });
-        userScoreTxt.innerText = `Rated: ${selectedRating}/10`;
-        document.getElementById('userRateBtn').querySelector('i').style.color = '#ffd700';
-        rateModal.classList.remove('show');
-    };
-
-    async function fetchUserRating(uid) {
-        const snap = await getDoc(doc(db, "users", uid, "ratings", String(malId)));
-        if (snap.exists()) {
-            const val = snap.data().rating;
-            userScoreTxt.innerText = `Rated: ${val}/10`;
-            document.querySelectorAll('.rating-item').forEach(item => {
-                if (parseInt(item.dataset.value) === val) item.classList.add('selected');
-            });
-        }
-    }
-
-    // ── ADD TO LIST ──
     document.getElementById('addBtn').onclick = async () => {
         const user = auth.currentUser;
         if (!user) return alert("Please login");
@@ -791,19 +1179,17 @@
 
         try {
             await setDoc(doc(db, "users", user.uid, "watchlist", String(malId)), {
-    malId: parseInt(malId),
-    title,
+                malId: parseInt(malId), title,
                 image: currentData.images.jpg.image_url,
-                status,
-                type: contentType,
+                status, type: contentType,
                 totalEpisodes: currentData.episodes || currentData.chapters || 0,
                 watchedEpisodes: status === 'Completed' ? (currentData.episodes || 0) : 0,
                 season: 1,
                 addedAt: serverTimestamp()
             });
-            await logActivity(title, 
-    status === 'Watching'      ? 'started watching' : 
-    status === 'Completed'     ? 'completed' : 'added to list');
+            await logActivity(title,
+                status === 'Watching'  ? 'started watching' :
+                status === 'Completed' ? 'completed' : 'added to list');
             setAddedState(status);
         } catch(e) { console.error(e); }
 
@@ -826,7 +1212,6 @@
         } catch(e) { console.error(e); }
     }
 
-    // ── CHARACTERS ──
     async function fetchCharacters() {
         try {
             const res  = await fetch(`https://api.jikan.moe/v4/${contentType}/${malId}/characters`);
@@ -855,7 +1240,6 @@
         } catch(e) { console.error(e); }
     }
 
-    // ── RECOMMENDATIONS ──
     async function fetchRecommendations() {
         try {
             const res  = await fetch(`https://api.jikan.moe/v4/${contentType}/${malId}/recommendations`);
@@ -873,7 +1257,6 @@
         } catch(e) { console.error(e); }
     }
 
-    // ── COMMENTS ──
     function loadComments() {
         if (!malId) return;
         const q = query(collection(db, "anime_comments", String(malId), "entries"), orderBy("timestamp", "desc"));
@@ -908,7 +1291,6 @@
         catch(e) { alert("Failed to delete."); }
     };
 
-    // Char count
     const commentInput = document.getElementById('commentInput');
     const charCount    = document.getElementById('charCount');
     commentInput.addEventListener('input', () => {
