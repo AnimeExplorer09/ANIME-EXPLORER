@@ -101,7 +101,7 @@
 }
   .chip-slider { display: flex; gap: 10px; overflow-x: auto; scrollbar-width: none; }
         .chip-slider::-webkit-scrollbar { display: none; }
-        .chip { background: #23252b; color: white; padding: 8px 16px; border-radius: 15px; font-size: 13px; font-weight: 500; white-space: nowrap; border: 1px solid #333; text-decoration: none; cursor: pointer; transition: 0.2s; }
+        .chip { background: #23252b; color: white; padding: 8px 16px; border-radius: 15px; font-size: 13px; font-weight: 500; white-space: nowrap; border: 1px solid #333; text-decoration: none; cursor: pointer; }
         .chip.active { background: #5738B0; color: white; border-color: #5738B0;  }
         
         body { height: auto !important; overflow-y: auto !important; display: block !important; background-color: #0f1116; color: white; padding-bottom: 80px; }
@@ -575,48 +575,65 @@
 }
 
 .verification-screen {
-    display: flex;
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: #0f1116;
+    z-index: 9999;
     align-items: center;
     justify-content: center;
-    height: 100vh;
-    background: #0f1116;
+    flex-direction: column;
     color: white;
     text-align: center;
-    flex-direction: column;
-    gap: 20px;
     padding: 20px;
+}
+
+.verification-screen.show {
+    display: flex;
 }
 
 .verification-screen h2 {
     font-size: 24px;
     margin-bottom: 10px;
+    color: #FFB800;
 }
 
 .verification-screen p {
-    color: #aaa;
     font-size: 14px;
-    margin-bottom: 5px;
+    color: #94a3b8;
+    margin-bottom: 20px;
+    line-height: 1.6;
 }
 
-.verification-btn {
-    margin-top: 20px;
-    padding: 12px 30px;
+.verification-screen button {
     background: #5738B0;
     color: white;
     border: none;
+    padding: 12px 30px;
     border-radius: 20px;
+    font-weight: 700;
     cursor: pointer;
-    font-weight: bold;
     font-size: 14px;
-    transition: 0.2s;
+    margin-top: 20px;
 }
 
-.verification-btn:active {
+.verification-screen button:active {
     transform: scale(0.95);
 }
       </style>
 </head>
 <body>
+    <div id="verificationScreen" class="verification-screen">
+        <i class="fa-solid fa-envelope" style="font-size: 50px; color: #FFB800; margin-bottom: 20px;"></i>
+        <h2>📧 Email Not Verified</h2>
+        <p>Please verify your email to access the app.</p>
+        <p style="font-size: 12px; color: #888;">Go back to login and click "Check Verification Status" after verifying.</p>
+        <button onclick="location.href='login.html'">Back to Login</button>
+    </div>
+
     <div id="ageVerificationModal" class="hidden">
         <div class="modal-content">
             <i class="fa-solid fa-circle-exclamation" style="font-size: 40px; color: #e91e63; margin-bottom: 15px;"></i>
@@ -629,7 +646,7 @@
     
 
     <div class="sticky-top-section">
-       <header class="app-header" style="display: flex; justify-content: space-between; align-items: center; padding: 2px 20px; background: #1a1c22; border-bottom: 1px solid rgba(255,255,255,0.1); border-radius: 0 0 15px 15px;">
+       <header class="app-header" style="display: flex; justify-content: space-between; align-items: center; padding: 2px 20px; background: #1a1c22; border-bottom: 1px solid rgba(255,255,255,0.1);">
     <div class="logo" style="display: flex; flex-direction: column; line-height: 0.8; cursor: pointer; user-select: none;">
         <div style="display: flex; align-items: center; gap: 2px; margin-bottom: 2px;">
             <span style="font-size: 22px; font-weight: 900; color: #fff; letter-spacing: 1px; text-transform: uppercase;">
@@ -663,11 +680,11 @@
                     <span id="inboxDot" class="hidden" style="position: absolute; top: -2px; right: 2px; width: 8px; height: 8px; background: #ff4b2b; border-radius: 50%; border: 2px solid #1a1c22;"></span>
                 </div>
                 <a href="calendar.html" style="text-decoration: none; color: #94a3b8; display: flex; flex-direction: column; align-items: center; gap: 2px;">
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" style="width: 20px; height: 20px;"><path d="M12.75 12.75a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0ZM7.5 15a.75.75 0 1 0 0-1.5.75.75 0 0 0 0 1.5ZM8.25 17a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0ZM9.75 15.75a.75.75 0 1 0 0-1.5.75.75 0 0 0 0 1.5ZM10.5 17a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0ZM15.75 15.75a.75.75 0 1 0 0-1.5.75.75 0 0 0 0 1.5ZM14.25 17a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0ZM16.5 15.75a.75.75 0 1 0 0-1.5.75.75 0 0 0 0 1.5ZM15.75 17a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0ZM18.75 15.75a.75.75 0 1 0 0-1.5.75.75 0 0 0 0 1.5ZM17.25 17a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0ZM21.75 15.75a.75.75 0 1 0 0-1.5.75.75 0 0 0 0 1.5ZM19.5 17a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0ZM7.5 9.75a.75.75 0 1 0 0-1.5.75.75 0 0 0 0 1.5ZM8.25 12a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0ZM9.75 9.75a.75.75 0 1 0 0-1.5.75.75 0 0 0 0 1.5ZM10.5 12a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0ZM15.75 9.75a.75.75 0 1 0 0-1.5.75.75 0 0 0 0 1.5ZM14.25 12a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0ZM16.5 9.75a.75.75 0 1 0 0-1.5.75.75 0 0 0 0 1.5ZM15.75 12a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0ZM18.75 9.75a.75.75 0 1 0 0-1.5.75.75 0 0 0 0 1.5ZM17.25 12a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0ZM9 6a.75.75 0 1 0 0-1.5A.75.75 0 0 0 9 6ZM8.25 3a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0ZM15 6a.75.75 0 1 0 0-1.5.75.75 0 0 0 0 1.5ZM14.25 3a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0Z" /></svg>
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" style="width: 20px; height: 20px;"><path d="M12.75 12.75a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0ZM7.5 15.75a.75.75 0 1 0 0-1.5.75.75 0 0 0 0 1.5ZM8.25 17.25a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0ZM9.75 15.75a.75.75 0 1 0 0-1.5.75.75 0 0 0 0 1.5ZM10.5 17.25a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0ZM12 15.75a.75.75 0 1 0 0-1.5.75.75 0 0 0 0 1.5ZM12.75 17.25a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0ZM14.25 15.75a.75.75 0 1 0 0-1.5.75.75 0 0 0 0 1.5ZM15 17.25a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0ZM16.5 15.75a.75.75 0 1 0 0-1.5.75.75 0 0 0 0 1.5ZM15 12.75a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0ZM16.5 13.5a.75.75 0 1 0 0-1.5.75.75 0 0 0 0 1.5Z" /><path fill-rule="evenodd" d="M6.75 2.25A.75.75 0 0 1 7.5 3v1.5h9V3A.75.75 0 0 1 18 3v1.5h.75a3 3 0 0 1 3 3v11.25a3 3 0 0 1-3 3H5.25a3 3 0 0 1-3-3V7.5a3 3 0 0 1 3-3H6V3a.75.75 0 0 1 .75-.75Zm13.5 9a1.5 1.5 0 0 0-1.5-1.5H5.25a1.5 1.5 0 0 0-1.5 1.5v7.5a1.5 1.5 0 0 0 1.5 1.5h13.5a1.5 1.5 0 0 0 1.5-1.5v-7.5Z" clip-rule="evenodd" /></svg>
                     <span style="font-size: 10px; font-weight: 600;">Calendar</span>
                 </a>
                 <a href="news.html" style="text-decoration: none; color: #94a3b8; display: flex; flex-direction: column; align-items: center; gap: 2px;">
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" style="width: 20px; height: 20px;"><path fill-rule="evenodd" d="M4.125 3C3.089 3 2.25 3.84 2.25 4.875v14.25C2.25 20.16 3.089 21 4.125 21h15.75c1.036 0 1.875-.84 1.875-1.875V4.875C21.75 3.84 20.911 3 19.875 3H4.125zm0 9.75a.75.75 0 0 0 0 1.5h6.75a.75.75 0 0 0 0-1.5H4.125zm0 3.75a.75.75 0 0 0 0 1.5h2.25a.75.75 0 0 0 0-1.5h-2.25zM3.75 15.75a.75.75 0 0 1 .75-.75h4.5a.75.75 0 0 1 0 1.5H4.5a.75.75 0 0 1-.75-.75z" clip-rule="evenodd" /></svg>
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" style="width: 20px; height: 20px;"><path fill-rule="evenodd" d="M4.125 3C3.089 3 2.25 3.84 2.25 4.875V21a3 3 0 0 0 3 3h15a3 3 0 0 1-3-3V4.875C17.25 3.839 16.41 3 15.375 3H4.125ZM12 9.75a.75.75 0 0 0 0 1.5h1.5a.75.75 0 0 0 0-1.5H12Zm-.75-2.25a.75.75 0 0 1 .75-.75h1.5a.75.75 0 0 1 0 1.5H12a.75.75 0 0 1-.75-.75ZM6 12.75a.75.75 0 0 0 0 1.5h7.5a.75.75 0 0 0 0-1.5H6Zm-.75 3.75a.75.75 0 0 1 .75-.75h7.5a.75.75 0 0 1 0 1.5H6a.75.75 0 0 1-.75-.75ZM6 6.75a.75.75 0 0 0-.75.75v3c0 .414.336.75.75.75h3a.75.75 0 0 0 .75-.75v-3A.75.75 0 0 0 9 6.75H6Z" clip-rule="evenodd" /><path d="M18.75 6.75h1.875c.621 0 1.125.504 1.125 1.125V18a1.5 1.5 0 0 1-3 0V6.75Z" /></svg>
                     <span style="font-size: 10px; font-weight: 600;">News</span>
                 </a>
             </div>
@@ -722,31 +739,31 @@
     <a href="index.html" class="nav-item active">
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" style="width: 24px; height: 24px;">
             <path d="M11.47 3.841a.75.75 0 0 1 1.06 0l8.69 8.69a.75.75 0 1 0 1.06-1.061l-8.689-8.69a2.25 2.25 0 0 0-3.182 0l-8.69 8.69a.75.75 0 1 0 1.061 1.06l8.69-8.689Z" />
-            <path d="m12 5.432 8.159 8.159c.03.03.06.058.091.086v6.198c0 1.035-.84 1.875-1.875 1.875H15a.75.75 0 0 1-.75-.75v-4.5a.75.75 0 0 0-.75-.75h-3a.75.75 0 0 0-.75.75V21a.75.75 0 0 1-.75.75H3.75a1.875 1.875 0 0 1-1.875-1.875v-6.198c.03-.028.061-.056.09-.086L12 5.432Z" />
+            <path d="m12 5.432 8.159 8.159c.03.03.06.058.091.086v6.198c0 1.035-.84 1.875-1.875 1.875H15a.75.75 0 0 1-.75-.75v-4.5a.75.75 0 0 0-.75-.75h-3a.75.75 0 0 0-.75.75V21a.75.75 0 0 1-.75.75H5.625a1.875 1.875 0 0 1-1.875-1.875v-6.198a2.29 2.29 0 0 0 .091-.086L12 5.432Z" />
         </svg>
         <span>Home</span>
     </a>
     <a href="watchlist.html" class="nav-item">
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" style="width: 24px; height: 24px;">
-            <path fill-rule="evenodd" d="M6.32 2.577a49.255 49.255 0 0 1 11.36 0c1.497.174 2.57 1.46 2.57 2.93V21a.75.75 0 0 1-1.085.67L12 18.089l-7.165 3.583A.75.75 0 0 1 3.75 21V5.507c0-1.47 1.073-2.756 2.57-2.93z" clip-rule="evenodd" />
+            <path fill-rule="evenodd" d="M6.32 2.577a49.255 49.255 0 0 1 11.36 0c1.497.174 2.57 1.46 2.57 2.93V21a.75.75 0 0 1-1.085.67L12 18.089l-7.165 3.583A.75.75 0 0 1 3.75 21V5.507c0-1.47 1.073-2.756 2.57-2.93Z" clip-rule="evenodd" />
         </svg>
         <span>List</span>
     </a>
     <a href="poll.html" class="nav-item">
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" style="width: 24px; height: 24px;">
-            <path d="M18.375 2.25c-1.035 0-1.875.84-1.875 1.875v15.75c0 1.035.84 1.875 1.875 1.875h.75c1.035 0 1.875-.84 1.875-1.875V4.125c0-1.036-.84-1.875-1.875-1.875h-.75ZM9.75 8.625c0-1.036.84-1.875 1.875-1.875h.75c1.036 0 1.875.84 1.875 1.875v11.25c0 1.035-.84 1.875-1.875 1.875h-.75a1.875 1.875 0 0 1-1.875-1.875V8.625ZM3 13.125c0-1.036.84-1.875 1.875-1.875h.75c1.036 0 1.875.84 1.875 1.875v7.5c0 1.035-.84 1.875-1.875 1.875h-.75A1.875 1.875 0 0 1 3 20.625v-7.5Z" />
+            <path d="M18.375 2.25c-1.035 0-1.875.84-1.875 1.875v15.75c0 1.035.84 1.875 1.875 1.875h.75c1.035 0 1.875-.84 1.875-1.875V4.125c0-1.036-.84-1.875-1.875-1.875h-.75ZM9.75 8.625c0-1.036.84-1.875 1.875-1.875h.75c1.036 0 1.875.84 1.875 1.875v11.25c0 1.035-.84 1.875-1.875 1.875h-.75a1.875 1.875 0 0 1-1.875-1.875V8.625ZM3 13.125c0-1.036.84-1.875 1.875-1.875h.75c1.036 0 1.875.84 1.875 1.875v6.75c0 1.035-.84 1.875-1.875 1.875h-.75A1.875 1.875 0 0 1 3 19.875v-6.75Z" />
         </svg>
         <span>Polls</span>
     </a>
     <a href="chat.html" class="nav-item">
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" style="width: 24px; height: 24px;">
-            <path fill-rule="evenodd" d="M4.848 2.771A49.144 49.144 0 0 1 12 2.25c2.43 0 4.817.178 7.152.52 1.978.292 3.348 2.024 3.348 3.97v6.02c0 1.946-1.37 3.678-3.348 3.97a48.901 48.901 0 0 1-7.152.52c-2.43 0-4.817-.178-7.152-.52-1.978-.292-3.348-2.024-3.348-3.97V5.741c0-1.946 1.37-3.678 3.348-3.97zM6.303 12.93a.75.75 0 1 0 0-1.5.75.75 0 0 0 0 1.5zm2.25 0a.75.75 0 1 0 0-1.5.75.75 0 0 0 0 1.5zm2.25 0a.75.75 0 1 0 0-1.5.75.75 0 0 0 0 1.5z" clip-rule="evenodd" />
+            <path fill-rule="evenodd" d="M4.848 2.771A49.144 49.144 0 0 1 12 2.25c2.43 0 4.817.178 7.152.52 1.978.292 3.348 2.024 3.348 3.97v6.02c0 1.946-1.37 3.678-3.348 3.97a48.901 48.901 0 0 1-3.476.383.39.39 0 0 0-.297.17l-2.755 4.133a.75.75 0 0 1-1.248 0l-2.755-4.133a.39.39 0 0 0-.297-.17 48.9 48.9 0 0 1-3.476-.384c-1.978-.29-3.348-2.024-3.348-3.97V6.741c0-1.946 1.37-3.68 3.348-3.97Z" clip-rule="evenodd" />
         </svg>
         <span>Chat</span>
     </a>
     <a href="profile.html" class="nav-item">
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" style="width: 24px; height: 24px;">
-            <path fill-rule="evenodd" d="M7.5 6a4.5 4.5 0 1 1 9 0 4.5 4.5 0 0 1-9 0ZM3.751 20.105a8.25 8.25 0 0 1 16.498 0 .75.75 0 0 1-.437.695A18.683 18.683 0 0 1 12 22.5c-2.786 0-5.433-.608-7.812-1.7a.75.75 0 0 1-.437-.695z" clip-rule="evenodd" />
+            <path fill-rule="evenodd" d="M7.5 6a4.5 4.5 0 1 1 9 0 4.5 4.5 0 0 1-9 0ZM3.751 20.105a8.25 8.25 0 0 1 16.498 0 .75.75 0 0 1-.437.695A18.683 18.683 0 0 1 12 22.5c-2.786 0-5.433-.608-7.812-1.7a.75.75 0 0 1-.437-.695Z" clip-rule="evenodd" />
         </svg>
         <span>Profile</span>
     </a>
@@ -803,45 +820,30 @@
     const auth = getAuth(app);
     const db = getFirestore(app);
 
-    // ========== CHECK AUTH STATE ==========
+    // ✅ AUTH STATE CHECK - YEH PEHLE RUN HOTA HAI
     onAuthStateChanged(auth, async (user) => { 
-        if (!user) {
-            window.location.href = "login.html";
+        if(!user) {
+            // Not logged in → Redirect to login
+            window.location.href = "login.html"; 
         } else {
-            // ✅ Reload user to get latest emailVerified status
+            // ✅ Logged in → Check email verification
             await user.reload();
             
             if (!user.emailVerified) {
-                // ✅ Show verification screen instead of errors
-                showVerificationScreen();
+                // Email not verified → Show verification screen
+                document.getElementById('verificationScreen').classList.add('show');
+                document.getElementById('main-content-scrollable').style.display = 'none';
+                document.querySelector('.bottom-nav').style.display = 'none';
                 return;
             }
             
-            // ✅ Email verified - load the app
-            setupAppFeatures(user, db, auth);
+            // ✅ User verified! → Initialize app
+            initializeApplication(user);
         }
     });
-    // =========================================
 
-    // ✅ Verification Screen Function
-    function showVerificationScreen() {
-        document.body.innerHTML = `
-            <div class="verification-screen">
-                <div>
-                    <h2>📧 Email Not Verified</h2>
-                    <p>Please verify your email to access the app.</p>
-                    <p style="font-size: 12px; color: #888; margin-top: 10px;">
-                        Check your inbox/spam for the verification email.
-                    </p>
-                    <button class="verification-btn" onclick="location.reload()">🔄 Check Verification Status</button>
-                    <button class="verification-btn" style="margin-left: 10px; background: #333;" onclick="location.href='login.html'">⬅️ Back to Login</button>
-                </div>
-            </div>
-        `;
-    }
-
-    // ✅ Main App Setup Function
-    async function setupAppFeatures(user, db, auth) {
+    // ✅ APP INITIALIZATION - Sirf verified users ke liye
+    async function initializeApplication(user) {
         const { doc, getDoc } = await import("https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js");
         
         try {
@@ -860,11 +862,11 @@
             console.error("Admin check error:", err);
         }
 
-        // Initialize all app features
-        initializeAppFeatures();
+        // ✅ Ab sab features load karo
+        setupAppFeatures();
     }
 
-    function initializeAppFeatures() {
+    function setupAppFeatures() {
         const grid = document.getElementById('animeGrid');
         const loader = document.getElementById('loading');
         const ageModal = document.getElementById('ageVerificationModal');
@@ -955,6 +957,7 @@
         async function fetchData() {
             if (isFetching) return;
             isFetching = true;
+            
             loader.classList.remove('hidden');
             loadMoreSection.classList.add('hidden');
             
@@ -1019,9 +1022,7 @@
                     const isChar = (currentCategory === 'characters' || (item.url && item.url.includes('/character/')));
                     const isManga = (currentCategory === 'manga' || currentCategory === 'novel' || item.type === 'Manga' || item.type === 'Light Novel');
                     const title = item.name || item.title_english || item.title;
-                    const subText = isChar ? `❤️ ${item.favorites || 0}` : `⭐ ${item.score || 'N/A'}`;
                     const isNSFW = item.rating && (item.rating.includes('Hentai') || item.rating.includes('Explicit'));
-                    
                     card.onclick = null;
 
                     const type = isChar ? 'char' : (isManga ? 'manga' : 'anime');
@@ -1062,62 +1063,339 @@
                                onclick="closePanel(event, 'panel-${item.mal_id}')"></i>
                             <div class="panel-score">${item.score || 'N/A'}</div>
                             <div class="panel-score-label">SCORE</div>
-                            <div class="panel-meta"><strong>${title}</strong><br/>${isChar ? `Favorites: ${item.favorites}` : `Episodes: ${item.episodes || 'N/A'}`}</div>
-                            <button class="panel-btn btn-watchlist" onclick="toggleStatusPicker(event, '${item.mal_id}')"><i class="fa-solid fa-plus"></i> Add to List</button>
-                            <button class="panel-btn btn-details" onclick="location.href='${detailUrl}'"><i class="fa-solid fa-circle-info"></i> Details</button>
-                        </div>
-                    `;
+                            <div class="panel-meta">
+                                ${item.episodes ? item.episodes + ' Eps' : ''}
+                                ${item.year ? '· ' + item.year : ''}
+                                ${item.rating ? '<br>' + item.rating.split(' ')[0] : ''}
+                            </div>
+                            <button class="panel-btn btn-watchlist" 
+                                    id="wl-${item.mal_id}"
+                                    onclick="showStatusPicker(event,'${item.mal_id}')">
+                                <i class="fa-solid fa-plus"></i> Watchlist
+                            </button>
+                            <button class="panel-btn btn-details"
+                                    onclick="goToDetails(event, '${detailUrl}', ${isNSFW})">
+                                <i class="fa-solid fa-circle-info"></i> Details
+                            </button>
+                        </div>`;
+                    checkIfWatchlisted(item.mal_id);
                     grid.appendChild(card);
                 });
-            } catch (err) {
-                console.error('Fetch Error:', err);
-                grid.innerHTML = '<p style="width:100%; text-align:center; color:#ff6b6b;">Failed to load data</p>';
+
+                loadMoreSection.classList.toggle('hidden', !hasNextPage);
+
+            } catch(e) { 
+                console.error("Fetch error:", e);
             } finally {
                 isFetching = false;
                 loader.classList.add('hidden');
-                loadMoreSection.classList.remove('hidden');
             }
         }
 
-        function saveToHistory(query) {
-            let history = JSON.parse(localStorage.getItem('searchHistory') || '[]');
-            if (!history.includes(query)) {
-                history.unshift(query);
-                history = history.slice(0, 10);
-                localStorage.setItem('searchHistory', JSON.stringify(history));
+        function listenToActivities() {
+            const activityFeed = document.getElementById('activityFeed');
+            const q = query(collection(db, "activities"), orderBy("timestamp", "desc"), limit(10));
+
+            onSnapshot(q, (snapshot) => {
+                if (snapshot.empty) {
+                    activityFeed.innerHTML = '<p style="font-size: 12px; color: #666; width:100%; text-align:center;">No recent activity.</p>';
+                    return;
+                } 
+                activityFeed.innerHTML = snapshot.docs.map(doc => {
+                    const act = doc.data();
+                    const displayPic = act.userImg || 'https://cdn-icons-png.flaticon.com/512/149/149071.png';
+                    
+                    return `
+                        <div onclick="location.href='details.html?id=${act.malId || ''}&type=${act.type || 'anime'}'" 
+                             style="min-width: 220px; background: #1a1c22; padding: 12px; border-radius: 15px; border: 1px solid #333; display: flex; align-items: center; gap: 12px; flex-shrink: 0; cursor: pointer;">
+                            <img src="${displayPic}" style="width: 40px; height: 40px; border-radius: 50%; object-fit: cover; border: 2px solid #5738B0;">
+                            <div style="overflow: hidden; flex: 1;">
+                                <div style="font-size: 12px; font-weight: 800; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${act.userName}</div>
+                                <div style="font-size: 10px; color: #aaa; line-height: 1.3;">
+                                    ${act.action} <span style="color: #5738B0; font-weight: 600;">${act.animeTitle}</span>
+                                </div>
+                            </div>
+                        </div>`;
+                }).join('');
+            });
+        }
+
+        function listenForNotifications() {
+            const q = query(collection(db, "notifications"), orderBy("timestamp", "desc"), limit(1));
+            onSnapshot(q, (snapshot) => {
+                if (!snapshot.empty) {
+                    const dot = document.getElementById('inboxDot');
+                    if(dot) dot.classList.remove('hidden');
+                }
+            });
+        }
+
+        async function loadMirrorHero() {
+            const swiperWrapper = document.getElementById('hero-swiper-wrapper');
+            const container = document.getElementById('hero-mirror-container');
+            const skeleton = document.getElementById('hero-skeleton');
+
+            if (!swiperWrapper || !container) return;
+
+            try {
+                const response = await fetch('https://api.jikan.moe/v4/top/anime?filter=airing&limit=10');
+                const result = await response.json();
+                
+                if (result && result.data && result.data.length > 0) {
+                    swiperWrapper.innerHTML = result.data.map(anime => `
+                        <div class="swiper-slide hero-slide" onclick="location.href='details.html?id=${anime.mal_id}&type=anime'">
+                            <div class="hero-mirror-bg" style="background-image: url('${anime.images.jpg.large_image_url}');"></div>
+                            <div class="hero-main-content">
+                                <img class="hero-small-poster" src="${anime.images.jpg.image_url}" alt="poster">
+                                <div class="hero-details-text">
+                                    <h1>${anime.title_english || anime.title}</h1>
+                                    <div class="hero-meta-info">
+                                        <span>${anime.year || '2026'}</span> | <span>TV • ${anime.episodes || '?'} Eps</span>
+                                    </div>
+                                </div>
+                                <div class="hero-list-icon"><i class="fa-solid fa-bookmark"></i></div>
+                            </div>
+                        </div>
+                    `).join('');
+
+                    if (skeleton) skeleton.style.display = 'none';
+                    container.classList.remove('hidden');
+                    setTimeout(() => container.classList.add('visible'), 50);
+
+                    setTimeout(() => {
+                        new Swiper('#hero-mirror-container', {
+                            loop: true,
+                            speed: 1000,
+                            autoplay: {
+                                delay: 4000,
+                                disableOnInteraction: false,
+                            },
+                            effect: 'fade',
+                            fadeEffect: {
+                                crossFade: true
+                            },
+                            observer: true,
+                            observeParents: true,
+                        });
+                    }, 100);
+                }
+            } catch (err) {
+                console.error("Hero Fetch Error:", err);
+                if (container) container.style.display = 'none';
             }
+        }
+
+        const MAX_HISTORY = 10;
+
+        function getHistory() {
+            return JSON.parse(localStorage.getItem('animeSearchHistory') || '[]');
+        }
+
+        function saveToHistory(query) {
+            let history = getHistory();
+            history = history.filter(h => h.toLowerCase() !== query.toLowerCase());
+            history.unshift(query);
+            if (history.length > MAX_HISTORY) history = history.slice(0, MAX_HISTORY);
+            localStorage.setItem('animeSearchHistory', JSON.stringify(history));
+        }
+
+        function deleteHistoryItem(query) {
+            let history = getHistory().filter(h => h !== query);
+            localStorage.setItem('animeSearchHistory', JSON.stringify(history));
+            renderHistory();
         }
 
         function renderHistory() {
             const historyList = document.getElementById('historyList');
-            const history = JSON.parse(localStorage.getItem('searchHistory') || '[]');
-            historyList.innerHTML = history.map(item => `
+            const historyBox = document.getElementById('searchHistoryBox');
+            const history = getHistory();
+            if (!historyList) return;
+            if (history.length === 0) {
+                historyBox.style.display = 'none';
+                return;
+            }
+            historyBox.style.display = 'block';
+            historyList.innerHTML = history.map(q => `
                 <div class="history-item">
-                    <div class="history-item-left" onclick="executeSearch('${item}')">
-                        <i class="fa-solid fa-clock"></i>
-                        <div class="history-item-text">${item}</div>
+                    <div class="history-item-left" onclick="selectHistory('${q.replace(/'/g, "\\'")}')">
+                        <i class="fa-solid fa-clock-rotate-left"></i>
+                        <span class="history-item-text">${q}</span>
                     </div>
-                    <div class="history-delete" onclick="deleteFromHistory('${item}')"><i class="fa-solid fa-trash"></i></div>
+                    <div class="history-delete" onclick="deleteHistoryItem('${q.replace(/'/g, "\\'")}')">
+                        <i class="fa-solid fa-xmark"></i>
+                    </div>
                 </div>
             `).join('');
         }
 
-        window.deleteFromHistory = (query) => {
-            let history = JSON.parse(localStorage.getItem('searchHistory') || '[]');
-            history = history.filter(h => h !== query);
-            localStorage.setItem('searchHistory', JSON.stringify(history));
-            renderHistory();
-        };
+        function selectHistory(query) {
+            overlayInput.value = query;
+            executeSearch(query);
+        }
+
+        window.selectHistory = selectHistory;
+        window.deleteHistoryItem = deleteHistoryItem;
 
         document.getElementById('clearHistory').onclick = () => {
-            localStorage.setItem('searchHistory', JSON.stringify([]));
+            localStorage.removeItem('animeSearchHistory');
             renderHistory();
         };
 
-        window.executeSearch = executeSearch;
-
-        // Load initial data
+        loadMirrorHero();
+        listenToActivities();
         fetchData();
+        listenForNotifications();
+
+        window.togglePanel = (e, card) => {
+            e.stopPropagation();
+            document.querySelectorAll('.card-panel.open').forEach(p => {
+                if (p !== card.querySelector('.card-panel')) p.classList.remove('open');
+            });
+            card.querySelector('.card-panel').classList.toggle('open');
+        };
+
+        window.closePanel = (e, panelId) => {
+            e.stopPropagation();
+            document.getElementById(panelId)?.classList.remove('open');
+        };
+
+        document.addEventListener('click', () => {
+            document.querySelectorAll('.card-panel.open')
+                    .forEach(p => p.classList.remove('open'));
+        });
+
+        window.goToDetails = (e, url, isNSFW) => {
+            e.stopPropagation();
+            if (isNSFW) {
+                pendingUrl = url;
+                ageModal.classList.remove('hidden');
+            } else {
+                location.href = url;
+            }
+        };
+
+        window.showStatusPicker = (e, malId) => {
+            e.stopPropagation();
+            document.getElementById('sp-' + malId).classList.add('show');
+        };
+
+        window.hideStatusPicker = (e, malId) => {
+            e.stopPropagation();
+            document.getElementById('sp-' + malId).classList.remove('show');
+        };
+
+        window.saveStatus = async (e, malId, title, img, type, episodes, status) => {
+            e.stopPropagation();
+            try {
+                const { doc, setDoc, addDoc, collection, serverTimestamp, getDoc } =
+                    await import("https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js");
+                const user = auth.currentUser;
+                if (!user) return;
+
+                await setDoc(doc(db, "users", user.uid, "watchlist", String(malId)), {
+                    malId, title, image: img, type,
+                    episodes: episodes || 0,
+                    status,
+                    addedAt: serverTimestamp()
+                });
+
+                const userSnap = await getDoc(doc(db, "users", user.uid));
+                const userData = userSnap.exists() ? userSnap.data() : {};
+
+                await addDoc(collection(db, "activities"), {
+                    userName: userData.username || "Otaku",
+                    userImg:  userData.avatar  || "",
+                    action:   status === 'Completed' ? 'completed' :
+                              status === 'Watching'  ? 'is watching' : 'added to watchlist',
+                    animeTitle: title,
+                    malId, type,
+                    timestamp: serverTimestamp()
+                });
+
+                const btn = document.getElementById('wl-' + malId);
+                if (btn) {
+                    const icon = status === 'Completed' ? 'fa-check' :
+                                 status === 'Watching'  ? 'fa-play'  : 'fa-clock';
+                    btn.innerHTML = `<i class="fa-solid ${icon}"></i> ${status}`;
+                    btn.classList.add('added');
+                }
+
+                document.getElementById('sp-' + malId)?.classList.remove('show');
+
+            } catch(err) { console.error(err); }
+        };
+
+        window.addToWatchlist = async (e, malId, title, img, type, episodes) => {
+            e.stopPropagation();
+            const btn = document.getElementById('wl-' + malId);
+            if (!btn || btn.classList.contains('added')) return;
+
+            try {
+                const { doc, setDoc, addDoc, collection, serverTimestamp, getDoc } = 
+                    await import("https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js");
+                const user = auth.currentUser;
+                if (!user) return;
+
+                await setDoc(doc(db, "users", user.uid, "watchlist", String(malId)), {
+                    malId, title, image: img, type,
+                    episodes: episodes || 0,
+                    status: "Plan to Watch",
+                    addedAt: serverTimestamp()
+                });
+
+                const userSnap = await getDoc(doc(db, "users", user.uid));
+                const userData = userSnap.exists() ? userSnap.data() : {};
+
+                await addDoc(collection(db, "activities"), {
+                    userName: userData.username || "Otaku",
+                    userImg: userData.avatar || "",
+                    action: "added to watchlist",
+                    animeTitle: title,
+                    malId: malId,
+                    type: type,
+                    timestamp: serverTimestamp()
+                });
+
+                btn.innerHTML = '<i class="fa-solid fa-check"></i> Added';
+                btn.classList.add('added');
+
+            } catch(err) {
+                console.error("Watchlist error:", err);
+            }
+        };
+
+        async function checkIfWatchlisted(malId) {
+            try {
+                const { doc, getDoc } = await import("https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js");
+                const user = auth.currentUser;
+                if (!user) return;
+
+                const snap = await getDoc(doc(db, "users", user.uid, "watchlist", String(malId)));
+                if (snap.exists()) {
+                    const btn = document.getElementById('wl-' + malId);
+                    if (!btn) return;
+
+                    const status = snap.data().status || 'Plan to Watch';
+                    const icon = status === 'Completed' ? 'fa-check' :
+                                 status === 'Watching'  ? 'fa-play'  : 'fa-clock';
+
+                    btn.innerHTML = `<i class="fa-solid ${icon}"></i> ${status}`;
+                    btn.classList.add('added');
+                }
+            } catch(err) {
+                console.error("Watchlist check error:", err);
+            }
+        }
+    }
+</script>
+
+<script>
+    if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+            navigator.serviceWorker.register('sw.js')
+                .then(reg => console.log('PWA Active!'))
+                .catch(err => console.log('PWA Error', err));
+        });
     }
 </script>
 </body>
