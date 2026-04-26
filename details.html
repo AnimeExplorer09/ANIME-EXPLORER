@@ -843,14 +843,18 @@
                 return;
             }
 
-            /* STEP 3: Search Jikan for each season with delay (rate limit safe) */
+            /* STEP 3: Jikan se sirf malId + image lo (episodes AI ne diya hai) */
             const seasons = [];
+            setAiStatus(`Found ${seasonsData.seasons.length} seasons — loading covers...`);
+
             for (let i = 0; i < seasonsData.seasons.length; i++) {
                 const s = seasonsData.seasons[i];
-                setAiStatus(`Fetching Season ${s.num} of ${seasonsData.seasons.length}...`);
 
-                /* Small delay between requests to respect Jikan rate limit */
-                if (i > 0) await new Promise(r => setTimeout(r, 400));
+                /* Delay between Jikan calls */
+                if (i > 0) await new Promise(r => setTimeout(r, 350));
+
+                let malIdFound = null;
+                let imageFound = currentData.images.jpg.image_url; // fallback = current anime image
 
                 try {
                     const jRes  = await fetch(
@@ -859,54 +863,59 @@
                     const jData = await jRes.json();
 
                     if (jData.data && jData.data.length > 0) {
-                        /* Pick best match: prefer exact title match, else first result */
-                        const lowerQuery = s.query.toLowerCase();
+                        const lq   = s.query.toLowerCase();
                         const best = jData.data.find(a =>
-                            (a.title || '').toLowerCase() === lowerQuery ||
-                            (a.title_english || '').toLowerCase() === lowerQuery
+                            (a.title || '').toLowerCase() === lq ||
+                            (a.title_english || '').toLowerCase() === lq
                         ) || jData.data[0];
 
-                        seasons.push({
-                            num:             s.num,
-                            malId:           best.mal_id,
-                            title:           best.title_english || best.title,
-                            episodes:        best.episodes || 0,
-                            watchedEpisodes: status === 'Completed' ? (best.episodes || 0) : 0,
-                            image:           best.images.jpg.image_url
-                        });
+                        malIdFound  = best.mal_id;
+                        imageFound  = best.images.jpg.image_url;
                     }
                 } catch (e) {
-                    console.warn(`Jikan search failed for season "${s.query}"`, e);
+                    console.warn(`Jikan image lookup failed for "${s.query}" — using fallback`);
                 }
+
+                /* AI ne episodes, isAiring, latestEpisode sab diya hai */
+                seasons.push({
+                    num:             s.num,
+                    malId:           malIdFound || parseInt(malId), // fallback to current
+                    title:           s.query,                        // Gemini ka title
+                    episodes:        s.episodes        || 0,         // ← AI se
+                    isAiring:        s.isAiring        || false,     // ← AI se
+                    latestEpisode:   s.latestEpisode   || s.episodes || 0, // ← AI se
+                    watchedEpisodes: status === 'Completed' ? (s.episodes || 0) : 0,
+                    image:           imageFound,
+                    episodesLastUpdated: Date.now()
+                });
             }
 
             /* STEP 4: Save to Firestore */
             setAiStatus('Saving to your list...');
 
-            if (seasons.length === 0) {
-                /* All Jikan searches failed → fall back to simple save */
-                await simpleSave(user, title, status);
-            } else {
-                const docData = {
-                    malId:      parseInt(malId),
-                    seriesName: seasonsData.seriesName,
-                    title:      seasonsData.seriesName,
-                    image:      seasons[0].image || currentData.images.jpg.image_url,
-                    type:       contentType,
-                    status,
-                    userScore:  0,
-                    isSeriesCard: true,
-                    seasons,
-                    addedAt:    serverTimestamp()
-                };
-                await setDoc(
-                    doc(db, "users", user.uid, "watchlist", String(malId)),
-                    docData
-                );
-                await logActivity(seasonsData.seriesName,
-                    status === 'Watching'  ? 'started watching' :
-                    status === 'Completed' ? 'completed' : 'added to list');
-            }
+            const docData = {
+                malId:        parseInt(malId),
+                seriesName:   seasonsData.seriesName,
+                title:        seasonsData.seriesName,
+                image:        seasons[0]?.image || currentData.images.jpg.image_url,
+                type:         contentType,
+                status,
+                userScore:    0,
+                isSeriesCard: true,
+                activeSeason: seasons[0]?.num || 1,
+                seasons,
+                addedAt:      serverTimestamp()
+            };
+
+            await setDoc(
+                doc(db, "users", user.uid, "watchlist", String(malId)),
+                docData
+            );
+            await logActivity(
+                seasonsData.seriesName,
+                status === 'Watching'  ? 'started watching' :
+                status === 'Completed' ? 'completed' : 'added to list'
+            );
 
             setAddedState(status);
 
