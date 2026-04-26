@@ -8,8 +8,8 @@ export default async function handler(req, res) {
   const { title } = req.body;
   if (!title) return res.status(400).json({ error: 'Title is required' });
 
-  const GEMINI_API_SEASON_KEY = process.env.GEMINI_API_SEASON_KEY;
-  if (!GEMINI_API_SEASON_KEY) return res.status(500).json({ error: 'GEMINI_API_KEY not configured' });
+  const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
+  if (!GEMINI_API_KEY) return res.status(500).json({ error: 'GEMINI_API_KEY not configured' });
 
   const prompt = `You are a MyAnimeList (MAL) anime database expert.
 
@@ -32,7 +32,7 @@ Rules:
 - Return ONLY the raw JSON object, nothing else`;
 
   try {
-    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GEMINI_API_KEY}`;
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${GEMINI_API_KEY}`;
     const response = await fetch(url, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
