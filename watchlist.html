@@ -9,39 +9,40 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#7c4dff">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-
     <style>
+        :root {
+            --primary: #5738B0;
+            --primary-glow: rgba(87,56,176,0.35);
+            --bg: #0f1014;
+            --card: #16181f;
+            --card2: #1e2029;
+            --border: rgba(255,255,255,0.06);
+            --dim: #64748b;
+        }
 
         /* ══════════════════════════════
            TYPE SWITCHER
         ══════════════════════════════ */
         .type-switcher {
-            display: flex;
-            background: #1a1c22;
-            margin: 15px;
-            padding: 4px;
-            border-radius: 14px;
-            border: 1px solid #333;
+            display: flex; background: #1a1c22;
+            margin: 14px; padding: 4px;
+            border-radius: 14px; border: 1px solid #2a2a35;
             position: relative;
         }
         .type-btn {
             flex: 1; padding: 10px; border: none;
-            background: transparent; color: #888;
+            background: transparent; color: #666;
             font-size: 13px; font-weight: 700;
             z-index: 2; cursor: pointer; transition: 0.3s;
             display: flex; align-items: center;
-            justify-content: center; gap: 8px;
+            justify-content: center; gap: 8px; border-radius: 10px;
         }
         .type-btn.active { color: white; }
         .type-indicator {
-            position: absolute;
-            top: 4px; left: 4px;
-            width: calc(50% - 4px);
-            height: calc(100% - 8px);
-            background: #5738B0;
-            border-radius: 10px;
-            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: absolute; top: 4px; left: 4px;
+            width: calc(50% - 4px); height: calc(100% - 8px);
+            background: var(--primary); border-radius: 10px;
+            transition: transform 0.3s cubic-bezier(0.4,0,0.2,1);
             z-index: 1;
         }
         .type-switcher[data-active="manga"] .type-indicator { transform: translateX(100%); }
@@ -50,336 +51,342 @@
            FILTER TABS
         ══════════════════════════════ */
         .filter-container {
-            display: flex; gap: 10px; padding: 0 15px 15px;
+            display: flex; gap: 8px; padding: 0 14px 14px;
             overflow-x: auto; scrollbar-width: none;
         }
         .filter-container::-webkit-scrollbar { display: none; }
         .filter-btn {
             display: flex; align-items: center; gap: 6px;
             padding: 7px 16px;
-            background: rgba(255,255,255,0.07);
-            color: #888; border-radius: 30px;
+            background: rgba(255,255,255,0.05);
+            color: #666; border-radius: 30px;
             font-size: 12px; font-weight: 700;
             white-space: nowrap; border: 1px solid transparent;
             cursor: pointer; transition: 0.25s; flex-shrink: 0;
         }
-        .filter-btn.active { color: white; border-color: rgba(255,255,255,0.15); }
-        .filter-btn[data-filter="all"].active      { background: #444; }
-        .filter-btn[data-filter="watching"].active { background: #2979ff; }
-        .filter-btn[data-filter="completed"].active{ background: #00e676; color: #000; }
-        .filter-btn[data-filter="plan"].active     { background: #ffab00; color: #000; }
+        .filter-btn.active { color: white; border-color: rgba(255,255,255,0.12); }
+        .filter-btn[data-filter="all"].active      { background: #2a2a35; }
+        .filter-btn[data-filter="watching"].active { background: #1565c0; }
+        .filter-btn[data-filter="completed"].active{ background: #1b5e20; color: #4ade80; }
+        .filter-btn[data-filter="plan"].active     { background: #e65100; color: #ffcc80; }
 
         /* ══════════════════════════════
-           ── BOOK CARD (New AI Card) ──
+           SERIES BOOK CARD (new premium)
         ══════════════════════════════ */
         .book-card {
             margin: 10px 12px;
-            border-radius: 18px;
-            background: #1b1d24;
-            border: 1px solid rgba(255,255,255,0.07);
-            box-shadow: 0 6px 28px rgba(0,0,0,0.45);
+            border-radius: 20px;
+            background: var(--card);
+            border: 1px solid var(--border);
             overflow: hidden;
-            transition: box-shadow 0.2s;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.5);
             position: relative;
         }
 
-        /* Coloured status stripe at top */
-        .book-stripe {
-            height: 3px;
-            width: 100%;
+        /* ── Banner (blurred active season image) ── */
+        .book-banner {
+            position: relative;
+            height: 130px;
+            overflow: hidden;
+        }
+        .book-banner-bg {
+            position: absolute; inset: -10px;
+            background-size: cover; background-position: center;
+            filter: blur(18px) brightness(0.35) saturate(1.4);
+            transform: scale(1.1);
+            transition: background-image 0.4s ease;
+        }
+        .book-banner-overlay {
+            position: absolute; inset: 0;
+            background: linear-gradient(to bottom, rgba(0,0,0,0.1) 0%, rgba(0,0,0,0.7) 100%);
+        }
+        .book-banner-content {
+            position: absolute; inset: 0;
+            display: flex; align-items: flex-end;
+            padding: 12px 14px; gap: 12px;
         }
 
-        /* Header: cover + info */
-        .book-header {
-            display: flex;
-            gap: 0;
-        }
-        .book-cover {
-            width: 82px;
-            min-height: 115px;
+        /* Active season thumbnail */
+        .active-thumb {
+            width: 62px; height: 88px;
+            border-radius: 10px;
             object-fit: cover;
             flex-shrink: 0;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.6);
+            border: 2px solid rgba(255,255,255,0.15);
             cursor: pointer;
+            transition: transform 0.2s;
         }
-        .book-info {
-            flex: 1;
-            padding: 11px 12px 10px;
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-            min-width: 0;
+        .active-thumb:active { transform: scale(0.95); }
+
+        .book-banner-info {
+            flex: 1; min-width: 0;
+            padding-bottom: 2px;
         }
-        .book-title {
-            font-size: 15px; font-weight: 800;
-            color: #fff; line-height: 1.3;
+        .book-series-title {
+            font-size: 16px; font-weight: 900;
+            color: white; line-height: 1.25;
+            text-shadow: 0 2px 8px rgba(0,0,0,0.8);
             display: -webkit-box;
             -webkit-line-clamp: 2;
             -webkit-box-orient: vertical;
             overflow: hidden;
             cursor: pointer;
-            margin-bottom: 6px;
-        }
-        .book-sub-row {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            flex-wrap: wrap;
-            margin-bottom: 7px;
-        }
-        .book-status-pill {
-            font-size: 10px; font-weight: 800;
-            text-transform: uppercase; letter-spacing: 0.4px;
-            padding: 3px 9px; border-radius: 20px;
-        }
-        .book-season-tag {
-            font-size: 10px; color: #888;
-            display: flex; align-items: center; gap: 4px;
-        }
-        .book-season-tag i { font-size: 9px; color: #5738B0; }
-
-        /* Progress row */
-        .book-progress-row {
-            display: flex; align-items: center; gap: 8px;
             margin-bottom: 4px;
         }
-        .book-progress-track {
+        .active-season-label {
+            font-size: 10px; font-weight: 800;
+            color: rgba(255,255,255,0.6);
+            text-transform: uppercase;
+            letter-spacing: 0.6px;
+            margin-bottom: 6px;
+        }
+
+        /* Episode progress inside banner */
+        .banner-ep-row {
+            display: flex; align-items: center; gap: 8px;
+        }
+        .banner-ep-track {
             flex: 1; height: 5px;
-            background: rgba(255,255,255,0.08);
+            background: rgba(255,255,255,0.15);
             border-radius: 3px; overflow: hidden;
         }
-        .book-progress-fill {
+        .banner-ep-fill {
             height: 100%; border-radius: 3px;
             transition: width 0.4s ease;
         }
-        .book-progress-pct {
-            font-size: 10px; font-weight: 800;
-            color: #888; white-space: nowrap; flex-shrink: 0;
+        .banner-ep-text {
+            font-size: 11px; font-weight: 800;
+            color: rgba(255,255,255,0.85);
+            white-space: nowrap;
         }
 
-        /* Rating button (top-right corner) */
+        /* Rate button (top-right) */
         .book-rate-btn {
-            position: absolute;
-            top: 10px; right: 10px;
-            width: 34px; height: 34px;
+            position: absolute; top: 10px; right: 10px;
+            width: 36px; height: 36px;
             border-radius: 50%;
-            border: 1px solid rgba(255,215,0,0.35);
-            background: rgba(255,215,0,0.1);
+            border: 1.5px solid rgba(255,215,0,0.4);
+            background: rgba(0,0,0,0.5);
+            backdrop-filter: blur(8px);
             color: #ffd700;
             display: flex; align-items: center; justify-content: center;
             font-size: 12px; font-weight: 800;
-            cursor: pointer; transition: 0.2s;
-            z-index: 5;
+            cursor: pointer; transition: 0.2s; z-index: 5;
+            flex-shrink: 0;
         }
-        .book-rate-btn:active { transform: scale(0.88); }
+        .book-rate-btn:active { transform: scale(0.88); background: rgba(255,215,0,0.2); }
 
-        /* Expand toggle button */
-        .book-toggle-btn {
-            display: flex; align-items: center; justify-content: center;
-            gap: 7px; padding: 9px 14px;
-            font-size: 11px; font-weight: 800;
-            color: #7c5fd4; cursor: pointer;
-            border-top: 1px solid rgba(255,255,255,0.05);
-            user-select: none; transition: background 0.2s;
-            letter-spacing: 0.2px;
+        /* ── Episode Controls Row ── */
+        .book-ep-controls {
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 10px 14px 8px;
+            border-bottom: 1px solid var(--border);
+            gap: 12px;
         }
-        .book-toggle-btn:active { background: rgba(255,255,255,0.03); }
-        .book-toggle-btn .chev {
-            font-size: 10px;
-            transition: transform 0.3s cubic-bezier(0.4,0,0.2,1);
-        }
-        .book-toggle-btn.open .chev { transform: rotate(180deg); }
-
-        /* ══════════════════════════════
-           SEASON ACCORDION
-        ══════════════════════════════ */
-        .seasons-body {
-            max-height: 0;
-            overflow: hidden;
-            transition: max-height 0.42s cubic-bezier(0.4,0,0.2,1);
-            background: rgba(0,0,0,0.18);
-            border-top: 1px solid rgba(255,255,255,0.04);
-        }
-        .seasons-body.open { max-height: 2400px; }
-
-        .season-row {
-            display: flex; align-items: center; gap: 11px;
-            padding: 9px 12px;
-            border-bottom: 1px solid rgba(255,255,255,0.04);
-            transition: background 0.15s;
-        }
-        .season-row:last-child { border-bottom: none; }
-        .season-row:active { background: rgba(255,255,255,0.025); }
-
-        .season-thumb {
-            width: 38px; height: 52px;
-            border-radius: 7px; object-fit: cover;
-            flex-shrink: 0; cursor: pointer;
-            background: #111;
-        }
-        .season-label-area {
-            flex: 1; min-width: 0;
-        }
-        .season-num {
-            font-size: 9px; font-weight: 800;
-            color: #7c5fd4; text-transform: uppercase;
+        .ep-ctrl-label {
+            font-size: 10px; font-weight: 800;
+            color: var(--dim); text-transform: uppercase;
             letter-spacing: 0.5px;
         }
-        .season-title {
-            font-size: 12px; font-weight: 700; color: #fff;
-            white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-            margin: 1px 0;
-        }
-        .season-ep-count {
-            font-size: 10px; color: #666;
-        }
-
-        /* Episode counter inside season row */
-        .ep-box {
+        .ep-ctrl-box {
             display: flex; align-items: center;
-            background: #0f1014; border-radius: 9px;
-            border: 1px solid #2a2a2a; height: 32px;
-            flex-shrink: 0; overflow: hidden;
+            background: var(--bg); border-radius: 12px;
+            border: 1px solid rgba(255,255,255,0.1);
+            height: 38px; overflow: hidden;
         }
-        .ep-ctrl {
-            width: 28px; height: 100%;
-            background: transparent; color: #fff;
-            border: none; cursor: pointer; font-size: 11px;
+        .ep-ctrl-btn {
+            width: 36px; height: 100%;
+            background: transparent; color: white;
+            border: none; cursor: pointer; font-size: 12px;
             display: flex; align-items: center; justify-content: center;
             transition: background 0.15s;
         }
-        .ep-ctrl:active { background: #5738B020; }
-        .ep-num {
-            min-width: 48px; text-align: center;
-            font-size: 11px; font-weight: 800; color: #fff;
-            cursor: pointer; padding: 0 4px;
-            white-space: nowrap;
+        .ep-ctrl-btn:active { background: rgba(87,56,176,0.3); }
+        .ep-num-display {
+            min-width: 70px; text-align: center;
+            font-size: 14px; font-weight: 900;
+            color: white; cursor: pointer;
+            padding: 0 6px;
         }
-        .ep-edit-input {
-            width: 48px; height: 100%;
-            background: #5738B0; color: white;
+        .ep-num-edit {
+            width: 70px; height: 100%;
+            background: var(--primary); color: white;
             border: none; text-align: center;
-            font-size: 12px; font-weight: 800;
+            font-size: 14px; font-weight: 900;
             outline: none;
         }
-        .ep-edit-input::-webkit-outer-spin-button,
-        .ep-edit-input::-webkit-inner-spin-button { -webkit-appearance: none; }
+        .ep-num-edit::-webkit-outer-spin-button,
+        .ep-num-edit::-webkit-inner-spin-button { -webkit-appearance: none; }
+
+        /* ── Season Chips ── */
+        .season-chips-wrap {
+            display: flex; align-items: center;
+            gap: 7px; padding: 10px 14px;
+            overflow-x: auto; scrollbar-width: none;
+        }
+        .season-chips-wrap::-webkit-scrollbar { display: none; }
+        .season-chip {
+            flex-shrink: 0;
+            padding: 6px 14px;
+            border-radius: 20px;
+            background: rgba(255,255,255,0.05);
+            border: 1.5px solid rgba(255,255,255,0.08);
+            color: #666;
+            font-size: 11px; font-weight: 800;
+            cursor: pointer;
+            transition: 0.2s;
+            position: relative;
+            white-space: nowrap;
+        }
+        .season-chip.active {
+            background: var(--primary);
+            border-color: var(--primary);
+            color: white;
+            box-shadow: 0 0 12px var(--primary-glow);
+        }
+        .season-chip.done {
+            border-color: rgba(74,222,128,0.3);
+            color: #4ade80;
+        }
+        .season-chip.done.active {
+            background: #166534;
+            border-color: #4ade80;
+            color: #4ade80;
+            box-shadow: 0 0 12px rgba(74,222,128,0.25);
+        }
+        .chip-check {
+            font-size: 8px;
+            margin-left: 4px;
+        }
 
         /* ══════════════════════════════
-           LEGACY CARD (old entries)
+           SINGLE / LEGACY CARD (clean)
         ══════════════════════════════ */
-        .mal-card {
+        .simple-card {
+            margin: 10px 12px;
+            border-radius: 16px;
+            background: var(--card);
+            border: 1px solid var(--border);
             display: flex; align-items: stretch;
-            background: var(--bg-card);
-            margin: 10px 8px;
-            border-radius: 12px;
-            border-left: 5px solid var(--primary);
-            box-shadow: 0 4px 15px rgba(0,0,0,0.4);
-            position: relative; overflow: hidden;
-            min-height: 110px; transition: 0.2s;
+            overflow: hidden;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.35);
+            position: relative;
+            min-height: 105px;
         }
-        .mal-img { width: 80px; height: auto; object-fit: cover; flex-shrink: 0; }
-        .mal-info {
-            flex: 2; padding: 12px;
+        .simple-status-bar {
+            width: 4px; flex-shrink: 0;
+        }
+        .simple-cover {
+            width: 72px; object-fit: cover;
+            flex-shrink: 0; cursor: pointer;
+        }
+        .simple-info {
+            flex: 1; padding: 11px 12px;
             display: flex; flex-direction: column;
             justify-content: space-between; min-width: 0;
         }
-        .mal-title {
-            font-size: 15px; font-weight: 700; color: white; line-height: 1.3;
-            display: -webkit-box; -webkit-line-clamp: 2;
-            -webkit-box-orient: vertical; overflow: hidden;
+        .simple-title {
+            font-size: 14px; font-weight: 800;
+            color: white; line-height: 1.3;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden; cursor: pointer;
         }
-        .mal-meta { display: flex; align-items: center; gap: 15px; margin-top: 8px; }
-        .status-label { font-weight: 800; font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; }
-        .btn-rate {
-            width: 32px; height: 32px; flex-shrink: 0;
-            border-radius: 50%;
-            border: 1px solid rgba(255,215,0,0.4);
-            background: rgba(255,215,0,0.1); color: #ffd700;
-            display: flex; align-items: center; justify-content: center;
-            font-size: 12px; font-weight: bold; cursor: pointer;
-            transition: 0.2s; margin: 0 auto;
+        .simple-status-pill {
+            display: inline-flex; align-items: center;
+            font-size: 9px; font-weight: 900;
+            text-transform: uppercase; letter-spacing: 0.5px;
+            padding: 2px 8px; border-radius: 20px;
+            margin-top: 5px; width: fit-content;
         }
-        .controls-wrapper {
+        .simple-controls {
             display: flex; flex-direction: column;
-            justify-content: center; gap: 6px; padding: 8px;
+            align-items: center; justify-content: center;
+            gap: 6px; padding: 10px 10px;
             background: rgba(0,0,0,0.2);
-            border-left: 1px solid rgba(255,255,255,0.05);
-            flex-shrink: 0; align-items: center;
+            border-left: 1px solid var(--border);
+            flex-shrink: 0;
         }
-        .ep-control-box {
+        .simple-rate-btn {
+            width: 32px; height: 32px;
+            border-radius: 50%;
+            border: 1px solid rgba(255,215,0,0.3);
+            background: rgba(255,215,0,0.08);
+            color: #ffd700; font-size: 11px; font-weight: 800;
+            display: flex; align-items: center; justify-content: center;
+            cursor: pointer; transition: 0.2s;
+        }
+        .simple-rate-btn:active { transform: scale(0.88); }
+        .simple-ep-box {
             display: flex; align-items: center;
-            background: #0f1014; border-radius: 8px;
-            border: 1px solid #333; height: 32px; width: 100px;
+            background: var(--bg); border-radius: 9px;
+            border: 1px solid rgba(255,255,255,0.08);
+            height: 30px; width: 100px; overflow: hidden;
         }
-        .ctrl-btn {
-            flex: 1; background: transparent; color: #fff;
-            border: none; cursor: pointer; font-size: 12px;
+        .simple-ctrl-btn {
+            flex: 1; background: transparent;
+            color: white; border: none; cursor: pointer; font-size: 11px;
         }
-        .ep-display, .sn-display {
-            flex: 1.5; font-size: 11px; font-weight: bold;
-            color: white; text-align: center;
+        .simple-ep-display {
+            flex: 1.5; font-size: 10px; font-weight: 800;
+            color: white; text-align: center; cursor: pointer;
         }
-        .progress-line {
+        .simple-progress {
             position: absolute; bottom: 0; left: 0;
-            height: 4px; background: var(--primary);
+            height: 3px; transition: width 0.4s ease;
         }
-        .label-tiny { font-size: 8px; color: #888; display: block; line-height: 1; }
-        .edit-input {
-            width: 100%; height: 100%;
-            background: #5738B0; color: white;
-            border: none; border-radius: 6px;
-            text-align: center; font-size: 13px; font-weight: 800;
-            outline: none;
-            box-shadow: 0 0 12px rgba(87,56,176,0.7);
-        }
-        .edit-input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
 
         /* ══════════════════════════════
            MODALS
         ══════════════════════════════ */
         .modal-overlay {
             position: fixed; inset: 0;
-            background: rgba(0,0,0,0.85); z-index: 2000;
+            background: rgba(0,0,0,0.88); z-index: 2000;
             display: flex; justify-content: center; align-items: center;
-            visibility: hidden; opacity: 0; transition: 0.2s;
-            backdrop-filter: blur(5px);
+            visibility: hidden; opacity: 0; transition: 0.22s;
+            backdrop-filter: blur(8px);
         }
         .modal-overlay.show { visibility: visible; opacity: 1; }
         .modal-box {
-            background: #1e1e24; width: 88%; max-width: 320px;
-            border-radius: 18px; padding: 24px 20px;
-            text-align: center; border: 1px solid #333;
+            background: #1e2029; width: 88%; max-width: 320px;
+            border-radius: 22px; padding: 24px 20px;
+            text-align: center;
+            border: 1px solid rgba(255,255,255,0.08);
+            transform: scale(0.9); transition: transform 0.22s;
         }
-        .modal-box h3 { color: white; font-size: 16px; margin-bottom: 6px; }
-        .modal-box p { color: #aaa; font-size: 13px; margin-bottom: 16px; }
-        .rating-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; margin: 18px 0; }
-        .rating-item {
-            background: #0f1014; border: 1px solid #333;
-            padding: 10px 0; border-radius: 9px;
-            color: #888; cursor: pointer; font-weight: 700; font-size: 14px;
-            transition: 0.2s;
-        }
-        .rating-item.selected { background: #5738B0; color: white; border-color: #5738B0; }
-        .btn-modal-primary {
-            background: #5738B0; color: white; border: none;
-            padding: 13px; border-radius: 11px; font-weight: 800;
-            width: 100%; cursor: pointer; font-size: 14px;
-        }
-        .btn-modal-danger {
-            background: #ff5252; color: white; border: none;
-            padding: 13px; border-radius: 11px; font-weight: 800;
-            cursor: pointer; font-size: 14px; flex: 1;
-        }
-        .btn-modal-cancel {
-            background: transparent; color: #aaa;
-            border: 1px solid #333; padding: 13px;
-            border-radius: 11px; cursor: pointer;
-            font-size: 14px; flex: 1;
-        }
+        .modal-overlay.show .modal-box { transform: scale(1); }
+        .modal-box h3 { color: white; font-size: 17px; font-weight: 900; margin-bottom: 6px; }
+        .modal-box p  { color: #888; font-size: 13px; margin-bottom: 18px; }
+        .rating-grid  { display: grid; grid-template-columns: repeat(5,1fr); gap: 8px; margin: 16px 0; }
+        .rating-item  { background: var(--bg); border: 1px solid #2a2a35; padding: 10px 0; border-radius: 10px; color: #666; cursor: pointer; font-weight: 800; font-size: 14px; transition: 0.2s; }
+        .rating-item.selected { background: var(--primary); color: white; border-color: var(--primary); }
+        .btn-modal-primary  { background: var(--primary); color: white; border: none; padding: 14px; border-radius: 12px; font-weight: 900; width: 100%; cursor: pointer; font-size: 14px; font-family: inherit; }
+        .btn-modal-danger   { background: #c62828; color: white; border: none; padding: 14px; border-radius: 12px; font-weight: 900; cursor: pointer; font-size: 14px; flex: 1; font-family: inherit; }
+        .btn-modal-cancel   { background: transparent; color: #888; border: 1px solid #2a2a35; padding: 14px; border-radius: 12px; cursor: pointer; font-size: 14px; flex: 1; font-family: inherit; }
         .modal-btn-row { display: flex; gap: 10px; }
 
         /* ══════════════════════════════
-           NAV + MISC
+           FETCH STATUS TOAST
+        ══════════════════════════════ */
+        .fetch-toast {
+            position: fixed; bottom: 90px; left: 50%;
+            transform: translateX(-50%) translateY(20px);
+            background: rgba(87,56,176,0.95);
+            color: white; font-size: 11px; font-weight: 700;
+            padding: 8px 18px; border-radius: 20px;
+            backdrop-filter: blur(10px);
+            opacity: 0; transition: 0.3s;
+            pointer-events: none; z-index: 100;
+            white-space: nowrap;
+        }
+        .fetch-toast.show {
+            opacity: 1; transform: translateX(-50%) translateY(0);
+        }
+
+        /* ══════════════════════════════
+           NAV
         ══════════════════════════════ */
         .bottom-nav {
             background: #161c24 !important;
@@ -398,6 +405,10 @@
         .nav-item span { font-size: 10px; font-weight: 600; }
         .nav-item.active { color: #5738B0; }
         .nav-item:active { transform: scale(0.9); }
+
+        /* misc */
+        .hidden { display: none !important; }
+        .text-center { text-align: center; }
     </style>
 </head>
 <body>
@@ -407,6 +418,7 @@
     </header>
 
     <div class="container" style="padding-bottom: 100px;">
+
         <div class="type-switcher" id="typeSwitcher" data-active="anime">
             <div class="type-indicator"></div>
             <button class="type-btn active" onclick="switchType('anime')">
@@ -432,52 +444,66 @@
             </button>
         </div>
 
-        <div id="loading" class="text-center" style="margin-top:50px;">
-            <i class="fa-solid fa-circle-notch fa-spin" style="font-size:30px; color:#5738B0;"></i>
+        <div id="loadingSpinner" class="text-center" style="margin-top:60px;">
+            <i class="fa-solid fa-circle-notch fa-spin" style="font-size:32px; color:#5738B0;"></i>
+            <p style="color:#444; font-size:12px; margin-top:12px; font-weight:600;">Loading your list...</p>
         </div>
+
         <div id="listContainer"></div>
-        <div id="emptyState" class="hidden text-center" style="margin-top:60px; color:#555;">
-            <i class="fa-solid fa-book-open" style="font-size:40px; margin-bottom:12px; color:#333;"></i>
-            <p style="font-size:14px;">Your list is empty</p>
-            <p style="font-size:12px; margin-top:6px; color:#444;">Search anime and add them!</p>
+
+        <div id="emptyState" class="hidden text-center" style="margin-top:70px;">
+            <i class="fa-solid fa-book-open" style="font-size:44px; color:#2a2a35; margin-bottom:14px; display:block;"></i>
+            <p style="color:#444; font-size:14px; font-weight:700;">Your list is empty</p>
+            <p style="color:#333; font-size:12px; margin-top:6px;">Search anime and add them!</p>
         </div>
     </div>
 
-    <!-- ══ RATE MODAL ══ -->
+    <!-- Fetch toast -->
+    <div class="fetch-toast" id="fetchToast">
+        <i class="fa-solid fa-circle-notch fa-spin" style="margin-right:6px;"></i>
+        <span id="fetchToastMsg">Updating episode counts...</span>
+    </div>
+
+    <!-- Rate Modal -->
     <div id="rateModal" class="modal-overlay">
         <div class="modal-box">
             <h3 id="rateTitle">Rate Anime</h3>
+            <p>Tap your score</p>
             <input type="hidden" id="rateId">
             <div class="rating-grid" id="ratingOptions"></div>
             <button class="btn-modal-primary" onclick="saveRating()">Save Rating</button>
             <button onclick="closeModal('rateModal')"
-                style="margin-top:10px;background:none;border:none;color:#aaa;cursor:pointer;width:100%;padding:8px;">
-                Close
+                style="margin-top:10px;background:none;border:none;color:#555;cursor:pointer;width:100%;padding:8px;font-family:inherit;">
+                Cancel
             </button>
         </div>
     </div>
 
-    <!-- ══ COMPLETED CONFIRM MODAL ══ -->
+    <!-- Completed confirm Modal -->
     <div id="completedModal" class="modal-overlay">
         <div class="modal-box">
-            <h3>🎉 Finished?</h3>
-            <p id="completedTitle"></p>
+            <div style="font-size:36px; margin-bottom:10px;">🎉</div>
+            <h3 id="completedTitle">Season Done!</h3>
+            <p id="completedSubtitle">Mark as completed?</p>
             <input type="hidden" id="pendingCompId">
             <input type="hidden" id="pendingCompVal">
             <input type="hidden" id="pendingCompSeason">
             <div class="modal-btn-row">
-                <button class="btn-modal-primary" style="background:#00e676;color:#000;"
-                    onclick="confirmCompletion()">Yes, Completed!</button>
+                <button class="btn-modal-primary" style="background:#166534; color:#4ade80;"
+                    onclick="confirmCompletion()">
+                    <i class="fa-solid fa-check"></i> Yes!
+                </button>
                 <button class="btn-modal-cancel" onclick="closeModal('completedModal')">Not yet</button>
             </div>
         </div>
     </div>
 
-    <!-- ══ DELETE MODAL ══ -->
+    <!-- Delete Modal -->
     <div id="deleteModal" class="modal-overlay">
         <div class="modal-box">
+            <div style="font-size:32px; margin-bottom:10px;">🗑️</div>
             <h3>Remove from list?</h3>
-            <p id="deleteTitle" style="color:#aaa; font-size:13px; margin:12px 0;"></p>
+            <p id="deleteTitle"></p>
             <input type="hidden" id="deleteId">
             <div class="modal-btn-row">
                 <button class="btn-modal-danger" onclick="confirmDelete()">Remove</button>
@@ -486,53 +512,31 @@
         </div>
     </div>
 
-    <!-- ══ BOTTOM NAV ══ -->
+    <!-- Bottom Nav -->
     <nav class="bottom-nav">
         <a href="index.html" class="nav-item">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" style="width:24px;height:24px;">
-                <path d="M11.47 3.841a.75.75 0 0 1 1.06 0l8.69 8.69a.75.75 0 1 0 1.06-1.061l-8.689-8.69a2.25 2.25 0 0 0-3.182 0l-8.69 8.69a.75.75 0 1 0 1.061 1.06l8.69-8.689Z"/>
-                <path d="m12 5.432 8.159 8.159c.03.03.06.058.091.086v6.198c0 1.035-.84 1.875-1.875 1.875H15a.75.75 0 0 1-.75-.75v-4.5a.75.75 0 0 0-.75-.75h-3a.75.75 0 0 0-.75.75V21a.75.75 0 0 1-.75.75H5.625a1.875 1.875 0 0 1-1.875-1.875v-6.198a2.29 2.29 0 0 0 .091-.086L12 5.432Z"/>
-            </svg>
-            <span>Home</span>
+            <i class="fa-solid fa-house"></i><span>Home</span>
         </a>
         <a href="watchlist.html" class="nav-item active">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" style="width:24px;height:24px;">
-                <path fill-rule="evenodd" d="M6.32 2.577a49.255 49.255 0 0 1 11.36 0c1.497.174 2.57 1.46 2.57 2.93V21a.75.75 0 0 1-1.085.67L12 18.089l-7.165 3.583A.75.75 0 0 1 3.75 21V5.507c0-1.47 1.073-2.756 2.57-2.93Z" clip-rule="evenodd"/>
-            </svg>
-            <span>List</span>
+            <i class="fa-solid fa-bookmark"></i><span>List</span>
         </a>
         <a href="poll.html" class="nav-item">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" style="width:24px;height:24px;">
-                <path d="M18.375 2.25c-1.035 0-1.875.84-1.875 1.875v15.75c0 1.035.84 1.875 1.875 1.875h.75c1.035 0 1.875-.84 1.875-1.875V4.125c0-1.036-.84-1.875-1.875-1.875h-.75ZM9.75 8.625c0-1.036.84-1.875 1.875-1.875h.75c1.036 0 1.875.84 1.875 1.875v11.25c0 1.035-.84 1.875-1.875 1.875h-.75a1.875 1.875 0 0 1-1.875-1.875V8.625ZM3 13.125c0-1.036.84-1.875 1.875-1.875h.75c1.036 0 1.875.84 1.875 1.875v6.75c0 1.035-.84 1.875-1.875 1.875h-.75A1.875 1.875 0 0 1 3 19.875v-6.75Z"/>
-            </svg>
-            <span>Polls</span>
+            <i class="fa-solid fa-chart-bar"></i><span>Polls</span>
         </a>
         <a href="chat.html" class="nav-item">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" style="width:24px;height:24px;">
-                <path fill-rule="evenodd" d="M4.848 2.771A49.144 49.144 0 0 1 12 2.25c2.43 0 4.817.178 7.152.52 1.978.292 3.348 2.024 3.348 3.97v6.02c0 1.946-1.37 3.678-3.348 3.97a48.901 48.901 0 0 1-3.476.383.39.39 0 0 0-.297.17l-2.755 4.133a.75.75 0 0 1-1.248 0l-2.755-4.133a.39.39 0 0 0-.297-.17 48.9 48.9 0 0 1-3.476-.384c-1.978-.29-3.348-2.024-3.348-3.97V6.741c0-1.946 1.37-3.68 3.348-3.97Z" clip-rule="evenodd"/>
-            </svg>
-            <span>Chat</span>
+            <i class="fa-solid fa-comments"></i><span>Chat</span>
         </a>
         <a href="profile.html" class="nav-item">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" style="width:24px;height:24px;">
-                <path fill-rule="evenodd" d="M7.5 6a4.5 4.5 0 1 1 9 0 4.5 4.5 0 0 1-9 0ZM3.751 20.105a8.25 8.25 0 0 1 16.498 0 .75.75 0 0 1-.437.695A18.683 18.683 0 0 1 12 22.5c-2.786 0-5.433-.608-7.812-1.7a.75.75 0 0 1-.437-.695Z" clip-rule="evenodd"/>
-            </svg>
-            <span>Profile</span>
-        </a>
-        <a href="admin.html" class="nav-item" id="adminTab" style="display:none;">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" style="width:24px;height:24px;">
-                <path fill-rule="evenodd" d="M10.788 3.21c.448-1.077 1.976-1.077 2.424 0l2.082 5.007 5.404.433c1.164.093 1.636 1.545.749 2.305l-4.117 3.527 1.257 5.273c.271 1.136-.964 2.033-1.96 1.425L12 18.354 7.373 21.18c-.996.608-2.231-.29-1.96-1.425l1.257-5.273-4.117-3.527c-.887-.76-.415-2.212.749-2.305l5.404-.433 2.082-5.006z" clip-rule="evenodd"/>
-            </svg>
-            <span>Admin</span>
+            <i class="fa-solid fa-user"></i><span>Profile</span>
         </a>
     </nav>
 
     <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { initializeApp }   from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
         import {
             getFirestore, collection, getDocs,
-            doc, updateDoc, deleteDoc, serverTimestamp
+            doc, updateDoc, deleteDoc
         } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
         const firebaseConfig = {
@@ -548,60 +552,145 @@
         const auth = getAuth(app);
         const db   = getFirestore(app);
 
-        /* ── haptic feedback ── */
-        const vibrate = () => navigator.vibrate?.(60);
+        /* ── Haptic ── */
+        const vib = () => navigator.vibrate?.(50);
 
-        let allAnime = [];
-        let currentType = 'anime';
-        let tempSelectedScore = 0;
-        const container = document.getElementById('listContainer');
+        /* ── Constants ── */
+        const THREE_DAYS = 3 * 24 * 60 * 60 * 1000;
 
+        let allAnime     = [];
+        let currentType  = 'anime';
+        let tempScore    = 0;
+        let currentUid   = null;
+
+        const container  = document.getElementById('listContainer');
+
+        /* ═══════════════════════════════════════
+           AUTH + LOAD
+        ═══════════════════════════════════════ */
         onAuthStateChanged(auth, async (user) => {
-            if (user) {
-                await fetchList(user.uid);
-            } else {
-                window.location.href = "login.html";
-            }
+            if (!user) { window.location.href = "login.html"; return; }
+            currentUid = user.uid;
+            await loadList(user.uid);
+            // Background: auto-fetch missing/stale episode counts
+            autoFetchEpisodes(user.uid);
         });
 
-        /* ─────────────────────────────────
-           FETCH ALL WATCHLIST DOCS
-        ───────────────────────────────── */
-        async function fetchList(uid) {
+        async function loadList(uid) {
             try {
-                const snapshot = await getDocs(collection(db, "users", uid, "watchlist"));
-                allAnime = [];
-                snapshot.forEach(d => allAnime.push({ ...d.data(), _docId: d.id }));
+                const snap = await getDocs(collection(db, "users", uid, "watchlist"));
+                allAnime   = [];
+                snap.forEach(d => allAnime.push({ ...d.data(), _docId: d.id }));
                 allAnime.sort((a, b) => (b.addedAt?.seconds || 0) - (a.addedAt?.seconds || 0));
-                document.getElementById('loading').classList.add('hidden');
+                document.getElementById('loadingSpinner').classList.add('hidden');
                 renderList('all');
             } catch (e) {
-                document.getElementById('loading').classList.add('hidden');
+                document.getElementById('loadingSpinner').classList.add('hidden');
                 console.error(e);
             }
         }
 
-        /* ─────────────────────────────────
-           TYPE SWITCHER
-        ───────────────────────────────── */
+        /* ═══════════════════════════════════════════════════════
+   AUTO FETCH EPISODE COUNTS via Gemini AI
+   - Runs silently in background after list loads
+   - Fetches counts for seasons where episodes === 0
+     OR episodesLastUpdated is older than 3 days
+   - One Gemini call per series card (batched per card)
+═══════════════════════════════════════════════════════ */
+async function autoFetchEpisodes(uid) {
+    const THREE_DAYS = 3 * 24 * 60 * 60 * 1000;
+    const now = Date.now();
+    let anyUpdate = false;
+
+    for (const anime of allAnime) {
+        if (!anime.isSeriesCard || !Array.isArray(anime.seasons)) continue;
+
+        // Collect only the seasons that need updating
+        const staleSeasons = anime.seasons.filter(sn => {
+            const lastUp = sn.episodesLastUpdated || 0;
+            return sn.episodes === 0 || (now - lastUp > THREE_DAYS);
+        });
+
+        if (staleSeasons.length === 0) continue;
+
+        showToast(`Updating ${anime.seriesName || anime.title}...`);
+
+        try {
+            // Send all stale seasons in one Gemini call
+            const res = await fetch('/api/gemini-episodes', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    seasons: staleSeasons.map(s => ({
+                        num:   s.num,
+                        title: s.title,
+                        malId: s.malId
+                    }))
+                })
+            });
+
+            if (!res.ok) { console.warn('gemini-episodes failed'); continue; }
+
+            const { results } = await res.json();
+
+            // Apply results back to anime.seasons
+            let changed = false;
+            anime.seasons = anime.seasons.map(sn => {
+                const found = results.find(r => r.num === sn.num);
+                if (found && found.episodes > 0) {
+                    changed = true;
+                    return { ...sn, episodes: found.episodes, episodesLastUpdated: now };
+                }
+                return sn;
+            });
+
+            if (changed) {
+                anyUpdate = true;
+                await updateDoc(
+                    doc(db, "users", uid, "watchlist", String(anime.malId)),
+                    { seasons: anime.seasons }
+                );
+            }
+
+        } catch (e) {
+            console.warn('Episode fetch error for', anime.seriesName, e);
+        }
+
+        // Small gap between series to be polite
+        await new Promise(r => setTimeout(r, 300));
+    }
+
+    hideToast();
+
+    if (anyUpdate) {
+        renderList(document.querySelector('.filter-btn.active')?.dataset.filter || 'all');
+    }
+}
+
+
+        /* ═══════════════════════════════════════
+           TYPE SWITCH
+        ═══════════════════════════════════════ */
         window.switchType = (type) => {
             currentType = type;
             document.getElementById('typeSwitcher').setAttribute('data-active', type);
             document.querySelectorAll('.type-btn').forEach(btn => {
-                btn.classList.toggle('active', btn.innerText.toLowerCase().includes(type));
+                btn.classList.toggle('active',
+                    (type === 'anime' && btn.innerText.includes('Anime')) ||
+                    (type === 'manga' && btn.innerText.includes('Manga'))
+                );
             });
-            renderList(document.querySelector('.filter-btn.active').dataset.filter);
+            renderList(document.querySelector('.filter-btn.active')?.dataset.filter || 'all');
         };
 
-        /* ─────────────────────────────────
+        /* ═══════════════════════════════════════
            RENDER LIST
-        ───────────────────────────────── */
+        ═══════════════════════════════════════ */
         function renderList(filter) {
             container.innerHTML = '';
-
             const filtered = allAnime.filter(a => {
-                const typeMatch = (a.type || 'anime') === currentType;
-                const sl = (a.status || '').toLowerCase();
+                const typeMatch   = (a.type || 'anime') === currentType;
+                const sl          = (a.status || '').toLowerCase();
                 const statusMatch =
                     filter === 'all'
                     || (filter === 'completed' && sl.includes('complet'))
@@ -610,406 +699,417 @@
                 return typeMatch && statusMatch;
             });
 
-            if (filtered.length === 0) {
-                document.getElementById('emptyState').classList.remove('hidden');
-                return;
-            }
-            document.getElementById('emptyState').classList.add('hidden');
+            document.getElementById('emptyState').classList.toggle('hidden', filtered.length !== 0);
 
             filtered.forEach(anime => {
                 if (anime.isSeriesCard && Array.isArray(anime.seasons) && anime.seasons.length > 0) {
                     renderBookCard(anime);
                 } else {
-                    renderLegacyCard(anime);
+                    renderSimpleCard(anime);
                 }
             });
         }
 
-        /* ══════════════════════════════════════════
-           BOOK CARD — new AI-grouped series card
-        ══════════════════════════════════════════ */
+        /* ═══════════════════════════════════════
+           BOOK CARD (multi-season)
+        ═══════════════════════════════════════ */
         function renderBookCard(anime) {
-            const sl = (anime.status || '').toLowerCase();
-            let statusColor = '#2979ff';
-            if (sl.includes('complet')) statusColor = '#00e676';
-            if (sl.includes('plan'))    statusColor = '#ffab00';
-            if (sl.includes('drop'))    statusColor = '#ff5252';
-
-            const seasons   = anime.seasons || [];
-            const totalEps  = seasons.reduce((s, sn) => s + (sn.episodes || 0), 0);
-            const watchedEps= seasons.reduce((s, sn) => s + (sn.watchedEpisodes || 0), 0);
-            const pct = totalEps > 0 ? Math.round((watchedEps / totalEps) * 100) : (sl.includes('complet') ? 100 : 0);
-            const score = anime.userScore || 0;
+            const seasons     = anime.seasons;
+            const activeNum   = anime.activeSeason || seasons[0].num;
+            const activeSn    = seasons.find(s => s.num === activeNum) || seasons[0];
+            const sl          = (anime.status || '').toLowerCase();
+            const statusColor = getStatusColor(sl);
 
             const card = document.createElement('div');
             card.className = 'book-card';
+            card.dataset.id = anime.malId;
 
-            /* Long-press to delete */
-            let touchStartY = 0, pressTimer;
-            card.ontouchstart = (e) => {
-                touchStartY = e.touches[0].clientY;
-                pressTimer = setTimeout(() => openDeleteModal(anime.malId, anime.seriesName || anime.title), 800);
-            };
-            card.ontouchmove = (e) => {
-                if (Math.abs(e.touches[0].clientY - touchStartY) > 10) clearTimeout(pressTimer);
-            };
-            card.ontouchend = () => clearTimeout(pressTimer);
+            /* Long-press → delete */
+            attachLongPress(card, () => openDeleteModal(anime.malId, anime.seriesName || anime.title));
 
-            card.innerHTML = `
-                <!-- Status stripe -->
-                <div class="book-stripe" style="background:${statusColor};"></div>
-
-                <!-- Rating button (absolute top-right) -->
-                <button class="book-rate-btn" onclick="event.stopPropagation(); openRateModal('${anime.malId}')">
-                    ${score > 0 ? score : '<i class="fa-regular fa-star" style="font-size:13px;"></i>'}
-                </button>
-
-                <!-- Header -->
-                <div class="book-header">
-                    <img class="book-cover" src="${anime.image}"
-                         onclick="location.href='details.html?id=${anime.malId}&type=${anime.type||'anime'}'">
-                    <div class="book-info">
-                        <div class="book-title"
-                             onclick="location.href='details.html?id=${anime.malId}&type=${anime.type||'anime'}'">
-                            ${anime.seriesName || anime.title}
-                        </div>
-                        <div class="book-sub-row">
-                            <span class="book-status-pill"
-                                style="background:${statusColor}22; color:${statusColor};">
-                                ${anime.status}
-                            </span>
-                            <span class="book-season-tag">
-                                <i class="fa-solid fa-layer-group"></i>
-                                ${seasons.length} Season${seasons.length !== 1 ? 's' : ''}
-                            </span>
-                        </div>
-                        <div class="book-progress-row">
-                            <div class="book-progress-track">
-                                <div class="book-progress-fill"
-                                     style="width:${pct}%; background:${statusColor};"></div>
-                            </div>
-                            <span class="book-progress-pct">
-                                ${watchedEps}/${totalEps || '?'} eps
-                            </span>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Expand toggle -->
-                <div class="book-toggle-btn" id="toggle_${anime.malId}" onclick="toggleSeasons('${anime.malId}')">
-                    <i class="fa-solid fa-list-ul" style="font-size:10px;"></i>
-                    All Seasons (${seasons.length})
-                    <i class="fa-solid fa-chevron-down chev"></i>
-                </div>
-
-                <!-- Seasons accordion -->
-                <div class="seasons-body" id="seasons_${anime.malId}">
-                    ${seasons.map(sn => buildSeasonRow(anime.malId, sn)).join('')}
-                </div>
-            `;
-
+            card.innerHTML = buildBookCardHTML(anime, seasons, activeSn, statusColor);
             container.appendChild(card);
         }
 
-        function buildSeasonRow(rootId, sn) {
-            const ep    = sn.watchedEpisodes || 0;
-            const total = sn.episodes || 0;
-            return `
-                <div class="season-row">
-                    <img class="season-thumb" src="${sn.image}"
-                         onclick="location.href='details.html?id=${sn.malId}&type=anime'">
-                    <div class="season-label-area">
-                        <div class="season-num">Season ${sn.num}</div>
-                        <div class="season-title">${sn.title}</div>
-                        <div class="season-ep-count">${total || '?'} episodes</div>
-                    </div>
-                    <div class="ep-box">
-                        <button class="ep-ctrl"
-                            onclick="updateSeasonEp('${rootId}', ${sn.num}, -1)">
-                            <i class="fa-solid fa-minus" style="font-size:9px;"></i>
-                        </button>
-                        <div class="ep-num" id="epnum_${rootId}_${sn.num}"
-                             onclick="startSeasonEdit('${rootId}', ${sn.num}, ${total}, this)">
-                            ${ep}/${total || '?'}
-                        </div>
-                        <button class="ep-ctrl"
-                            onclick="updateSeasonEp('${rootId}', ${sn.num}, 1)">
-                            <i class="fa-solid fa-plus" style="font-size:9px;"></i>
-                        </button>
-                    </div>
+        function buildBookCardHTML(anime, seasons, activeSn, statusColor) {
+            const sl         = (anime.status || '').toLowerCase();
+            const ep         = activeSn.watchedEpisodes || 0;
+            const total      = activeSn.episodes || 0;
+            const pct        = total > 0 ? Math.min(100, Math.round((ep / total) * 100)) : (sl.includes('complet') ? 100 : 0);
+            const score      = anime.userScore || 0;
+            const epText     = total > 0 ? `${ep}/${total}` : `${ep}/?`;
+            const seriesTitle = anime.seriesName || anime.title;
+
+            /* Season chips */
+            const chipsHTML = seasons.map(sn => {
+                const snDone    = sn.episodes > 0 && (sn.watchedEpisodes || 0) >= sn.episodes;
+                const isActive  = sn.num === activeSn.num;
+                const classes   = ['season-chip',
+                    isActive ? 'active' : '',
+                    snDone   ? 'done'   : ''
+                ].filter(Boolean).join(' ');
+                const checkmark = snDone && !isActive
+                    ? '<i class="fa-solid fa-check chip-check"></i>' : '';
+                return `<div class="${classes}"
+                    onclick="selectSeason('${anime.malId}', ${sn.num})">
+                    S${sn.num}${checkmark}
                 </div>`;
+            }).join('');
+
+            return `
+                <!-- Banner -->
+                <div class="book-banner">
+                    <div class="book-banner-bg"
+                         style="background-image:url('${activeSn.image}')"></div>
+                    <div class="book-banner-overlay"></div>
+
+                    <!-- Rate btn -->
+                    <button class="book-rate-btn"
+                        onclick="openRateModal('${anime.malId}')">
+                        ${score > 0 ? score : '<i class="fa-regular fa-star" style="font-size:12px;"></i>'}
+                    </button>
+
+                    <div class="book-banner-content">
+                        <img class="active-thumb" src="${activeSn.image}"
+                             onclick="location.href='details.html?id=${activeSn.malId}&type=anime'">
+                        <div class="book-banner-info">
+                            <div class="book-series-title"
+                                 onclick="location.href='details.html?id=${anime.malId}&type=anime'">
+                                ${seriesTitle}
+                            </div>
+                            <div class="active-season-label">
+                                Season ${activeSn.num} of ${seasons.length}
+                                &nbsp;·&nbsp;
+                                <span style="color:${statusColor};">${anime.status}</span>
+                            </div>
+                            <div class="banner-ep-row">
+                                <div class="banner-ep-track">
+                                    <div class="banner-ep-fill"
+                                         style="width:${pct}%; background:${statusColor};"></div>
+                                </div>
+                                <span class="banner-ep-text">${epText} ep</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Episode controls -->
+                <div class="book-ep-controls">
+                    <span class="ep-ctrl-label">
+                        <i class="fa-solid fa-play" style="font-size:8px; color:var(--primary); margin-right:4px;"></i>
+                        Episodes
+                    </span>
+                    <div class="ep-ctrl-box">
+                        <button class="ep-ctrl-btn"
+                            onclick="updateBookEp('${anime.malId}', ${activeSn.num}, -1)">
+                            <i class="fa-solid fa-minus" style="font-size:10px;"></i>
+                        </button>
+                        <div class="ep-num-display"
+                             id="epdisp_${anime.malId}_${activeSn.num}"
+                             onclick="startBookEdit('${anime.malId}', ${activeSn.num}, ${activeSn.episodes || 0}, this)">
+                            ${epText}
+                        </div>
+                        <button class="ep-ctrl-btn"
+                            onclick="updateBookEp('${anime.malId}', ${activeSn.num}, 1)">
+                            <i class="fa-solid fa-plus" style="font-size:10px;"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Season chips -->
+                <div class="season-chips-wrap">
+                    <span style="font-size:10px; font-weight:800; color:var(--dim); flex-shrink:0;">
+                        <i class="fa-solid fa-layer-group" style="font-size:9px;"></i>
+                        Seasons
+                    </span>
+                    ${chipsHTML}
+                </div>
+            `;
         }
 
-        /* ── Toggle season accordion ── */
-        window.toggleSeasons = (id) => {
-            const body   = document.getElementById('seasons_' + id);
-            const toggle = document.getElementById('toggle_' + id);
-            body.classList.toggle('open');
-            toggle.classList.toggle('open');
+        /* ── Select active season ── */
+        window.selectSeason = async (rootId, seasonNum) => {
+            vib();
+            const anime = allAnime.find(a => String(a.malId) === String(rootId));
+            if (!anime) return;
+            anime.activeSeason = seasonNum;
+
+            // Update Firestore silently
+            updateDoc(doc(db, "users", currentUid, "watchlist", String(rootId)),
+                { activeSeason: seasonNum }).catch(console.error);
+
+            // Re-render just this card
+            rerenderCard(anime);
         };
 
-        /* ── Update episode count for a season inside a book card ── */
-        window.updateSeasonEp = async (rootId, seasonNum, change) => {
-            vibrate();
-            const anime  = allAnime.find(a => String(a.malId) === String(rootId));
+        /* ── Update episode for active season of book card ── */
+        window.updateBookEp = async (rootId, seasonNum, change) => {
+            vib();
+            const anime = allAnime.find(a => String(a.malId) === String(rootId));
             if (!anime) return;
-            const sn     = anime.seasons.find(s => s.num === seasonNum);
+            const sn    = anime.seasons.find(s => s.num === seasonNum);
             if (!sn) return;
 
             const total  = sn.episodes || 0;
-            let newVal   = (sn.watchedEpisodes || 0) + change;
-            if (newVal < 0 || (total > 0 && newVal > total)) return;
-
-            /* Check if season just completed → show confirmation */
-            if (total > 0 && newVal === total) {
-                document.getElementById('pendingCompId').value    = rootId;
-                document.getElementById('pendingCompVal').value   = newVal;
-                document.getElementById('pendingCompSeason').value= seasonNum;
-                document.getElementById('completedTitle').innerText =
-                    `Mark Season ${seasonNum} as finished?`;
-                document.getElementById('completedModal').classList.add('show');
-                return;
-            }
+            let newVal   = Math.max(0, (sn.watchedEpisodes || 0) + change);
+            if (total > 0 && newVal > total) return;
 
             sn.watchedEpisodes = newVal;
-            await saveSeasons(anime);
-            refreshBookCard(anime);
+
+            // Check if season just finished
+            if (total > 0 && newVal >= total) {
+                document.getElementById('pendingCompId').value     = rootId;
+                document.getElementById('pendingCompVal').value    = newVal;
+                document.getElementById('pendingCompSeason').value = seasonNum;
+
+                const nextSn = anime.seasons.find(s => s.num > seasonNum);
+                document.getElementById('completedTitle').innerText =
+                    `Season ${seasonNum} complete! 🎉`;
+                document.getElementById('completedSubtitle').innerText =
+                    nextSn
+                        ? `Move to Season ${nextSn.num}?`
+                        : `Mark "${anime.seriesName || anime.title}" as Completed?`;
+
+                document.getElementById('completedModal').classList.add('show');
+            } else {
+                await saveAndRerender(anime);
+            }
         };
 
         /* ── Inline edit for episode number ── */
-        window.startSeasonEdit = (rootId, seasonNum, total, el) => {
-            vibrate();
+        window.startBookEdit = (rootId, seasonNum, totalEps, el) => {
+            vib();
             const anime = allAnime.find(a => String(a.malId) === String(rootId));
             const sn    = anime?.seasons?.find(s => s.num === seasonNum);
             if (!sn) return;
 
             const input = document.createElement('input');
             input.type  = 'number';
-            input.className = 'ep-edit-input';
+            input.className = 'ep-num-edit';
             input.value = sn.watchedEpisodes || 0;
-            el.innerHTML = '';
-            el.appendChild(input);
-            input.focus();
-            input.select();
+            el.replaceWith(input);
+            input.focus(); input.select();
 
-            input.onblur = async () => {
+            const commit = async () => {
                 let val = parseInt(input.value);
                 if (isNaN(val) || val < 0) val = sn.watchedEpisodes || 0;
-                if (total > 0 && val > total) val = total;
+                if (totalEps > 0 && val > totalEps) val = totalEps;
                 sn.watchedEpisodes = val;
-                await saveSeasons(anime);
-                refreshBookCard(anime);
+                await saveAndRerender(anime);
             };
-            input.onkeydown = (e) => { if (e.key === 'Enter') input.blur(); };
+            input.onblur   = commit;
+            input.onkeydown = e => { if (e.key === 'Enter') input.blur(); };
         };
 
-        /* Save updated seasons array to Firestore */
-        async function saveSeasons(anime) {
-            try {
-                const uid = auth.currentUser?.uid;
-                if (!uid) return;
-                await updateDoc(
-                    doc(db, "users", uid, "watchlist", String(anime.malId)),
-                    { seasons: anime.seasons }
-                );
-            } catch (e) { console.error(e); }
-        }
-
-        /* Re-render only the affected card (no full re-render needed) */
-        function refreshBookCard(anime) {
-            const existingCard = container.querySelector(`[data-cardid="${anime.malId}"]`);
-            // Simple: re-render full list to keep it clean
-            renderList(document.querySelector('.filter-btn.active').dataset.filter);
-        }
-
-        /* ── Season completion confirm ── */
+        /* ── Completion confirm ── */
         window.confirmCompletion = async () => {
             const rootId    = document.getElementById('pendingCompId').value;
             const newVal    = parseInt(document.getElementById('pendingCompVal').value);
             const seasonNum = parseInt(document.getElementById('pendingCompSeason').value);
             const anime     = allAnime.find(a => String(a.malId) === String(rootId));
+            closeModal('completedModal');
+            if (!anime) return;
 
-            if (anime && anime.isSeriesCard) {
-                const sn = anime.seasons?.find(s => s.num === seasonNum);
+            if (anime.isSeriesCard) {
+                const sn = anime.seasons.find(s => s.num === seasonNum);
                 if (sn) sn.watchedEpisodes = newVal;
-                /* If all seasons done → mark overall as completed */
-                const allDone = anime.seasons.every(s =>
-                    (s.episodes > 0) && (s.watchedEpisodes >= s.episodes)
-                );
-                if (allDone) anime.status = 'Completed';
-                await updateDoc(
-                    doc(db, "users", auth.currentUser.uid, "watchlist", String(rootId)),
-                    { seasons: anime.seasons, ...(allDone ? { status: 'Completed' } : {}) }
-                );
-            } else if (anime) {
-                /* Legacy card */
+
+                // Auto-advance to next season
+                const nextSn = anime.seasons.find(s => s.num > seasonNum);
+                if (nextSn) {
+                    anime.activeSeason = nextSn.num;
+                } else {
+                    // All seasons done → mark whole series completed
+                    anime.status = 'Completed';
+                }
+                await saveAndRerender(anime, true);
+            } else {
+                // Legacy single card
                 anime.watchedEpisodes = newVal;
                 anime.status = 'completed';
                 await updateDoc(
-                    doc(db, "users", auth.currentUser.uid, "watchlist", String(rootId)),
+                    doc(db, "users", currentUid, "watchlist", String(rootId)),
                     { watchedEpisodes: newVal, status: 'completed' }
                 );
+                renderList(document.querySelector('.filter-btn.active')?.dataset.filter || 'all');
             }
-
-            closeModal('completedModal');
-            renderList(document.querySelector('.filter-btn.active').dataset.filter);
         };
 
-        /* ══════════════════════════════════════════
-           LEGACY CARD — old entries without seasons
-        ══════════════════════════════════════════ */
-        function renderLegacyCard(anime) {
+        /* Save season data + re-render card */
+        async function saveAndRerender(anime, saveStatus = false) {
+            try {
+                const payload = {
+                    seasons:       anime.seasons,
+                    activeSeason:  anime.activeSeason || anime.seasons[0].num
+                };
+                if (saveStatus) payload.status = anime.status;
+                await updateDoc(
+                    doc(db, "users", currentUid, "watchlist", String(anime.malId)),
+                    payload
+                );
+            } catch (e) { console.error(e); }
+            rerenderCard(anime);
+        }
+
+        /* Re-render only one card in-place */
+        function rerenderCard(anime) {
+            const existing = container.querySelector(`[data-id="${anime.malId}"]`);
+            if (!existing) return;
+
+            const seasons     = anime.seasons;
+            const activeNum   = anime.activeSeason || seasons[0].num;
+            const activeSn    = seasons.find(s => s.num === activeNum) || seasons[0];
+            const sl          = (anime.status || '').toLowerCase();
+            const statusColor = getStatusColor(sl);
+
+            existing.innerHTML = buildBookCardHTML(anime, seasons, activeSn, statusColor);
+            attachLongPress(existing, () => openDeleteModal(anime.malId, anime.seriesName || anime.title));
+        }
+
+        /* ═══════════════════════════════════════
+           SIMPLE CARD (legacy / manga / single ep)
+        ═══════════════════════════════════════ */
+        function renderSimpleCard(anime) {
             const watched = anime.watchedEpisodes || 0;
             const total   = anime.totalEpisodes || anime.episodes || 0;
             const score   = anime.userScore || 0;
-            const season  = anime.season || 1;
-            const labelText = currentType === 'manga' ? 'V' : 'S';
-
-            const sl = (anime.status || '').toLowerCase();
-            let statusColor = '#2979ff';
-            if (sl.includes('complet')) statusColor = '#00e676';
-            if (sl.includes('plan'))    statusColor = '#ffab00';
-            if (sl.includes('drop'))    statusColor = '#ff5252';
-
-            let progressWidth = sl.includes('complet') ? 100
-                : (total > 0 ? (watched / total) * 100 : 0);
+            const sl      = (anime.status || '').toLowerCase();
+            const statusColor = getStatusColor(sl);
+            const pct     = sl.includes('complet') ? 100 : total > 0 ? (watched / total) * 100 : 0;
+            const epText  = total > 0 ? `${watched}/${total}` : `${watched}/?`;
+            const labelLetter = currentType === 'manga' ? 'V' : 'S';
+            const seasonVal   = anime.season || 1;
 
             const div = document.createElement('div');
-            div.className = 'mal-card';
-            div.style.borderLeftColor = statusColor;
+            div.className  = 'simple-card';
+            div.dataset.id = anime.malId;
 
-            let touchStartY = 0, pressTimer;
-            div.ontouchstart = (e) => {
-                touchStartY = e.touches[0].clientY;
-                pressTimer = setTimeout(() => openDeleteModal(anime.malId, anime.title), 800);
-            };
-            div.ontouchmove = (e) => {
-                if (Math.abs(e.touches[0].clientY - touchStartY) > 10) clearTimeout(pressTimer);
-            };
-            div.ontouchend = () => clearTimeout(pressTimer);
+            attachLongPress(div, () => openDeleteModal(anime.malId, anime.title));
 
             div.innerHTML = `
-                <img src="${anime.image}" class="mal-img"
+                <div class="simple-status-bar" style="background:${statusColor};"></div>
+                <img src="${anime.image}" class="simple-cover"
                      onclick="location.href='details.html?id=${anime.malId}&type=${anime.type||'anime'}'">
-                <div class="mal-info"
+                <div class="simple-info"
                      onclick="location.href='details.html?id=${anime.malId}&type=${anime.type||'anime'}'">
-                    <div class="mal-title">${anime.title}</div>
-                    <div class="mal-meta">
-                        <span class="status-label" style="color:${statusColor};">${anime.status}</span>
-                    </div>
+                    <div class="simple-title">${anime.title}</div>
+                    <span class="simple-status-pill"
+                        style="background:${statusColor}20; color:${statusColor};">
+                        ${anime.status}
+                    </span>
                 </div>
-                <div class="controls-wrapper">
-                    <div class="btn-rate"
+                <div class="simple-controls">
+                    <div class="simple-rate-btn"
                          onclick="event.stopPropagation(); openRateModal('${anime.malId}')">
                         ${score > 0 ? score : '<i class="fa-regular fa-star"></i>'}
                     </div>
-                    <div class="ep-control-box" style="border-color:#444;">
-                        <button class="ctrl-btn" onclick="legacyUpdateSeason('${anime.malId}',-1)">
-                            <i class="fa-solid fa-minus"></i>
+                    <div class="simple-ep-box" style="width:90px;">
+                        <button class="simple-ctrl-btn"
+                            onclick="simpleUpdateSeason('${anime.malId}', -1)">
+                            <i class="fa-solid fa-minus" style="font-size:9px;"></i>
                         </button>
-                        <div class="sn-display"
-                             onclick="legacyStartEdit('${anime.malId}','season',this)">
-                            <span class="label-tiny">${labelText}</span>${season}
+                        <div class="simple-ep-display"
+                             onclick="simpleStartEdit('${anime.malId}','season',this)">
+                            ${labelLetter}${seasonVal}
                         </div>
-                        <button class="ctrl-btn" onclick="legacyUpdateSeason('${anime.malId}',1)">
-                            <i class="fa-solid fa-plus"></i>
+                        <button class="simple-ctrl-btn"
+                            onclick="simpleUpdateSeason('${anime.malId}', 1)">
+                            <i class="fa-solid fa-plus" style="font-size:9px;"></i>
                         </button>
                     </div>
-                    <div class="ep-control-box">
-                        <button class="ctrl-btn" onclick="legacyUpdateEp('${anime.malId}',-1)">
-                            <i class="fa-solid fa-minus"></i>
+                    <div class="simple-ep-box">
+                        <button class="simple-ctrl-btn"
+                            onclick="simpleUpdateEp('${anime.malId}', -1)">
+                            <i class="fa-solid fa-minus" style="font-size:9px;"></i>
                         </button>
-                        <div class="ep-display"
-                             onclick="legacyStartEdit('${anime.malId}','watchedEpisodes',this)">
-                            ${watched}/${total || '?'}
+                        <div class="simple-ep-display"
+                             onclick="simpleStartEdit('${anime.malId}','watchedEpisodes',this)">
+                            ${epText}
                         </div>
-                        <button class="ctrl-btn" onclick="legacyUpdateEp('${anime.malId}',1)">
-                            <i class="fa-solid fa-plus"></i>
+                        <button class="simple-ctrl-btn"
+                            onclick="simpleUpdateEp('${anime.malId}', 1)">
+                            <i class="fa-solid fa-plus" style="font-size:9px;"></i>
                         </button>
                     </div>
                 </div>
-                <div class="progress-line"
-                     style="width:${progressWidth}%; background:${statusColor};"></div>
+                <div class="simple-progress"
+                     style="width:${pct}%; background:${statusColor};"></div>
             `;
             container.appendChild(div);
         }
 
-        window.legacyUpdateSeason = async (id, change) => {
-            vibrate();
+        window.simpleUpdateSeason = async (id, change) => {
+            vib();
             const anime = allAnime.find(a => String(a.malId) === String(id));
-            let newVal  = (anime.season || 1) + change;
-            if (newVal < 1) return;
-            await updateDoc(doc(db, "users", auth.currentUser.uid, "watchlist", String(id)),
-                { season: newVal });
+            let newVal  = Math.max(1, (anime.season || 1) + change);
             anime.season = newVal;
-            renderList(document.querySelector('.filter-btn.active').dataset.filter);
+            await updateDoc(doc(db, "users", currentUid, "watchlist", String(id)), { season: newVal });
+            renderList(document.querySelector('.filter-btn.active')?.dataset.filter || 'all');
         };
 
-        window.legacyUpdateEp = async (id, change) => {
-            vibrate();
+        window.simpleUpdateEp = async (id, change) => {
+            vib();
             const anime = allAnime.find(a => String(a.malId) === String(id));
             const total = anime.totalEpisodes || anime.episodes || 0;
-            let newVal  = (anime.watchedEpisodes || 0) + change;
-            if (newVal < 0 || (total > 0 && newVal > total)) return;
+            let newVal  = Math.max(0, (anime.watchedEpisodes || 0) + change);
+            if (total > 0 && newVal > total) return;
 
-            if (total > 0 && newVal === total && !anime.status?.includes('complet')) {
-                document.getElementById('pendingCompId').value    = id;
-                document.getElementById('pendingCompVal').value   = newVal;
+            if (total > 0 && newVal === total) {
+                document.getElementById('pendingCompId').value     = id;
+                document.getElementById('pendingCompVal').value    = newVal;
                 document.getElementById('pendingCompSeason').value = '';
-                document.getElementById('completedTitle').innerText = `Mark "${anime.title}" as Completed?`;
+                document.getElementById('completedTitle').innerText = `${anime.title} — Done!`;
+                document.getElementById('completedSubtitle').innerText = 'Mark as Completed?';
                 document.getElementById('completedModal').classList.add('show');
+                anime.watchedEpisodes = newVal;
                 return;
             }
-            await updateDoc(doc(db, "users", auth.currentUser.uid, "watchlist", String(id)),
-                { watchedEpisodes: newVal });
             anime.watchedEpisodes = newVal;
-            renderList(document.querySelector('.filter-btn.active').dataset.filter);
+            await updateDoc(doc(db, "users", currentUid, "watchlist", String(id)),
+                { watchedEpisodes: newVal });
+            renderList(document.querySelector('.filter-btn.active')?.dataset.filter || 'all');
         };
 
-        window.legacyStartEdit = function(id, field, element) {
-            vibrate();
-            const anime    = allAnime.find(a => String(a.malId) === String(id));
-            const currentVal = field === 'season' ? (anime.season || 1) : (anime.watchedEpisodes || 0);
-            const input    = document.createElement('input');
-            input.type     = 'number';
-            input.className = 'edit-input';
-            input.value    = currentVal;
-            element.innerHTML = '';
-            element.appendChild(input);
-            input.focus();
+        window.simpleStartEdit = function(id, field, el) {
+            vib();
+            const anime = allAnime.find(a => String(a.malId) === String(id));
+            const curr  = field === 'season' ? (anime.season || 1) : (anime.watchedEpisodes || 0);
+            const input = document.createElement('input');
+            input.type  = 'number'; input.className = 'ep-num-edit';
+            input.style.cssText = 'width:60px; height:100%; border-radius:0;';
+            input.value = curr;
+            el.replaceWith(input); input.focus();
             input.onblur = async () => {
-                let newVal = parseInt(input.value) || currentVal;
-                await updateDoc(
-                    doc(db, "users", auth.currentUser.uid, "watchlist", String(id)),
-                    { [field]: newVal }
-                );
-                anime[field] = newVal;
-                renderList(document.querySelector('.filter-btn.active').dataset.filter);
+                const val = parseInt(input.value) || curr;
+                anime[field] = val;
+                await updateDoc(doc(db, "users", currentUid, "watchlist", String(id)), { [field]: val });
+                renderList(document.querySelector('.filter-btn.active')?.dataset.filter || 'all');
             };
+            input.onkeydown = e => { if (e.key === 'Enter') input.blur(); };
         };
 
-        /* ─────────────────────────────────
-           FILTER + COMMON ACTIONS
-        ───────────────────────────────── */
-        window.filterList = (status, btn) => {
+        /* ═══════════════════════════════════════
+           FILTER + COMMON
+        ═══════════════════════════════════════ */
+        window.filterList = (filter, btn) => {
             document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
             btn.classList.add('active');
-            renderList(status);
+            renderList(filter);
         };
 
         window.openRateModal = (id) => {
             const anime = allAnime.find(a => String(a.malId) === String(id));
-            document.getElementById('rateId').value  = id;
+            document.getElementById('rateId').value        = id;
             document.getElementById('rateTitle').innerText = anime.seriesName || anime.title;
-            tempSelectedScore = anime.userScore || 0;
+            tempScore = anime.userScore || 0;
             const grid = document.getElementById('ratingOptions');
             grid.innerHTML = '';
             for (let i = 1; i <= 10; i++) {
                 const item = document.createElement('div');
-                item.className = `rating-item ${i === tempSelectedScore ? 'selected' : ''}`;
+                item.className = `rating-item${i === tempScore ? ' selected' : ''}`;
                 item.innerText = i;
                 item.onclick   = () => {
-                    tempSelectedScore = i;
+                    tempScore = i;
                     document.querySelectorAll('.rating-item').forEach(el => el.classList.remove('selected'));
                     item.classList.add('selected');
                 };
@@ -1020,31 +1120,62 @@
 
         window.saveRating = async () => {
             const id    = document.getElementById('rateId').value;
-            await updateDoc(
-                doc(db, "users", auth.currentUser.uid, "watchlist", String(id)),
-                { userScore: tempSelectedScore }
-            );
             const anime = allAnime.find(a => String(a.malId) === String(id));
-            if (anime) anime.userScore = tempSelectedScore;
+            if (anime) anime.userScore = tempScore;
+            await updateDoc(doc(db, "users", currentUid, "watchlist", String(id)),
+                { userScore: tempScore });
             closeModal('rateModal');
-            renderList(document.querySelector('.filter-btn.active').dataset.filter);
+            renderList(document.querySelector('.filter-btn.active')?.dataset.filter || 'all');
         };
 
         window.openDeleteModal = (id, title) => {
             document.getElementById('deleteId').value    = id;
-            document.getElementById('deleteTitle').innerText = `"${title}" will be removed.`;
+            document.getElementById('deleteTitle').innerText = `"${title}" will be removed from your list.`;
             document.getElementById('deleteModal').classList.add('show');
         };
 
         window.confirmDelete = async () => {
             const id = document.getElementById('deleteId').value;
-            await deleteDoc(doc(db, "users", auth.currentUser.uid, "watchlist", String(id)));
+            await deleteDoc(doc(db, "users", currentUid, "watchlist", String(id)));
             allAnime = allAnime.filter(a => String(a.malId) !== String(id));
             closeModal('deleteModal');
-            renderList(document.querySelector('.filter-btn.active').dataset.filter);
+            renderList(document.querySelector('.filter-btn.active')?.dataset.filter || 'all');
         };
 
-        window.closeModal = (id) => document.getElementById(id).classList.remove('show');
+        window.closeModal = id => document.getElementById(id).classList.remove('show');
+
+        /* ═══════════════════════════════════════
+           HELPERS
+        ═══════════════════════════════════════ */
+        function getStatusColor(sl) {
+            if (sl.includes('complet')) return '#4ade80';
+            if (sl.includes('plan'))    return '#fb923c';
+            if (sl.includes('drop'))    return '#f87171';
+            return '#60a5fa'; // watching
+        }
+
+        function attachLongPress(el, callback) {
+            let timer, startY = 0;
+            el.ontouchstart = e => {
+                startY = e.touches[0].clientY;
+                timer  = setTimeout(callback, 800);
+            };
+            el.ontouchmove  = e => {
+                if (Math.abs(e.touches[0].clientY - startY) > 12) clearTimeout(timer);
+            };
+            el.ontouchend   = () => clearTimeout(timer);
+        }
+
+        function delay(ms) { return new Promise(r => setTimeout(r, ms)); }
+
+        function showToast(msg) {
+            const t = document.getElementById('fetchToast');
+            document.getElementById('fetchToastMsg').innerText = msg;
+            t.classList.add('show');
+        }
+        function hideToast() {
+            document.getElementById('fetchToast').classList.remove('show');
+        }
     </script>
 </body>
 </html>
