@@ -515,19 +515,39 @@
     <!-- Bottom Nav -->
     <nav class="bottom-nav">
         <a href="index.html" class="nav-item">
-            <i class="fa-solid fa-house"></i><span>Home</span>
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" style="width:24px;height:24px;">
+                <path d="M11.47 3.841a.75.75 0 0 1 1.06 0l8.69 8.69a.75.75 0 1 0 1.06-1.061l-8.689-8.69a2.25 2.25 0 0 0-3.182 0l-8.69 8.69a.75.75 0 1 0 1.061 1.06l8.69-8.689Z"/>
+                <path d="m12 5.432 8.159 8.159c.03.03.06.058.091.086v6.198c0 1.035-.84 1.875-1.875 1.875H15a.75.75 0 0 1-.75-.75v-4.5a.75.75 0 0 0-.75-.75h-3a.75.75 0 0 0-.75.75V21a.75.75 0 0 1-.75.75H5.625a1.875 1.875 0 0 1-1.875-1.875v-6.198a2.29 2.29 0 0 0 .091-.086L12 5.432Z"/>
+            </svg>
+            <span>Home</span>
         </a>
         <a href="watchlist.html" class="nav-item active">
-            <i class="fa-solid fa-bookmark"></i><span>List</span>
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" style="width:24px;height:24px;">
+                <path fill-rule="evenodd" d="M6.32 2.577a49.255 49.255 0 0 1 11.36 0c1.497.174 2.57 1.46 2.57 2.93V21a.75.75 0 0 1-1.085.67L12 18.089l-7.165 3.583A.75.75 0 0 1 3.75 21V5.507c0-1.47 1.073-2.756 2.57-2.93Z" clip-rule="evenodd"/>
+            </svg>
+            <span>List</span>
         </a>
         <a href="poll.html" class="nav-item">
-            <i class="fa-solid fa-chart-bar"></i><span>Polls</span>
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" style="width:24px;height:24px;">
+                <path d="M18.375 2.25c-1.035 0-1.875.84-1.875 1.875v15.75c0 1.035.84 1.875 1.875 1.875h.75c1.035 0 1.875-.84 1.875-1.875V4.125c0-1.036-.84-1.875-1.875-1.875h-.75ZM9.75 8.625c0-1.036.84-1.875 1.875-1.875h.75c1.036 0 1.875.84 1.875 1.875v11.25c0 1.035-.84 1.875-1.875 1.875h-.75a1.875 1.875 0 0 1-1.875-1.875V8.625ZM3 13.125c0-1.036.84-1.875 1.875-1.875h.75c1.036 0 1.875.84 1.875 1.875v6.75c0 1.035-.84 1.875-1.875 1.875h-.75A1.875 1.875 0 0 1 3 19.875v-6.75Z"/>
+            </svg>
+            <span>Polls</span>
         </a>
         <a href="chat.html" class="nav-item">
-            <i class="fa-solid fa-comments"></i><span>Chat</span>
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" style="width:24px;height:24px;">
+                <path fill-rule="evenodd" d="M4.848 2.771A49.144 49.144 0 0 1 12 2.25c2.43 0 4.817.178 7.152.52 1.978.292 3.348 2.024 3.348 3.97v6.02c0 1.946-1.37 3.678-3.348 3.97a48.901 48.901 0 0 1-3.476.383.39.39 0 0 0-.297.17l-2.755 4.133a.75.75 0 0 1-1.248 0l-2.755-4.133a.39.39 0 0 0-.297-.17 48.9 48.9 0 0 1-3.476-.384c-1.978-.29-3.348-2.024-3.348-3.97V6.741c0-1.946 1.37-3.68 3.348-3.97Z" clip-rule="evenodd"/>
+            </svg>
+            <span>Chat</span>
         </a>
         <a href="profile.html" class="nav-item">
-            <i class="fa-solid fa-user"></i><span>Profile</span>
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" style="width:24px;height:24px;">
+                <path fill-rule="evenodd" d="M7.5 6a4.5 4.5 0 1 1 9 0 4.5 4.5 0 0 1-9 0ZM3.751 20.105a8.25 8.25 0 0 1 16.498 0 .75.75 0 0 1-.437.695A18.683 18.683 0 0 1 12 22.5c-2.786 0-5.433-.608-7.812-1.7a.75.75 0 0 1-.437-.695Z" clip-rule="evenodd"/>
+            </svg>
+            <span>Profile</span>
+        </a>
+        <a href="admin.html" class="nav-item" id="adminTab" style="display:none;">
+            <i class="fa-solid fa-crown"></i>
+            <span>Admin</span>
         </a>
     </nav>
 
@@ -556,7 +576,8 @@
         const vib = () => navigator.vibrate?.(50);
 
         /* ── Constants ── */
-        const THREE_DAYS = 3 * 24 * 60 * 60 * 1000;
+        const THREE_HOURS = 3 * 60 * 60 * 1000;
+        const THREE_DAYS  = 3 * 24 * 60 * 60 * 1000;
 
         let allAnime     = [];
         let currentType  = 'anime';
@@ -590,83 +611,114 @@
             }
         }
 
-        /* ═══════════════════════════════════════════════════════
-   AUTO FETCH EPISODE COUNTS via Gemini AI
-   - Runs silently in background after list loads
-   - Fetches counts for seasons where episodes === 0
-     OR episodesLastUpdated is older than 3 days
-   - One Gemini call per series card (batched per card)
-═══════════════════════════════════════════════════════ */
-async function autoFetchEpisodes(uid) {
-    const THREE_DAYS = 3 * 24 * 60 * 60 * 1000;
-    const now = Date.now();
-    let anyUpdate = false;
+        /* ═══════════════════════════════════════════════════════════
+           AUTO FETCH EPISODE COUNTS via Gemini AI (background)
 
-    for (const anime of allAnime) {
-        if (!anime.isSeriesCard || !Array.isArray(anime.seasons)) continue;
+           Logic:
+           - Ongoing anime  → har 3 GHANTE update (latest ep track karo)
+           - Finished anime → har 3 DIN update (stable count)
+           - "Ongoing" = kisi bhi season ka episodes count 0 hai
+             ya Jikan se pata chala hai ki airing hai
 
-        // Collect only the seasons that need updating
-        const staleSeasons = anime.seasons.filter(sn => {
-            const lastUp = sn.episodesLastUpdated || 0;
-            return sn.episodes === 0 || (now - lastUp > THREE_DAYS);
-        });
+           Flow:
+           1. Sare stale seasons ek series ke liye ek Gemini call me bhejo
+           2. Gemini latest ep count + airing status batata hai
+           3. Firestore me save karo timestamp ke saath
+           4. 3 ghante baad automatically phir se update
+        ═══════════════════════════════════════════════════════════ */
+        async function autoFetchEpisodes(uid) {
+            const now = Date.now();
+            let anyUpdate = false;
 
-        if (staleSeasons.length === 0) continue;
+            for (const anime of allAnime) {
+                if (!anime.isSeriesCard || !Array.isArray(anime.seasons)) continue;
 
-        showToast(`Updating ${anime.seriesName || anime.title}...`);
+                // Determine staleness threshold per season:
+                // Ongoing (episodes=0 OR isAiring=true) → 3 hours
+                // Finished → 3 days
+                const staleSeasons = anime.seasons.filter(sn => {
+                    const lastUp   = sn.episodesLastUpdated || 0;
+                    const isOngoing = sn.isAiring || sn.episodes === 0;
+                    const threshold = isOngoing ? THREE_HOURS : THREE_DAYS;
+                    return (now - lastUp) > threshold;
+                });
 
-        try {
-            // Send all stale seasons in one Gemini call
-            const res = await fetch('/api/gemini-episodes', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    seasons: staleSeasons.map(s => ({
-                        num:   s.num,
-                        title: s.title,
-                        malId: s.malId
-                    }))
-                })
-            });
+                if (staleSeasons.length === 0) continue;
 
-            if (!res.ok) { console.warn('gemini-episodes failed'); continue; }
+                showToast(`Checking ${anime.seriesName || anime.title}...`);
 
-            const { results } = await res.json();
+                try {
+                    const res = await fetch('/api/gemini-episodes', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            seasons: staleSeasons.map(s => ({
+                                num:      s.num,
+                                title:    s.title,
+                                malId:    s.malId,
+                                isOngoing: s.isAiring || s.episodes === 0
+                            }))
+                        })
+                    });
 
-            // Apply results back to anime.seasons
-            let changed = false;
-            anime.seasons = anime.seasons.map(sn => {
-                const found = results.find(r => r.num === sn.num);
-                if (found && found.episodes > 0) {
-                    changed = true;
-                    return { ...sn, episodes: found.episodes, episodesLastUpdated: now };
+                    if (!res.ok) { console.warn('gemini-episodes failed'); continue; }
+
+                    const { results } = await res.json();
+                    let changed = false;
+
+                    anime.seasons = anime.seasons.map(sn => {
+                        const found = results?.find(r => r.num === sn.num);
+                        if (!found) return sn;
+
+                        const updated = {
+                            ...sn,
+                            episodesLastUpdated: now
+                        };
+
+                        // Update episode count if Gemini gave one
+                        if (found.episodes > 0) {
+                            updated.episodes = found.episodes;
+                        }
+
+                        // Track airing status for future threshold decisions
+                        if (typeof found.isAiring === 'boolean') {
+                            updated.isAiring = found.isAiring;
+                        }
+
+                        // Latest aired episode for ongoing anime
+                        if (found.latestEpisode > 0) {
+                            updated.latestEpisode = found.latestEpisode;
+                        }
+
+                        changed = true;
+                        return updated;
+                    });
+
+                    if (changed) {
+                        anyUpdate = true;
+                        await updateDoc(
+                            doc(db, "users", uid, "watchlist", String(anime.malId)),
+                            { seasons: anime.seasons }
+                        );
+                    }
+
+                } catch (e) {
+                    console.warn('Episode AI fetch error:', anime.seriesName, e);
                 }
-                return sn;
-            });
 
-            if (changed) {
-                anyUpdate = true;
-                await updateDoc(
-                    doc(db, "users", uid, "watchlist", String(anime.malId)),
-                    { seasons: anime.seasons }
-                );
+                // Small gap between series
+                await new Promise(r => setTimeout(r, 300));
             }
 
-        } catch (e) {
-            console.warn('Episode fetch error for', anime.seriesName, e);
+            hideToast();
+
+            if (anyUpdate) {
+                renderList(document.querySelector('.filter-btn.active')?.dataset.filter || 'all');
+            }
+
+            // Schedule next run in 3 hours (for ongoing anime)
+            setTimeout(() => autoFetchEpisodes(uid), THREE_HOURS);
         }
-
-        // Small gap between series to be polite
-        await new Promise(r => setTimeout(r, 300));
-    }
-
-    hideToast();
-
-    if (anyUpdate) {
-        renderList(document.querySelector('.filter-btn.active')?.dataset.filter || 'all');
-    }
-}
-
 
         /* ═══════════════════════════════════════
            TYPE SWITCH
@@ -732,31 +784,77 @@ async function autoFetchEpisodes(uid) {
         }
 
         function buildBookCardHTML(anime, seasons, activeSn, statusColor) {
-            const sl         = (anime.status || '').toLowerCase();
-            const ep         = activeSn.watchedEpisodes || 0;
-            const total      = activeSn.episodes || 0;
-            const pct        = total > 0 ? Math.min(100, Math.round((ep / total) * 100)) : (sl.includes('complet') ? 100 : 0);
-            const score      = anime.userScore || 0;
-            const epText     = total > 0 ? `${ep}/${total}` : `${ep}/?`;
+            const sl          = (anime.status || '').toLowerCase();
+            const ep          = activeSn.watchedEpisodes || 0;
+            const total       = activeSn.episodes || 0;
+            const latest      = activeSn.latestEpisode || total;   // Latest aired ep
+            const isOngoing   = activeSn.isAiring === true;
+            const score       = anime.userScore || 0;
             const seriesTitle = anime.seriesName || anime.title;
+
+            // Progress % based on total (not latest)
+            const pct = total > 0
+                ? Math.min(100, Math.round((ep / total) * 100))
+                : (sl.includes('complet') ? 100 : 0);
+
+            // Ep display: "watched/total" — for ongoing also show latest aired badge
+            const epText = total > 0 ? `${ep}/${total}` : `${ep}/?`;
+
+            // "New Ep" badge: show if latest > watched (user has unwatched new eps)
+            const hasNewEp     = isOngoing && latest > 0 && ep < latest;
+            const newEpBadge   = hasNewEp
+                ? `<span style="
+                    background:#ef4444; color:white;
+                    font-size:9px; font-weight:900;
+                    padding:2px 7px; border-radius:20px;
+                    margin-left:6px; letter-spacing:0.3px;
+                    animation: pulse 1.5s infinite;">
+                    EP ${latest} OUT
+                  </span>`
+                : '';
+
+            // Ongoing live dot
+            const airingDot = isOngoing
+                ? `<span style="
+                    display:inline-flex; align-items:center; gap:3px;
+                    font-size:9px; font-weight:800; color:#4ade80; margin-left:6px;">
+                    <span style="width:6px;height:6px;background:#4ade80;
+                        border-radius:50%;display:inline-block;
+                        animation:pulse 1.5s infinite;"></span>
+                    AIRING
+                  </span>`
+                : '';
 
             /* Season chips */
             const chipsHTML = seasons.map(sn => {
-                const snDone    = sn.episodes > 0 && (sn.watchedEpisodes || 0) >= sn.episodes;
-                const isActive  = sn.num === activeSn.num;
-                const classes   = ['season-chip',
-                    isActive ? 'active' : '',
-                    snDone   ? 'done'   : ''
+                const snDone      = sn.episodes > 0 && (sn.watchedEpisodes || 0) >= sn.episodes;
+                const snOngoing   = sn.isAiring === true;
+                const snHasNewEp  = snOngoing && (sn.latestEpisode||0) > (sn.watchedEpisodes||0);
+                const isActive    = sn.num === activeSn.num;
+                const classes     = ['season-chip',
+                    isActive   ? 'active' : '',
+                    snDone     ? 'done'   : ''
                 ].filter(Boolean).join(' ');
-                const checkmark = snDone && !isActive
-                    ? '<i class="fa-solid fa-check chip-check"></i>' : '';
+
+                const chipExtra = snDone && !isActive
+                    ? '<i class="fa-solid fa-check chip-check"></i>'
+                    : snHasNewEp && !isActive
+                        ? '<span style="width:5px;height:5px;background:#ef4444;border-radius:50%;display:inline-block;margin-left:4px;"></span>'
+                        : '';
+
                 return `<div class="${classes}"
                     onclick="selectSeason('${anime.malId}', ${sn.num})">
-                    S${sn.num}${checkmark}
+                    S${sn.num}${chipExtra}
                 </div>`;
             }).join('');
 
             return `
+                <style>
+                  @keyframes pulse {
+                    0%,100%{opacity:1} 50%{opacity:0.4}
+                  }
+                </style>
+
                 <!-- Banner -->
                 <div class="book-banner">
                     <div class="book-banner-bg"
@@ -777,10 +875,11 @@ async function autoFetchEpisodes(uid) {
                                  onclick="location.href='details.html?id=${anime.malId}&type=anime'">
                                 ${seriesTitle}
                             </div>
-                            <div class="active-season-label">
+                            <div class="active-season-label" style="display:flex;align-items:center;flex-wrap:wrap;gap:2px;">
                                 Season ${activeSn.num} of ${seasons.length}
                                 &nbsp;·&nbsp;
                                 <span style="color:${statusColor};">${anime.status}</span>
+                                ${airingDot}
                             </div>
                             <div class="banner-ep-row">
                                 <div class="banner-ep-track">
@@ -795,9 +894,10 @@ async function autoFetchEpisodes(uid) {
 
                 <!-- Episode controls -->
                 <div class="book-ep-controls">
-                    <span class="ep-ctrl-label">
-                        <i class="fa-solid fa-play" style="font-size:8px; color:var(--primary); margin-right:4px;"></i>
+                    <span class="ep-ctrl-label" style="display:flex;align-items:center;">
+                        <i class="fa-solid fa-play" style="font-size:8px;color:var(--primary);margin-right:4px;"></i>
                         Episodes
+                        ${newEpBadge}
                     </span>
                     <div class="ep-ctrl-box">
                         <button class="ep-ctrl-btn"
@@ -806,7 +906,7 @@ async function autoFetchEpisodes(uid) {
                         </button>
                         <div class="ep-num-display"
                              id="epdisp_${anime.malId}_${activeSn.num}"
-                             onclick="startBookEdit('${anime.malId}', ${activeSn.num}, ${activeSn.episodes || 0}, this)">
+                             onclick="startBookEdit('${anime.malId}', ${activeSn.num}, ${activeSn.episodes||0}, this)">
                             ${epText}
                         </div>
                         <button class="ep-ctrl-btn"
@@ -818,7 +918,7 @@ async function autoFetchEpisodes(uid) {
 
                 <!-- Season chips -->
                 <div class="season-chips-wrap">
-                    <span style="font-size:10px; font-weight:800; color:var(--dim); flex-shrink:0;">
+                    <span style="font-size:10px;font-weight:800;color:var(--dim);flex-shrink:0;">
                         <i class="fa-solid fa-layer-group" style="font-size:9px;"></i>
                         Seasons
                     </span>
