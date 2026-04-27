@@ -6,98 +6,160 @@ export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
 
   const { title } = req.body;
-  if (!title) return res.status(400).json({ error: 'Title is required' });
+  if (!title) return res.status(400).json({ error: 'Title required' });
 
   const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
-  if (!GEMINI_API_KEY) return res.status(500).json({ error: 'GEMINI_API_KEY not configured' });
+  if (!GEMINI_API_KEY) return res.status(500).json({ error: 'GEMINI_API_KEY not set' });
 
-  const prompt = `Search the internet and find complete information about the anime "${title}".
+  // ── STEP 1: Gemini → season names list ──
+  const prompt = `You are a MyAnimeList expert. For the anime "${title}", list all separate TV seasons on MyAnimeList.
 
-Find ALL separate TV seasons on MyAnimeList and their CURRENT episode counts.
-
-Return ONLY this exact JSON (no markdown, no explanation, just raw JSON):
+Return ONLY this raw JSON (no markdown):
 {
   "seriesName": "Clean English series name",
   "seasons": [
-    {
-      "num": 1,
-      "query": "Exact Japanese romanized title as on MAL",
-      "episodes": 1159,
-      "isAiring": true,
-      "latestEpisode": 1159
-    }
+    { "num": 1, "query": "Exact MAL Japanese romanized title" }
   ]
 }
 
-STRICT RULES:
-- Only main TV series (NO Movies, OVAs, Specials)
-- seriesName = clean English title
-- query = exact MAL search title (Japanese romanized)
-- episodes = REAL current episode count. Search the internet to get accurate number. NEVER use 0
-- For One Piece: episodes is 1000+, currently airing
-- For long-running single-entry anime (One Piece, Naruto, Bleach) that are NOT split into multiple seasons on MAL: return exactly 1 item
-- isAiring = true only if actively airing new episodes right now in 2025/2026
-- latestEpisode = latest actually aired episode number
+Rules:
+- Only TV series (no movies/OVA/specials)
+- query = exact title as it appears on MAL
+- For long-running single-entry anime (One Piece, Naruto, Bleach, Dragon Ball Z) return just 1 item
 - Return ONLY raw JSON, nothing else`;
 
+  let seasonsFromGemini = null;
   try {
-    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GEMINI_API_KEY}`;
-    
-    const response = await fetch(url, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        contents: [{ parts: [{ text: prompt }] }],
-        tools: [{ google_search: {} }],  // ← Real-time internet search
-        generationConfig: { temperature: 0.1, maxOutputTokens: 1024 }
-      })
-    });
-
-    const data = await response.json();
-    
-    if (data.error) {
-      console.error('Gemini seasons error:', data.error);
-      // Fallback without search
-      return await fallbackSeasons(res, title, GEMINI_API_KEY, prompt);
-    }
-
-    let raw = data?.candidates?.[0]?.content?.parts?.[0]?.text?.trim() || '';
+    const gRes = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${GEMINI_API_KEY}`,
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          contents: [{ parts: [{ text: prompt }] }],
+          generationConfig: { temperature: 0, maxOutputTokens: 512 }
+        })
+      }
+    );
+    const gData = await gRes.json();
+    let raw = gData?.candidates?.[0]?.content?.parts?.[0]?.text?.trim() || '';
     raw = raw.replace(/^```json\s*/i,'').replace(/^```\s*/i,'').replace(/\s*```$/i,'').trim();
-    const jsonMatch = raw.match(/\{[\s\S]*\}/);
-    if (jsonMatch) raw = jsonMatch[0];
-
-    const parsed = JSON.parse(raw);
-    if (!parsed.seriesName || !Array.isArray(parsed.seasons) || parsed.seasons.length === 0)
-      return res.status(500).json({ error: 'Invalid Gemini response' });
-
-    console.log('Gemini seasons result:', JSON.stringify(parsed));
-    return res.status(200).json(parsed);
-
-  } catch (err) {
-    console.error('gemini-seasons error:', err);
-    return await fallbackSeasons(res, title, GEMINI_API_KEY, prompt);
-  }
-}
-
-async function fallbackSeasons(res, title, apiKey, prompt) {
-  try {
-    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
-    const response = await fetch(url, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        contents: [{ parts: [{ text: prompt }] }],
-        generationConfig: { temperature: 0.1, maxOutputTokens: 1024 }
-      })
-    });
-    const data = await response.json();
-    let raw = data?.candidates?.[0]?.content?.parts?.[0]?.text?.trim() || '';
-    raw = raw.replace(/^```json\s*/i,'').replace(/^```\s*/i,'').replace(/\s*```$/i,'').trim();
-    const jsonMatch = raw.match(/\{[\s\S]*\}/);
-    if (jsonMatch) raw = jsonMatch[0];
-    const parsed = JSON.parse(raw);
-    return res.status(200).json(parsed);
+    const match = raw.match(/\{[\s\S]*\}/);
+    if (match) raw = match[0];
+    seasonsFromGemini = JSON.parse(raw);
   } catch(e) {
-    return res.status(500).json({ error: 'Gemini fallback failed: ' + e.message });
+    console.error('Gemini error:', e);
+    return res.status(500).json({ error: 'Gemini failed: ' + e.message });
   }
+
+  if (!seasonsFromGemini?.seriesName || !Array.isArray(seasonsFromGemini.seasons)) {
+    return res.status(500).json({ error: 'Invalid Gemini response' });
+  }
+
+  // ── STEP 2: For each season → Jikan (malId+image) + AniList (episodes) ──
+  const finalSeasons = [];
+
+  for (let i = 0; i < seasonsFromGemini.seasons.length; i++) {
+    const s = seasonsFromGemini.seasons[i];
+    if (i > 0) await new Promise(r => setTimeout(r, 350));
+
+    let malId   = null;
+    let image   = '';
+    let episodes = 0;
+    let isAiring = false;
+    let latestEpisode = 0;
+
+    // Jikan → malId + image
+    try {
+      const jRes  = await fetch(
+        `https://api.jikan.moe/v4/anime?q=${encodeURIComponent(s.query)}&type=tv&limit=5&sfw`
+      );
+      const jData = await jRes.json();
+      if (jData.data?.length > 0) {
+        const lq   = s.query.toLowerCase();
+        const best = jData.data.find(a =>
+          (a.title||'').toLowerCase() === lq ||
+          (a.title_english||'').toLowerCase() === lq
+        ) || jData.data[0];
+
+        malId    = best.mal_id;
+        image    = best.images?.jpg?.image_url || '';
+        isAiring = best.airing || false;
+
+        // Jikan episodes (works for finished anime)
+        if (best.episodes && best.episodes > 0) {
+          episodes      = best.episodes;
+          latestEpisode = best.episodes;
+        }
+      }
+    } catch(e) { console.warn('Jikan failed for:', s.query); }
+
+    // AniList → exact current episode (works for ONGOING anime)
+    // Overrides Jikan episode count with real-time data
+    try {
+      const aniQuery = `{
+        Media(search: ${JSON.stringify(s.query)}, type: ANIME, format_in: [TV]) {
+          episodes
+          status
+          nextAiringEpisode { episode }
+          airingSchedule(notYetAired: false, perPage: 1, sort: TIME_DESC) {
+            nodes { episode }
+          }
+        }
+      }`;
+
+      const aRes = await fetch('https://graphql.anilist.co', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+        body: JSON.stringify({ query: aniQuery })
+      });
+      const aData = await aRes.json();
+      const media = aData?.data?.Media;
+
+      if (media) {
+        const status = media.status; // FINISHED, RELEASING, NOT_YET_RELEASED
+
+        if (status === 'FINISHED' && media.episodes) {
+          // Finished anime — use total episodes
+          episodes      = media.episodes;
+          latestEpisode = media.episodes;
+          isAiring      = false;
+        } else if (status === 'RELEASING') {
+          isAiring = true;
+          // Latest aired = nextAiring.episode - 1
+          if (media.nextAiringEpisode?.episode) {
+            latestEpisode = media.nextAiringEpisode.episode - 1;
+            episodes      = latestEpisode; // current count
+          }
+          // Or from airing schedule
+          else if (media.airingSchedule?.nodes?.[0]?.episode) {
+            latestEpisode = media.airingSchedule.nodes[0].episode;
+            episodes      = latestEpisode;
+          }
+          // Fallback: AniList total if set
+          else if (media.episodes) {
+            episodes      = media.episodes;
+            latestEpisode = media.episodes;
+          }
+        }
+      }
+    } catch(e) { console.warn('AniList failed for:', s.query); }
+
+    finalSeasons.push({
+      num:           s.num,
+      malId:         malId,
+      title:         s.query,
+      episodes:      episodes,
+      isAiring:      isAiring,
+      latestEpisode: latestEpisode,
+      watchedEpisodes: 0,
+      image:         image,
+      episodesLastUpdated: Date.now()
+    });
+  }
+
+  return res.status(200).json({
+    seriesName: seasonsFromGemini.seriesName,
+    seasons:    finalSeasons
+  });
 }
