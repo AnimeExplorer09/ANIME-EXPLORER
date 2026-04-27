@@ -7,256 +7,137 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         :root {
-            --primary: #5738B0;
-            --primary-glow: #5738B04d;
-            --primary-soft: #5738B01a;
-            --bg: #0f1014;
-            --card: #1a1c22;
-            --card2: #13151d;
-            --border: #ffffff0f;
-            --border-p: #5738B040;
-            --dim: #94a3b8;
-            --text: #e2e8f0;
+            --primary:#5738B0;--primary-glow:#5738B04d;--primary-soft:#5738B01a;
+            --bg:#0f1014;--card:#1a1c22;--card2:#13151d;
+            --border:#ffffff0f;--border-p:#5738B040;--dim:#94a3b8;--text:#e2e8f0;
         }
-
-        * { box-sizing: border-box; margin: 0; padding: 0; }
-
-        body {
-            background: var(--bg);
-            color: var(--text);
-            font-family: 'Segoe UI', sans-serif;
-            padding-bottom: 60px;
-            overflow-y: auto;
-            min-height: 100vh;
-        }
-
-        /* ── LOADING ── */
-        #loading {
-            height: 100vh;
-            display: flex; justify-content: center; align-items: center;
-            flex-direction: column; gap: 14px;
-        }
-        .loader-ring {
-            width: 48px; height: 48px;
-            border: 3px solid #5738B030;
-            border-top-color: var(--primary);
-            border-radius: 50%;
-            animation: spin 0.8s linear infinite;
-        }
-        @keyframes spin { to { transform: rotate(360deg); } }
-        #loading p { color: var(--dim); font-size: 13px; font-weight: 600; }
-
-        .hidden { display: none !important; }
-
-        /* ── BACK BUTTON ── */
-        .back-btn {
-            position: fixed; top: 16px; left: 16px; z-index: 200;
-            width: 38px; height: 38px;
-            background: #000000cc;
-            border-radius: 12px;
-            display: flex; align-items: center; justify-content: center;
-            color: white; text-decoration: none;
-            backdrop-filter: blur(10px);
-            border: 1px solid #ffffff1a;
-            transition: 0.2s;
-        }
-        .back-btn:active { background: var(--primary); transform: scale(0.93); }
-
-        /* ── BANNER ── */
-        .banner-container { position: relative; width: 100%; height: 280px; }
-        .banner-img {
-            width: 100%; height: 100%; object-fit: cover; opacity: 0.35;
-            mask-image: linear-gradient(to bottom, black 20%, transparent 100%);
-            -webkit-mask-image: linear-gradient(to bottom, black 20%, transparent 100%);
-        }
-        .banner-overlay {
-            position: absolute; inset: 0;
-            background: linear-gradient(to bottom, #0f101400 40%, #0f1014 100%);
-        }
-
-        /* ── CONTENT ── */
-        .content-container { padding: 0 16px 0; margin-top: -130px; position: relative; z-index: 10; }
-
-        /* ── HEADER FLEX ── */
-        .header-flex { display: flex; gap: 15px; align-items: flex-end; margin-bottom: 20px; }
-        .poster-wrap { position: relative; flex-shrink: 0; }
-        .poster-img {
-            width: 115px; border-radius: 12px;
-            box-shadow: 0 8px 30px #00000099, 0 0 0 2px #5738B040;
-            display: block; background: var(--card2);
-        }
-        .poster-status-badge {
-            position: absolute; bottom: -8px; left: 50%; transform: translateX(-50%);
-            background: var(--primary); color: white; font-size: 9px; font-weight: 800;
-            padding: 3px 10px; border-radius: 20px; white-space: nowrap;
-            letter-spacing: 0.5px; text-transform: uppercase;
-        }
-        .header-info { flex: 1; padding-bottom: 4px; }
-        .title { font-size: 17px; font-weight: 800; line-height: 1.3; color: white; text-shadow: 0 2px 10px #00000099; margin-bottom: 8px; }
-        .genres { display: flex; flex-wrap: wrap; gap: 5px; margin-bottom: 10px; }
-        .genre-tag { background: var(--primary-soft); border: 1px solid var(--border-p); color: #b39dff; padding: 3px 9px; border-radius: 6px; font-size: 10px; font-weight: 600; }
-
-        /* ── STATS BOX ── */
-        .stats-box { display: flex; background: var(--card); border: 1px solid var(--border-p); border-radius: 16px; overflow: hidden; margin-bottom: 16px; }
-        .stat-item { flex: 1; text-align: center; padding: 14px 8px; position: relative; }
-        .stat-item:not(:last-child)::after { content: ''; position: absolute; right: 0; top: 20%; bottom: 20%; width: 1px; background: var(--border); }
-        .stat-val { display: block; font-size: 15px; font-weight: 800; color: white; margin-bottom: 3px; }
-        .stat-label { font-size: 10px; color: var(--dim); text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600; }
-
-        /* ── COMPACT RATING CARD ── */
-        .rating-card { background: var(--card); border: 1px solid var(--border-p); border-radius: 16px; margin-bottom: 16px; overflow: hidden; }
-        .rating-top { display: flex; align-items: stretch; padding: 12px 14px; gap: 10px; }
-        .score-chip { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1px; min-width: 60px; }
-        .score-chip-label { font-size: 9px; font-weight: 800; letter-spacing: 0.6px; text-transform: uppercase; color: var(--dim); }
-        .score-chip-val { font-size: 22px; font-weight: 900; color: white; line-height: 1; }
-        .score-chip-val.na { font-size: 14px; color: var(--dim); }
-        .score-chip-sub { font-size: 9px; color: var(--dim); text-align: center; }
-        .score-chip-stars { display: flex; gap: 1px; margin-top: 1px; }
-        .score-chip-stars i { font-size: 7px; }
-        .score-chip.mal .score-chip-label { color: #6a8fd8; }
-        .score-chip.comm .score-chip-label { color: #a78bfa; }
-        .score-chip.comm .score-chip-val { color: #c4b5fd; }
-        .v-sep { width: 1px; background: var(--border); align-self: stretch; flex-shrink: 0; }
-        .rate-btn-compact {
-            flex: 1; background: var(--primary-soft); border: 1px solid var(--border-p);
-            border-radius: 10px; color: white; display: flex; flex-direction: column;
-            align-items: center; justify-content: center; gap: 4px; cursor: pointer;
-            font-family: inherit; padding: 10px 8px; transition: 0.2s; position: relative; overflow: hidden;
-        }
-        .rate-btn-compact:active { background: var(--primary); transform: scale(0.97); }
-        .rate-btn-compact i { font-size: 16px; color: #ffd700; }
-        .rate-btn-compact .rbtn-label { font-size: 10px; font-weight: 800; letter-spacing: 0.3px; }
-        .rate-btn-compact.user-rated { background: #ffd70010; border-color: #ffd70035; }
-        .user-score-chip { background: var(--primary); color: white; font-size: 9px; font-weight: 800; padding: 2px 6px; border-radius: 20px; }
-        .rating-meta-row { display: flex; align-items: center; justify-content: space-between; padding: 0 14px 10px; }
-        .votes-pill { background: var(--primary-soft); border: 1px solid var(--border-p); color: #a78bfa; font-size: 9px; font-weight: 800; padding: 3px 8px; border-radius: 20px; letter-spacing: 0.4px; display: flex; align-items: center; gap: 4px; }
-        .votes-pill i { font-size: 8px; }
-        .dist-mini-wrap { border-top: 1px solid var(--border); padding: 10px 14px 12px; }
-        .dist-mini-title { font-size: 9px; font-weight: 800; color: var(--dim); text-transform: uppercase; letter-spacing: 0.7px; margin-bottom: 8px; }
-        .dist-mini-grid { display: flex; align-items: flex-end; gap: 3px; height: 36px; }
-        .dist-col { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; gap: 3px; height: 100%; }
-        .dist-col-bar-bg { width: 100%; flex: 1; border-radius: 3px 3px 0 0; display: flex; align-items: flex-end; overflow: hidden; }
-        .dist-col-bar-fill { width: 100%; border-radius: 3px 3px 0 0; transition: height 0.7s cubic-bezier(.4,0,.2,1); height: 0%; }
-        .dist-col-num { font-size: 8px; font-weight: 700; color: var(--dim); line-height: 1; }
-
-        /* ── ACTION CARD ── */
-        .action-card { background: var(--card); border: 1px solid var(--border-p); border-radius: 16px; padding: 16px; margin-bottom: 16px; }
-        .action-card-label { font-size: 11px; color: var(--dim); font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 10px; }
-        .form-group { display: flex; gap: 10px; }
-        select { background: var(--card2); color: white; border: 1px solid var(--border-p); padding: 12px 14px; border-radius: 12px; flex: 1; outline: none; font-size: 13px; font-family: inherit; transition: 0.2s; }
-        select:focus { border-color: var(--primary); }
-        .add-btn { background: var(--primary); color: white; border: none; padding: 0 20px; border-radius: 12px; font-weight: 700; font-size: 13px; display: flex; align-items: center; gap: 8px; cursor: pointer; transition: 0.2s; white-space: nowrap; min-width: 90px; justify-content: center; }
-        .add-btn:active { transform: scale(0.96); opacity: 0.9; }
-        .add-btn.added { background: #16a34a; }
-        .add-btn:disabled { opacity: 0.65; }
-
-        /* ── AI status message ── */
-        #aiStatusMsg {
-            margin-top: 8px;
-            font-size: 11px;
-            color: #a78bfa;
-            font-weight: 600;
-            min-height: 16px;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-        }
-
-        /* ── SECTION ── */
-        .section { margin-bottom: 24px; }
-        .section-title { font-size: 13px; font-weight: 800; color: var(--dim); text-transform: uppercase; letter-spacing: 1px; display: flex; align-items: center; gap: 8px; margin-bottom: 12px; }
-        .section-title i { color: var(--primary); font-size: 12px; }
-        .section-title::after { content: ''; flex: 1; height: 1px; background: var(--border); }
-
-        /* ── SYNOPSIS ── */
-        .synopsis-text { font-size: 14px; line-height: 1.75; color: #b0b7c5; }
-        .synopsis-text.clamped { display: -webkit-box; -webkit-line-clamp: 4; -webkit-box-orient: vertical; overflow: hidden; }
-        .read-more-btn { background: none; border: none; color: var(--primary); font-size: 13px; font-weight: 700; cursor: pointer; margin-top: 6px; padding: 0; display: flex; align-items: center; gap: 5px; font-family: inherit; }
-
-        /* ── TRAILER ── */
-        .trailer-wrap { width: 100%; border-radius: 14px; overflow: hidden; border: 1px solid var(--border-p); aspect-ratio: 16/9; background: #000; }
-        .trailer-wrap iframe { width: 100%; height: 100%; border: none; }
-
-        /* ── CHARACTERS ── */
-        .char-card { display: flex; justify-content: space-between; align-items: center; background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 10px 12px; margin-bottom: 8px; animation: fadeUp 0.3s ease both; }
-        @keyframes fadeUp { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
-        .char-side { display: flex; align-items: center; gap: 10px; }
-        .char-img { width: 46px; height: 58px; border-radius: 8px; object-fit: cover; background: var(--card2); }
-        .char-name { font-size: 13px; font-weight: 700; color: white; }
-        .char-role { font-size: 10px; color: var(--primary); font-weight: 700; text-transform: uppercase; letter-spacing: 0.3px; margin-top: 2px; }
-        .char-va { font-size: 11px; color: var(--dim); margin-top: 1px; }
-
-        /* ── RECOMMENDATIONS ── */
-        .rec-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
-        .rec-card { background: var(--card); border-radius: 12px; overflow: hidden; cursor: pointer; border: 1px solid var(--border); transition: 0.2s; animation: fadeUp 0.35s ease both; }
-        .rec-card:active { transform: scale(0.97); border-color: var(--border-p); }
-        .rec-card img { width: 100%; height: 120px; object-fit: cover; display: block; }
-        .rec-title { font-size: 11px; padding: 7px 8px; color: var(--text); font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-
-        /* ── COMMENTS ── */
-        .comment-input-wrap { background: var(--card); border: 1.5px solid var(--border-p); border-radius: 14px; padding: 12px; margin-bottom: 16px; transition: 0.2s; }
-        .comment-input-wrap:focus-within { border-color: var(--primary); box-shadow: 0 0 0 3px #5738B01f; }
-        #commentInput { width: 100%; background: transparent; color: white; border: none; font-family: inherit; font-size: 14px; outline: none; resize: none; line-height: 1.6; }
-        #commentInput::placeholder { color: #ffffff33; }
-        .comment-footer { display: flex; justify-content: space-between; align-items: center; margin-top: 10px; }
-        .char-count { font-size: 11px; color: var(--dim); }
-        .post-btn { background: var(--primary); color: white; border: none; padding: 8px 18px; border-radius: 10px; font-size: 12px; font-weight: 700; cursor: pointer; font-family: inherit; display: flex; align-items: center; gap: 6px; transition: 0.2s; }
-        .post-btn:active { transform: scale(0.95); opacity: 0.9; }
-        .comment-card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 12px 14px; animation: fadeUp 0.3s ease both; }
-        .comment-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 7px; }
-        .comment-user { font-size: 13px; font-weight: 700; color: var(--primary); }
-        .comment-meta { display: flex; align-items: center; gap: 10px; }
-        .comment-time { font-size: 10px; color: var(--dim); }
-        .comment-del { color: #ff6b6b; font-size: 12px; cursor: pointer; background: none; border: none; padding: 2px; transition: 0.2s; }
-        .comment-del:active { transform: scale(0.9); }
-        .comment-text { font-size: 13px; color: #b0b7c5; line-height: 1.55; }
-
-        /* ── RATING MODAL ── */
-        .modal-overlay { position: fixed; inset: 0; background: #000000cc; z-index: 2000; display: flex; justify-content: center; align-items: center; visibility: hidden; opacity: 0; transition: 0.25s; backdrop-filter: blur(8px); }
-        .modal-overlay.show { visibility: visible; opacity: 1; }
-        .modal-box { background: var(--card); width: 90%; max-width: 340px; border-radius: 22px; padding: 24px 20px; text-align: center; border: 1px solid var(--border-p); transform: scale(0.85); transition: 0.25s; box-shadow: 0 20px 60px #00000099; }
-        .modal-overlay.show .modal-box { transform: scale(1); }
-        .modal-icon { width: 48px; height: 48px; background: var(--primary-soft); border: 1px solid var(--border-p); border-radius: 14px; display: flex; align-items: center; justify-content: center; font-size: 20px; color: #ffd700; margin: 0 auto 12px; }
-        .modal-box h3 { font-size: 16px; font-weight: 800; color: white; margin-bottom: 4px; }
-        .modal-box p { font-size: 12px; color: var(--dim); }
-        .star-row { display: flex; justify-content: center; gap: 4px; margin: 16px 0 6px; }
-        .star-item { font-size: 22px; cursor: pointer; color: #ffffff20; transition: transform 0.15s, color 0.15s; line-height: 1; }
-        .star-item.lit { color: #ffd700; }
-        .star-item:active { transform: scale(1.25); }
-        .rating-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; margin: 12px 0; }
-        .rating-item { background: var(--card2); border: 1px solid var(--border); padding: 10px 5px; border-radius: 10px; font-size: 14px; font-weight: 800; color: var(--dim); cursor: pointer; transition: 0.2s; }
-        .rating-item.selected { background: var(--primary); color: white; border-color: var(--primary); transform: scale(1.08); box-shadow: 0 4px 16px var(--primary-glow); }
-        .selected-rating-label { font-size: 12px; color: var(--dim); margin-bottom: 14px; min-height: 18px; }
-        .selected-rating-label span { color: white; font-weight: 700; }
-        .btn-save-rate { background: var(--primary); color: white; font-weight: 800; border: none; padding: 13px; border-radius: 12px; width: 100%; font-size: 14px; cursor: pointer; font-family: inherit; transition: 0.2s; }
-        .btn-save-rate:active { opacity: 0.85; transform: scale(0.98); }
-        .btn-cancel-rate { margin-top: 10px; background: transparent; color: var(--dim); border: none; font-size: 13px; font-weight: 600; cursor: pointer; width: 100%; font-family: inherit; }
-
-        #commentsList { display: flex; flex-direction: column; gap: 10px; }
+        *{box-sizing:border-box;margin:0;padding:0;}
+        body{background:var(--bg);color:var(--text);font-family:'Segoe UI',sans-serif;padding-bottom:60px;min-height:100vh;}
+        .hidden{display:none!important;}
+        #loading{height:100vh;display:flex;justify-content:center;align-items:center;flex-direction:column;gap:14px;}
+        .loader-ring{width:48px;height:48px;border:3px solid #5738B030;border-top-color:var(--primary);border-radius:50%;animation:spin .8s linear infinite;}
+        @keyframes spin{to{transform:rotate(360deg);}}
+        #loading p{color:var(--dim);font-size:13px;font-weight:600;}
+        .back-btn{position:fixed;top:16px;left:16px;z-index:200;width:38px;height:38px;background:#000000cc;border-radius:12px;display:flex;align-items:center;justify-content:center;color:white;text-decoration:none;backdrop-filter:blur(10px);border:1px solid #ffffff1a;transition:.2s;}
+        .back-btn:active{background:var(--primary);transform:scale(.93);}
+        .banner-container{position:relative;width:100%;height:280px;}
+        .banner-img{width:100%;height:100%;object-fit:cover;opacity:.35;mask-image:linear-gradient(to bottom,black 20%,transparent 100%);-webkit-mask-image:linear-gradient(to bottom,black 20%,transparent 100%);}
+        .banner-overlay{position:absolute;inset:0;background:linear-gradient(to bottom,#0f101400 40%,#0f1014 100%);}
+        .content-container{padding:0 16px;margin-top:-130px;position:relative;z-index:10;}
+        .header-flex{display:flex;gap:15px;align-items:flex-end;margin-bottom:20px;}
+        .poster-wrap{position:relative;flex-shrink:0;}
+        .poster-img{width:115px;border-radius:12px;box-shadow:0 8px 30px #00000099,0 0 0 2px #5738B040;display:block;background:var(--card2);}
+        .poster-status-badge{position:absolute;bottom:-8px;left:50%;transform:translateX(-50%);background:var(--primary);color:white;font-size:9px;font-weight:800;padding:3px 10px;border-radius:20px;white-space:nowrap;letter-spacing:.5px;text-transform:uppercase;}
+        .header-info{flex:1;padding-bottom:4px;}
+        .title{font-size:17px;font-weight:800;line-height:1.3;color:white;margin-bottom:8px;}
+        .genres{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:10px;}
+        .genre-tag{background:var(--primary-soft);border:1px solid var(--border-p);color:#b39dff;padding:3px 9px;border-radius:6px;font-size:10px;font-weight:600;}
+        .stats-box{display:flex;background:var(--card);border:1px solid var(--border-p);border-radius:16px;overflow:hidden;margin-bottom:16px;}
+        .stat-item{flex:1;text-align:center;padding:14px 8px;position:relative;}
+        .stat-item:not(:last-child)::after{content:'';position:absolute;right:0;top:20%;bottom:20%;width:1px;background:var(--border);}
+        .stat-val{display:block;font-size:15px;font-weight:800;color:white;margin-bottom:3px;}
+        .stat-label{font-size:10px;color:var(--dim);text-transform:uppercase;letter-spacing:.5px;font-weight:600;}
+        .rating-card{background:var(--card);border:1px solid var(--border-p);border-radius:16px;margin-bottom:16px;overflow:hidden;}
+        .rating-top{display:flex;align-items:stretch;padding:12px 14px;gap:10px;}
+        .score-chip{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;min-width:60px;}
+        .score-chip-label{font-size:9px;font-weight:800;letter-spacing:.6px;text-transform:uppercase;color:var(--dim);}
+        .score-chip-val{font-size:22px;font-weight:900;color:white;line-height:1;}
+        .score-chip-val.na{font-size:14px;color:var(--dim);}
+        .score-chip-sub{font-size:9px;color:var(--dim);text-align:center;}
+        .score-chip-stars{display:flex;gap:1px;margin-top:1px;}
+        .score-chip-stars i{font-size:7px;}
+        .score-chip.mal .score-chip-label{color:#6a8fd8;}
+        .score-chip.comm .score-chip-label{color:#a78bfa;}
+        .score-chip.comm .score-chip-val{color:#c4b5fd;}
+        .v-sep{width:1px;background:var(--border);align-self:stretch;flex-shrink:0;}
+        .rate-btn-compact{flex:1;background:var(--primary-soft);border:1px solid var(--border-p);border-radius:10px;color:white;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;cursor:pointer;font-family:inherit;padding:10px 8px;transition:.2s;}
+        .rate-btn-compact:active{background:var(--primary);}
+        .rate-btn-compact i{font-size:16px;color:#ffd700;}
+        .rate-btn-compact .rbtn-label{font-size:10px;font-weight:800;}
+        .rate-btn-compact.user-rated{background:#ffd70010;border-color:#ffd70035;}
+        .user-score-chip{background:var(--primary);color:white;font-size:9px;font-weight:800;padding:2px 6px;border-radius:20px;}
+        .rating-meta-row{display:flex;align-items:center;justify-content:space-between;padding:0 14px 10px;}
+        .votes-pill{background:var(--primary-soft);border:1px solid var(--border-p);color:#a78bfa;font-size:9px;font-weight:800;padding:3px 8px;border-radius:20px;display:flex;align-items:center;gap:4px;}
+        .dist-mini-wrap{border-top:1px solid var(--border);padding:10px 14px 12px;}
+        .dist-mini-grid{display:flex;align-items:flex-end;gap:3px;height:36px;}
+        .dist-col{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;gap:3px;height:100%;}
+        .dist-col-bar-bg{width:100%;flex:1;border-radius:3px 3px 0 0;display:flex;align-items:flex-end;overflow:hidden;}
+        .dist-col-bar-fill{width:100%;border-radius:3px 3px 0 0;transition:height .7s cubic-bezier(.4,0,.2,1);height:0%;}
+        .dist-col-num{font-size:8px;font-weight:700;color:var(--dim);line-height:1;}
+        .action-card{background:var(--card);border:1px solid var(--border-p);border-radius:16px;padding:16px;margin-bottom:16px;}
+        .action-card-label{font-size:11px;color:var(--dim);font-weight:700;text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px;}
+        .form-group{display:flex;gap:10px;}
+        select{background:var(--card2);color:white;border:1px solid var(--border-p);padding:12px 14px;border-radius:12px;flex:1;outline:none;font-size:13px;font-family:inherit;}
+        select:focus{border-color:var(--primary);}
+        .add-btn{background:var(--primary);color:white;border:none;padding:0 20px;border-radius:12px;font-weight:700;font-size:13px;display:flex;align-items:center;gap:8px;cursor:pointer;transition:.2s;white-space:nowrap;min-width:90px;justify-content:center;}
+        .add-btn:active{transform:scale(.96);}
+        .add-btn.added{background:#16a34a;}
+        .add-btn:disabled{opacity:.7;}
+        #aiStatusMsg{margin-top:8px;font-size:11px;color:#a78bfa;font-weight:600;min-height:16px;display:flex;align-items:center;gap:6px;}
+        .section{margin-bottom:24px;}
+        .section-title{font-size:13px;font-weight:800;color:var(--dim);text-transform:uppercase;letter-spacing:1px;display:flex;align-items:center;gap:8px;margin-bottom:12px;}
+        .section-title i{color:var(--primary);font-size:12px;}
+        .section-title::after{content:'';flex:1;height:1px;background:var(--border);}
+        .synopsis-text{font-size:14px;line-height:1.75;color:#b0b7c5;}
+        .synopsis-text.clamped{display:-webkit-box;-webkit-line-clamp:4;-webkit-box-orient:vertical;overflow:hidden;}
+        .read-more-btn{background:none;border:none;color:var(--primary);font-size:13px;font-weight:700;cursor:pointer;margin-top:6px;padding:0;display:flex;align-items:center;gap:5px;font-family:inherit;}
+        .trailer-wrap{width:100%;border-radius:14px;overflow:hidden;border:1px solid var(--border-p);aspect-ratio:16/9;background:#000;}
+        .trailer-wrap iframe{width:100%;height:100%;border:none;}
+        .char-card{display:flex;justify-content:space-between;align-items:center;background:var(--card);border:1px solid var(--border);border-radius:12px;padding:10px 12px;margin-bottom:8px;animation:fadeUp .3s ease both;}
+        @keyframes fadeUp{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:translateY(0);}}
+        .char-side{display:flex;align-items:center;gap:10px;}
+        .char-img{width:46px;height:58px;border-radius:8px;object-fit:cover;background:var(--card2);}
+        .char-name{font-size:13px;font-weight:700;color:white;}
+        .char-role{font-size:10px;color:var(--primary);font-weight:700;text-transform:uppercase;letter-spacing:.3px;margin-top:2px;}
+        .char-va{font-size:11px;color:var(--dim);margin-top:1px;}
+        .rec-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;}
+        .rec-card{background:var(--card);border-radius:12px;overflow:hidden;cursor:pointer;border:1px solid var(--border);transition:.2s;animation:fadeUp .35s ease both;}
+        .rec-card:active{transform:scale(.97);border-color:var(--border-p);}
+        .rec-card img{width:100%;height:120px;object-fit:cover;display:block;}
+        .rec-title{font-size:11px;padding:7px 8px;color:var(--text);font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+        .comment-input-wrap{background:var(--card);border:1.5px solid var(--border-p);border-radius:14px;padding:12px;margin-bottom:16px;transition:.2s;}
+        .comment-input-wrap:focus-within{border-color:var(--primary);box-shadow:0 0 0 3px #5738B01f;}
+        #commentInput{width:100%;background:transparent;color:white;border:none;font-family:inherit;font-size:14px;outline:none;resize:none;line-height:1.6;}
+        #commentInput::placeholder{color:#ffffff33;}
+        .comment-footer{display:flex;justify-content:space-between;align-items:center;margin-top:10px;}
+        .char-count{font-size:11px;color:var(--dim);}
+        .post-btn{background:var(--primary);color:white;border:none;padding:8px 18px;border-radius:10px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:6px;}
+        .comment-card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:12px 14px;animation:fadeUp .3s ease both;}
+        .comment-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:7px;}
+        .comment-user{font-size:13px;font-weight:700;color:var(--primary);}
+        .comment-meta{display:flex;align-items:center;gap:10px;}
+        .comment-time{font-size:10px;color:var(--dim);}
+        .comment-del{color:#ff6b6b;font-size:12px;cursor:pointer;background:none;border:none;padding:2px;}
+        .comment-text{font-size:13px;color:#b0b7c5;line-height:1.55;}
+        .modal-overlay{position:fixed;inset:0;background:#000000cc;z-index:2000;display:flex;justify-content:center;align-items:center;visibility:hidden;opacity:0;transition:.25s;backdrop-filter:blur(8px);}
+        .modal-overlay.show{visibility:visible;opacity:1;}
+        .modal-box{background:var(--card);width:90%;max-width:340px;border-radius:22px;padding:24px 20px;text-align:center;border:1px solid var(--border-p);transform:scale(.85);transition:.25s;box-shadow:0 20px 60px #00000099;}
+        .modal-overlay.show .modal-box{transform:scale(1);}
+        .modal-icon{width:48px;height:48px;background:var(--primary-soft);border:1px solid var(--border-p);border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:20px;color:#ffd700;margin:0 auto 12px;}
+        .modal-box h3{font-size:16px;font-weight:800;color:white;margin-bottom:4px;}
+        .modal-box p{font-size:12px;color:var(--dim);}
+        .star-row{display:flex;justify-content:center;gap:4px;margin:16px 0 6px;}
+        .star-item{font-size:22px;cursor:pointer;color:#ffffff20;transition:.15s;line-height:1;}
+        .star-item.lit{color:#ffd700;}
+        .rating-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;margin:12px 0;}
+        .rating-item{background:var(--card2);border:1px solid var(--border);padding:10px 5px;border-radius:10px;font-size:14px;font-weight:800;color:var(--dim);cursor:pointer;transition:.2s;}
+        .rating-item.selected{background:var(--primary);color:white;border-color:var(--primary);transform:scale(1.08);}
+        .selected-rating-label{font-size:12px;color:var(--dim);margin-bottom:14px;min-height:18px;}
+        .selected-rating-label span{color:white;font-weight:700;}
+        .btn-save-rate{background:var(--primary);color:white;font-weight:800;border:none;padding:13px;border-radius:12px;width:100%;font-size:14px;cursor:pointer;font-family:inherit;}
+        .btn-cancel-rate{margin-top:10px;background:transparent;color:var(--dim);border:none;font-size:13px;font-weight:600;cursor:pointer;width:100%;font-family:inherit;}
+        #commentsList{display:flex;flex-direction:column;gap:10px;}
     </style>
 </head>
 <body>
-
 <a href="index.html" class="back-btn"><i class="fa-solid fa-arrow-left"></i></a>
-
-<!-- LOADING -->
-<div id="loading">
-    <div class="loader-ring"></div>
-    <p>Loading details...</p>
-</div>
-
-<!-- CONTENT -->
+<div id="loading"><div class="loader-ring"></div><p>Loading details...</p></div>
 <div id="content" class="hidden">
-
-    <!-- BANNER -->
     <div class="banner-container">
         <img id="banner" class="banner-img" src="">
         <div class="banner-overlay"></div>
     </div>
-
     <div class="content-container">
-
-        <!-- HEADER -->
         <div class="header-flex">
             <div class="poster-wrap">
                 <img id="poster" class="poster-img" src="">
@@ -267,35 +148,13 @@
                 <div id="genres" class="genres"></div>
             </div>
         </div>
-
-        <!-- STATS -->
         <div class="stats-box">
-            <div class="stat-item">
-                <span class="stat-val">
-                    <i class="fa-solid fa-star" style="color:#ffd700; font-size:11px;"></i>
-                    <span id="score">—</span>
-                </span>
-                <span class="stat-label">MAL</span>
-            </div>
-            <div class="stat-item">
-                <span class="stat-val" id="episodes">—</span>
-                <span class="stat-label" id="epsLabel">Episodes</span>
-            </div>
-            <div class="stat-item">
-                <span class="stat-val" id="year">—</span>
-                <span class="stat-label">Year</span>
-            </div>
-            <div class="stat-item">
-                <span class="stat-val" id="type" style="font-size:12px;">—</span>
-                <span class="stat-label">Type</span>
-            </div>
-            <div class="stat-item">
-                <span class="stat-val" id="airing" style="font-size:11px;">—</span>
-                <span class="stat-label">Status</span>
-            </div>
+            <div class="stat-item"><span class="stat-val"><i class="fa-solid fa-star" style="color:#ffd700;font-size:11px;"></i> <span id="score">—</span></span><span class="stat-label">MAL</span></div>
+            <div class="stat-item"><span class="stat-val" id="episodes">—</span><span class="stat-label" id="epsLabel">Episodes</span></div>
+            <div class="stat-item"><span class="stat-val" id="year">—</span><span class="stat-label">Year</span></div>
+            <div class="stat-item"><span class="stat-val" id="type" style="font-size:12px;">—</span><span class="stat-label">Type</span></div>
+            <div class="stat-item"><span class="stat-val" id="airing" style="font-size:11px;">—</span><span class="stat-label">Status</span></div>
         </div>
-
-        <!-- COMPACT RATING CARD -->
         <div class="rating-card" id="ratingPanel">
             <div class="rating-top">
                 <div class="score-chip mal">
@@ -319,22 +178,13 @@
                 </button>
             </div>
             <div class="rating-meta-row">
-                <span class="votes-pill">
-                    <i class="fa-solid fa-users"></i>
-                    <span id="totalVotesBadge">0 Votes</span>
-                </span>
-                <span style="font-size:9px; color:var(--dim); font-weight:600; letter-spacing:0.4px; text-transform:uppercase;">Score Distribution</span>
+                <span class="votes-pill"><i class="fa-solid fa-users"></i><span id="totalVotesBadge">0 Votes</span></span>
+                <span style="font-size:9px;color:var(--dim);font-weight:600;text-transform:uppercase;letter-spacing:.4px;">Score Distribution</span>
             </div>
-            <div class="dist-mini-wrap">
-                <div class="dist-mini-grid" id="distBars"></div>
-            </div>
+            <div class="dist-mini-wrap"><div class="dist-mini-grid" id="distBars"></div></div>
         </div>
-
-        <!-- ADD TO LIST -->
         <div class="action-card" id="actionCard">
-            <div class="action-card-label">
-                <i class="fa-solid fa-list" style="color:var(--primary);"></i> Add to your list
-            </div>
+            <div class="action-card-label"><i class="fa-solid fa-list" style="color:var(--primary);"></i> Add to your list</div>
             <div class="form-group">
                 <select id="statusSelect">
                     <option value="Watching">Watching</option>
@@ -347,68 +197,42 @@
                     <span id="addText">Add</span>
                 </button>
             </div>
-            <!-- AI status message shown during season detection -->
             <div id="aiStatusMsg"></div>
         </div>
-
-        <!-- SYNOPSIS -->
         <div class="section">
             <div class="section-title"><i class="fa-solid fa-book-open"></i> Synopsis</div>
             <p id="synopsis" class="synopsis-text clamped">Loading...</p>
-            <button class="read-more-btn" id="readMoreBtn">
-                <i class="fa-solid fa-chevron-down"></i> Read More
-            </button>
+            <button class="read-more-btn" id="readMoreBtn"><i class="fa-solid fa-chevron-down"></i> Read More</button>
         </div>
-
-        <!-- TRAILER -->
         <div id="trailer-section" class="section hidden">
             <div class="section-title"><i class="fa-solid fa-play"></i> Official Trailer</div>
-            <div class="trailer-wrap">
-                <iframe id="trailer-video" allowfullscreen></iframe>
-            </div>
+            <div class="trailer-wrap"><iframe id="trailer-video" allowfullscreen></iframe></div>
         </div>
-
-        <!-- CHARACTERS -->
         <div class="section">
             <div class="section-title"><i class="fa-solid fa-users"></i> Characters</div>
-            <div id="characters-list">
-                <p style="color:var(--dim); font-size:13px;">Loading characters...</p>
-            </div>
+            <div id="characters-list"><p style="color:var(--dim);font-size:13px;">Loading...</p></div>
         </div>
-
-        <!-- RECOMMENDATIONS -->
         <div class="section">
             <div class="section-title"><i class="fa-solid fa-wand-magic-sparkles"></i> You May Also Like</div>
-            <div id="recommendations-grid" class="rec-grid">
-                <p style="color:var(--dim); font-size:13px;">Loading...</p>
-            </div>
+            <div id="recommendations-grid" class="rec-grid"></div>
         </div>
-
-        <!-- COMMENTS -->
         <div class="section">
             <div class="section-title"><i class="fa-solid fa-comments"></i> Comments</div>
             <div class="comment-input-wrap">
                 <textarea id="commentInput" rows="3" placeholder="Share your thoughts..." maxlength="300"></textarea>
                 <div class="comment-footer">
                     <span class="char-count"><span id="charCount">0</span>/300</span>
-                    <button class="post-btn" id="postCommentBtn">
-                        <i class="fa-solid fa-paper-plane"></i> Post
-                    </button>
+                    <button class="post-btn" id="postCommentBtn"><i class="fa-solid fa-paper-plane"></i> Post</button>
                 </div>
             </div>
-            <div id="commentsList">
-                <p style="color:var(--dim); font-size:13px; text-align:center;">Loading comments...</p>
-            </div>
+            <div id="commentsList"></div>
         </div>
     </div>
 </div>
-
-<!-- RATING MODAL -->
 <div id="rateModal" class="modal-overlay">
     <div class="modal-box">
         <div class="modal-icon"><i class="fa-solid fa-star"></i></div>
-        <h3>Rate this Anime</h3>
-        <p>Your rating helps the community</p>
+        <h3>Rate this Anime</h3><p>Your rating helps the community</p>
         <div class="star-row" id="starRow">
             <span class="star-item" data-v="1">★</span><span class="star-item" data-v="2">★</span>
             <span class="star-item" data-v="3">★</span><span class="star-item" data-v="4">★</span>
@@ -424,662 +248,507 @@
 </div>
 
 <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-    import {
-        getFirestore, doc, setDoc, getDoc, updateDoc, collection,
-        addDoc, query, orderBy, onSnapshot, serverTimestamp, deleteDoc,
-        runTransaction, getDocs
-    } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+import {
+    getFirestore, doc, setDoc, getDoc, updateDoc, collection,
+    addDoc, query, orderBy, onSnapshot, serverTimestamp,
+    deleteDoc, runTransaction, getDocs
+} from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-    const firebaseConfig = {
-        apiKey: "AIzaSyDLd3TW-y89lwShUmcIHw3YGzDjo4cg3y4",
-        authDomain: "animea2z.firebaseapp.com",
-        projectId: "animea2z",
-        storageBucket: "animea2z.firebasestorage.app",
-        messagingSenderId: "673605765684",
-        appId: "1:673605765684:web:a6f851e0d79836b79b1861"
-    };
+const firebaseConfig = {
+    apiKey:"AIzaSyDLd3TW-y89lwShUmcIHw3YGzDjo4cg3y4",
+    authDomain:"animea2z.firebaseapp.com", projectId:"animea2z",
+    storageBucket:"animea2z.firebasestorage.app",
+    messagingSenderId:"673605765684",
+    appId:"1:673605765684:web:a6f851e0d79836b79b1861"
+};
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db   = getFirestore(app);
 
-    const app  = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
-    const db   = getFirestore(app);
+const params      = new URLSearchParams(window.location.search);
+const malId       = params.get('id');
+const contentType = params.get('type') || 'anime';
+let currentData   = null;
+let selectedRating = 0;
 
-    const params      = new URLSearchParams(window.location.search);
-    const malId       = params.get('id');
-    const contentType = params.get('type') || 'anime';
+const RATING_LABELS = {
+    1:'😞 Appalling',2:'😑 Horrible',3:'😕 Very Bad',4:'🙁 Bad',
+    5:'😐 Average',6:'🙂 Fine',7:'😊 Good',8:'😃 Very Good',
+    9:'🤩 Great',10:'⚡ Absolutely Cinema'
+};
 
-    let currentData    = null;
-    let selectedRating = 0;
-    let userPrevRating = 0;
+if (malId) fetchDetails();
 
-    const RATING_LABELS = {
-        1: '😞 Appalling', 2: '😑 Horrible',  3: '😕 Very Bad',
-        4: '🙁 Bad',       5: '😐 Average',    6: '🙂 Fine',
-        7: '😊 Good',      8: '😃 Very Good',  9: '🤩 Great',
-        10: '⚡ Absolutely Cinema'
-    };
+function timeAgo(date) {
+    const d = Date.now() - date.getTime();
+    const m = Math.floor(d/60000), h = Math.floor(d/3600000), dy = Math.floor(d/86400000);
+    if (m<1) return 'Just now'; if (m<60) return `${m}m ago`;
+    if (h<24) return `${h}h ago`; if (dy<7) return `${dy}d ago`;
+    return date.toLocaleDateString('en-GB',{day:'numeric',month:'short'});
+}
 
-    if (malId) fetchDetails();
+function setAiStatus(msg) {
+    document.getElementById('aiStatusMsg').innerHTML = msg
+        ? `<i class="fa-solid fa-circle-notch fa-spin" style="font-size:10px;"></i> ${msg}` : '';
+}
 
-    function timeAgo(date) {
-        const diff  = Date.now() - date.getTime();
-        const mins  = Math.floor(diff / 60000);
-        const hours = Math.floor(diff / 3600000);
-        const days  = Math.floor(diff / 86400000);
-        if (mins < 1)   return 'Just now';
-        if (mins < 60)  return `${mins}m ago`;
-        if (hours < 24) return `${hours}h ago`;
-        if (days < 7)   return `${days}d ago`;
-        return date.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
-    }
+async function fetchDetails() {
+    try {
+        const apiPath = contentType==='char' ? `characters/${malId}/full` : `${contentType}/${malId}/full`;
+        const res  = await fetch(`https://api.jikan.moe/v4/${apiPath}`);
+        const { data } = await res.json();
+        currentData = data;
 
-    async function fetchDetails() {
-        try {
-            const apiPath = contentType === 'char'
-                ? `characters/${malId}/full`
-                : `${contentType}/${malId}/full`;
-            const res  = await fetch(`https://api.jikan.moe/v4/${apiPath}`);
-            const { data } = await res.json();
-            currentData = data;
+        document.getElementById('loading').classList.add('hidden');
+        document.getElementById('content').classList.remove('hidden');
 
-            document.getElementById('loading').classList.add('hidden');
-            document.getElementById('content').classList.remove('hidden');
+        const title = data.title_english || data.title || data.name;
+        document.getElementById('title').innerText    = title;
+        document.getElementById('banner').src         = data.images.jpg.large_image_url || data.images.jpg.image_url;
+        document.getElementById('poster').src         = data.images.jpg.image_url;
+        document.getElementById('synopsis').innerText = data.synopsis || data.about || 'No description available.';
 
-            const title = data.title_english || data.title || data.name;
-            document.getElementById('title').innerText   = title;
-            document.getElementById('banner').src        = data.images.jpg.large_image_url || data.images.jpg.image_url;
-            document.getElementById('poster').src        = data.images.jpg.image_url;
-            document.getElementById('synopsis').innerText = data.synopsis || data.about || 'No description available.';
-
-            const malScore = data.score || null;
-            document.getElementById('score').innerText      = malScore || '—';
-            document.getElementById('malBigScore').innerText = malScore || '—';
-            if (malScore) {
-                const fullStars = Math.round(malScore / 2);
-                document.getElementById('malStars').innerHTML = Array.from({ length: 5 }, (_, i) =>
-                    `<i class="fa-solid fa-star" style="color:${i < fullStars ? '#ffd700' : '#ffffff20'}"></i>`
-                ).join('');
-                document.getElementById('malScoredBy').innerText =
-                    data.scored_by ? `${(data.scored_by / 1000).toFixed(1)}K users` : 'MAL Score';
-            }
-
-            if (data.status) {
-                const badge = document.getElementById('statusBadge');
-                badge.innerText = data.status.replace('Currently Airing', 'Airing').replace('Finished Airing', 'Finished');
-                badge.classList.remove('hidden');
-            }
-
-            const airingEl = document.getElementById('airing');
-            if (data.status) {
-                const isAiring = data.status.toLowerCase().includes('airing');
-                airingEl.innerHTML = isAiring
-                    ? `<span style="color:#4ade80;">● Airing</span>`
-                    : `<span style="color:var(--dim);">Finished</span>`;
-            }
-
-            if (contentType === 'manga') {
-                document.getElementById('epsLabel').innerText   = 'Chapters';
-                document.getElementById('episodes').innerText   = data.chapters || '?';
-                document.getElementById('type').innerText       = data.type || 'Manga';
-                document.getElementById('year').innerText       = data.published?.prop?.from?.year || '—';
-            } else if (contentType === 'char') {
-                document.getElementById('actionCard').classList.add('hidden');
-                document.getElementById('ratingPanel').classList.add('hidden');
-                document.getElementById('episodes').innerText   = 'N/A';
-                document.getElementById('year').innerText       = 'N/A';
-            } else {
-                document.getElementById('episodes').innerText   = data.episodes || '?';
-                document.getElementById('year').innerText       = data.year || '—';
-                document.getElementById('type').innerText       = data.type || 'TV';
-            }
-
-            if (data.genres) {
-                document.getElementById('genres').innerHTML = data.genres
-                    .map(g => `<span class="genre-tag">${g.name}</span>`).join('');
-            }
-
-            if (data.trailer?.embed_url) {
-                const sec   = document.getElementById('trailer-section');
-                const video = document.getElementById('trailer-video');
-                const thumb = data.trailer.images?.maximum_image_url || data.images.jpg.large_image_url;
-                const videoUrl = data.trailer.embed_url + (data.trailer.embed_url.includes('?') ? '&' : '?') + 'autoplay=1';
-                video.srcdoc = `<style>*{padding:0;margin:0;overflow:hidden}html,body{height:100%;background:#000}img,span{position:absolute;width:100%;top:0;bottom:0;margin:auto;object-fit:cover}.play{height:56px;width:56px;background:#5738B0;border-radius:50%;left:50%;top:50%;transform:translate(-50%,-50%);display:flex;align-items:center;justify-content:center;position:absolute;font-size:22px;color:white}</style><a href="${videoUrl}"><img src="${thumb}"><div class="play">▶</div></a>`;
-                sec.classList.remove('hidden');
-            }
-
-            buildDistBars({});
-
-            onAuthStateChanged(auth, async (user) => {
-                if (user) {
-                    if (contentType !== 'char') {
-                        /* Check if already in watchlist (also check series cards) */
-                        const wlSnap = await getDocs(collection(db, "users", user.uid, "watchlist"));
-                        wlSnap.forEach(d => {
-                            const item = d.data();
-                            /* Match by malId directly OR if any season malId matches */
-                            const directMatch  = String(item.malId) === String(malId);
-                            const seasonMatch  = Array.isArray(item.seasons) &&
-                                item.seasons.some(s => String(s.malId) === String(malId));
-                            if (directMatch || seasonMatch) {
-                                setAddedState(item.status);
-                            }
-                        });
-                    }
-                    fetchUserRating(user.uid);
-                }
-            });
-
-            if (contentType !== 'char') {
-                listenCommunityRatings();
-                fetchCharacters();
-                setTimeout(() => fetchRecommendations(), 1000);
-                setTimeout(() => loadComments(), 500);
-            }
-        } catch (e) { console.error(e); }
-    }
-
-    /* ── Bar chart ── */
-    function buildDistBars(dist) {
-        const container = document.getElementById('distBars');
-        const maxVal    = Math.max(1, ...Object.values(dist));
-        container.innerHTML = Array.from({ length: 10 }, (_, i) => {
-            const num   = i + 1;
-            const count = dist[num] || 0;
-            const pct   = Math.round((count / maxVal) * 100);
-            const color = num >= 9 ? '#a78bfa' : num >= 7 ? '#5738B0' : num >= 5 ? '#3d2a8a' : '#ffffff18';
-            return `<div class="dist-col">
-                <div class="dist-col-bar-bg">
-                    <div class="dist-col-bar-fill" id="bar${num}" style="background:${color}; height:${pct}%"></div>
-                </div>
-                <span class="dist-col-num">${num}</span>
-            </div>`;
-        }).join('');
-    }
-
-    function updateDistBars(dist) {
-        const maxVal = Math.max(1, ...Object.values(dist));
-        for (let num = 1; num <= 10; num++) {
-            const pct = Math.round(((dist[num] || 0) / maxVal) * 100);
-            const bar = document.getElementById('bar' + num);
-            if (bar) bar.style.height = pct + '%';
+        const ms = data.score || null;
+        document.getElementById('score').innerText       = ms || '—';
+        document.getElementById('malBigScore').innerText = ms || '—';
+        if (ms) {
+            const fs = Math.round(ms/2);
+            document.getElementById('malStars').innerHTML = Array.from({length:5},(_,i) =>
+                `<i class="fa-solid fa-star" style="color:${i<fs?'#ffd700':'#ffffff20'}"></i>`).join('');
+            document.getElementById('malScoredBy').innerText = data.scored_by
+                ? `${(data.scored_by/1000).toFixed(1)}K users` : 'MAL Score';
         }
-    }
+        if (data.status) {
+            const b = document.getElementById('statusBadge');
+            b.innerText = data.status.replace('Currently Airing','Airing').replace('Finished Airing','Finished');
+            b.classList.remove('hidden');
+            const ia = data.status.toLowerCase().includes('airing');
+            document.getElementById('airing').innerHTML = ia
+                ? `<span style="color:#4ade80;">● Airing</span>`
+                : `<span style="color:var(--dim);">Finished</span>`;
+        }
+        if (contentType === 'manga') {
+            document.getElementById('epsLabel').innerText = 'Chapters';
+            document.getElementById('episodes').innerText = data.chapters || '?';
+            document.getElementById('type').innerText     = data.type || 'Manga';
+            document.getElementById('year').innerText     = data.published?.prop?.from?.year || '—';
+        } else if (contentType === 'char') {
+            document.getElementById('actionCard').classList.add('hidden');
+            document.getElementById('ratingPanel').classList.add('hidden');
+            document.getElementById('episodes').innerText = 'N/A';
+            document.getElementById('year').innerText     = 'N/A';
+        } else {
+            document.getElementById('episodes').innerText = data.episodes || '?';
+            document.getElementById('year').innerText     = data.year || '—';
+            document.getElementById('type').innerText     = data.type || 'TV';
+        }
+        if (data.genres) {
+            document.getElementById('genres').innerHTML = data.genres
+                .map(g=>`<span class="genre-tag">${g.name}</span>`).join('');
+        }
+        if (data.trailer?.embed_url) {
+            const sec = document.getElementById('trailer-section');
+            const vid = document.getElementById('trailer-video');
+            const thumb = data.trailer.images?.maximum_image_url || data.images.jpg.large_image_url;
+            const vUrl  = data.trailer.embed_url + (data.trailer.embed_url.includes('?')?'&':'?') + 'autoplay=1';
+            vid.srcdoc = `<style>*{padding:0;margin:0;overflow:hidden}html,body{height:100%;background:#000}img{position:absolute;width:100%;top:0;bottom:0;margin:auto;object-fit:cover}.play{height:56px;width:56px;background:#5738B0;border-radius:50%;left:50%;top:50%;transform:translate(-50%,-50%);display:flex;align-items:center;justify-content:center;position:absolute;font-size:22px;color:white}</style><a href="${vUrl}"><img src="${thumb}"><div class="play">▶</div></a>`;
+            sec.classList.remove('hidden');
+        }
+        buildDistBars({});
 
-    function listenCommunityRatings() {
-        const ratingDocRef = doc(db, "anime_ratings", String(malId));
-        onSnapshot(ratingDocRef, (snap) => {
-            if (!snap.exists()) {
-                document.getElementById('commBigScore').innerText  = 'N/A';
-                document.getElementById('commBigScore').className  = 'score-chip-val na';
-                document.getElementById('commRatedBy').innerText   = 'No ratings yet';
-                document.getElementById('totalVotesBadge').innerText = '0 Votes';
-                buildDistBars({});
-                return;
+        onAuthStateChanged(auth, async user => {
+            if (user && contentType !== 'char') {
+                const wSnap = await getDocs(collection(db,"users",user.uid,"watchlist"));
+                wSnap.forEach(d => {
+                    const item = d.data();
+                    const direct   = String(item.malId) === String(malId);
+                    const inSeason = Array.isArray(item.seasons) &&
+                        item.seasons.some(s => String(s.malId) === String(malId));
+                    if (direct || inSeason) setAddedState(item.status);
+                });
+                fetchUserRating(user.uid);
             }
-            const d          = snap.data();
-            const totalVotes = d.totalVotes || 0;
-            const totalSum   = d.totalSum   || 0;
-            const dist       = d.distribution || {};
-            const avg        = totalVotes > 0 ? (totalSum / totalVotes).toFixed(1) : null;
-
-            document.getElementById('totalVotesBadge').innerText =
-                totalVotes === 1 ? '1 Vote' : `${totalVotes} Votes`;
-
-            if (avg) {
-                const scoreEl = document.getElementById('commBigScore');
-                scoreEl.innerText  = avg;
-                scoreEl.className  = 'score-chip-val';
-                document.getElementById('commRatedBy').innerText = `${totalVotes} votes`;
-                const fullStars = Math.round(parseFloat(avg) / 2);
-                document.getElementById('commStars').innerHTML = Array.from({ length: 5 }, (_, i) =>
-                    `<i class="fa-solid fa-star" style="color:${i < fullStars ? '#a78bfa' : '#ffffff20'}"></i>`
-                ).join('');
-            }
-            updateDistBars(dist);
         });
-    }
 
-    async function fetchUserRating(uid) {
-        const snap = await getDoc(doc(db, "anime_ratings", String(malId), "userRatings", uid));
-        if (snap.exists()) {
-            userPrevRating = snap.data().rating;
-            selectedRating = userPrevRating;
-            updateRateButton(userPrevRating);
-            highlightStars(userPrevRating);
-            highlightGrid(userPrevRating);
+        if (contentType !== 'char') {
+            listenCommunityRatings();
+            fetchCharacters();
+            setTimeout(fetchRecommendations, 800);
+            setTimeout(loadComments, 400);
         }
-    }
+    } catch(e) { console.error(e); }
+}
 
-    function updateRateButton(val) {
+function buildDistBars(dist) {
+    const c = document.getElementById('distBars');
+    const m = Math.max(1,...Object.values(dist));
+    c.innerHTML = Array.from({length:10},(_,i) => {
+        const n=i+1, cnt=dist[n]||0, pct=Math.round((cnt/m)*100);
+        const col = n>=9?'#a78bfa':n>=7?'#5738B0':n>=5?'#3d2a8a':'#ffffff18';
+        return `<div class="dist-col"><div class="dist-col-bar-bg"><div class="dist-col-bar-fill" id="bar${n}" style="background:${col};height:${pct}%"></div></div><span class="dist-col-num">${n}</span></div>`;
+    }).join('');
+}
+
+function listenCommunityRatings() {
+    onSnapshot(doc(db,"anime_ratings",String(malId)), snap => {
+        if (!snap.exists()) { buildDistBars({}); return; }
+        const d=snap.data(), tv=d.totalVotes||0, ts=d.totalSum||0, dist=d.distribution||{};
+        document.getElementById('totalVotesBadge').innerText = tv===1?'1 Vote':`${tv} Votes`;
+        const avg = tv>0?(ts/tv).toFixed(1):null;
+        if (avg) {
+            document.getElementById('commBigScore').innerText = avg;
+            document.getElementById('commBigScore').className = 'score-chip-val';
+            document.getElementById('commRatedBy').innerText  = `${tv} votes`;
+            const fs = Math.round(parseFloat(avg)/2);
+            document.getElementById('commStars').innerHTML = Array.from({length:5},(_,i) =>
+                `<i class="fa-solid fa-star" style="color:${i<fs?'#a78bfa':'#ffffff20'}"></i>`).join('');
+        }
+        const mx = Math.max(1,...Object.values(dist));
+        for(let n=1;n<=10;n++){
+            const bar=document.getElementById('bar'+n);
+            if(bar) bar.style.height = Math.round(((dist[n]||0)/mx)*100)+'%';
+        }
+    });
+}
+
+async function fetchUserRating(uid) {
+    const snap = await getDoc(doc(db,"anime_ratings",String(malId),"userRatings",uid));
+    if (snap.exists()) {
+        selectedRating = snap.data().rating;
         document.getElementById('rateThisBtn').classList.add('user-rated');
         document.getElementById('rateThisText').innerText = 'Rated';
         const chip = document.getElementById('userScoreChip');
-        chip.innerText = `${val}/10`;
-        chip.classList.remove('hidden');
+        chip.innerText = `${selectedRating}/10`; chip.classList.remove('hidden');
+        highlightStars(selectedRating); highlightGrid(selectedRating);
     }
+}
 
-    window.openRateModal = () => document.getElementById('rateModal').classList.add('show');
+window.openRateModal = () => document.getElementById('rateModal').classList.add('show');
 
-    const starItems = document.querySelectorAll('.star-item');
-    starItems.forEach(star => {
-        star.addEventListener('click', () => {
-            const val = parseInt(star.dataset.v);
-            selectedRating = val;
-            highlightStars(val);
-            highlightGrid(val);
-            document.getElementById('ratingLabelText').innerHTML =
-                `<span>${val}/10</span> — ${RATING_LABELS[val]}`;
+const starItems = document.querySelectorAll('.star-item');
+starItems.forEach(s => s.addEventListener('click', () => {
+    selectedRating = parseInt(s.dataset.v);
+    highlightStars(selectedRating); highlightGrid(selectedRating);
+    document.getElementById('ratingLabelText').innerHTML =
+        `<span>${selectedRating}/10</span> — ${RATING_LABELS[selectedRating]}`;
+}));
+function highlightStars(v) { starItems.forEach(s => s.classList.toggle('lit',parseInt(s.dataset.v)<=v)); }
+
+const rGrid = document.getElementById('ratingOptions');
+rGrid.innerHTML = Array.from({length:10},(_,i)=>i+1)
+    .map(n=>`<div class="rating-item" data-value="${n}">${n}</div>`).join('');
+rGrid.addEventListener('click', e => {
+    const item = e.target.closest('.rating-item'); if(!item) return;
+    selectedRating = parseInt(item.dataset.value);
+    highlightGrid(selectedRating); highlightStars(selectedRating);
+    document.getElementById('ratingLabelText').innerHTML =
+        `<span>${selectedRating}/10</span> — ${RATING_LABELS[selectedRating]}`;
+});
+function highlightGrid(v) {
+    document.querySelectorAll('.rating-item').forEach(el =>
+        el.classList.toggle('selected', parseInt(el.dataset.value)===v));
+}
+
+document.getElementById('closeModalBtn').onclick = () =>
+    document.getElementById('rateModal').classList.remove('show');
+
+document.getElementById('saveRateBtn').onclick = async () => {
+    const user = auth.currentUser;
+    if (!user) return alert("Please login to rate");
+    if (!selectedRating) return alert("Please select a rating");
+    const rRef = doc(db,"anime_ratings",String(malId));
+    const uRef = doc(db,"anime_ratings",String(malId),"userRatings",user.uid);
+    try {
+        await runTransaction(db, async tx => {
+            const rs=await tx.get(rRef), us=await tx.get(uRef);
+            const prev=us.exists()?us.data().rating:0, isNew=!us.exists();
+            let tv=rs.exists()?(rs.data().totalVotes||0):0;
+            let ts=rs.exists()?(rs.data().totalSum||0):0;
+            let dist=rs.exists()?(rs.data().distribution||{}):{};
+            if(!isNew){ts-=prev;dist[prev]=Math.max(0,(dist[prev]||1)-1);}else{tv+=1;}
+            ts+=selectedRating; dist[selectedRating]=(dist[selectedRating]||0)+1;
+            tx.set(rRef,{totalVotes:tv,totalSum:ts,distribution:dist,
+                animeTitle:document.getElementById('title').innerText,
+                lastUpdated:serverTimestamp()},{merge:true});
+            tx.set(uRef,{rating:selectedRating,uid:user.uid,timestamp:serverTimestamp()});
         });
-    });
-
-    function highlightStars(val) {
-        starItems.forEach(s => s.classList.toggle('lit', parseInt(s.dataset.v) <= val));
-    }
-
-    const ratingGrid = document.getElementById('ratingOptions');
-    ratingGrid.innerHTML = Array.from({ length: 10 }, (_, i) => i + 1)
-        .map(n => `<div class="rating-item" data-value="${n}">${n}</div>`).join('');
-
-    ratingGrid.addEventListener('click', (e) => {
-        const item = e.target.closest('.rating-item');
-        if (!item) return;
-        const val = parseInt(item.dataset.value);
-        selectedRating = val;
-        highlightGrid(val);
-        highlightStars(val);
-        document.getElementById('ratingLabelText').innerHTML =
-            `<span>${val}/10</span> — ${RATING_LABELS[val]}`;
-    });
-
-    function highlightGrid(val) {
-        document.querySelectorAll('.rating-item').forEach(el =>
-            el.classList.toggle('selected', parseInt(el.dataset.value) === val));
-    }
-
-    document.getElementById('closeModalBtn').onclick = () =>
+        document.getElementById('rateThisBtn').classList.add('user-rated');
+        document.getElementById('rateThisText').innerText = 'Rated';
+        const chip = document.getElementById('userScoreChip');
+        chip.innerText = `${selectedRating}/10`; chip.classList.remove('hidden');
         document.getElementById('rateModal').classList.remove('show');
+    } catch(e) { console.error(e); alert("Failed to save rating."); }
+};
 
-    document.getElementById('saveRateBtn').onclick = async () => {
-        const user = auth.currentUser;
-        if (!user) return alert("Please login to rate");
-        if (!selectedRating) return alert("Please select a rating");
+function setAddedState(status) {
+    const btn = document.getElementById('addBtn');
+    btn.innerHTML = '<i class="fa-solid fa-check"></i> <span>Added</span>';
+    btn.classList.add('added');
+    if (status) document.getElementById('statusSelect').value = status;
+}
 
-        const ratingDocRef  = doc(db, "anime_ratings", String(malId));
-        const userRatingRef = doc(db, "anime_ratings", String(malId), "userRatings", user.uid);
+/* ═══════════════════════════════════════════════════════
+   ADD TO WATCHLIST — FULL AI FLOW
+   ─────────────────────────────────────────────────────
+   ALL anime (single or multi season) saved as isSeriesCard
+   with seasons[] array — watchlist.html reads this format.
 
+   Gemini  → series name + ALL seasons with episodes/airing
+   Jikan   → image + malId per season (for covers only)
+   Fallback→ if Gemini fails, use Jikan data directly
+═══════════════════════════════════════════════════════ */
+document.getElementById('addBtn').onclick = async () => {
+    const user = auth.currentUser;
+    if (!user) { alert("Please login first"); return; }
+
+    const btn    = document.getElementById('addBtn');
+    const status = document.getElementById('statusSelect').value;
+    const title  = currentData.title_english || currentData.title;
+    const now    = Date.now();
+
+    btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> <span>AI Scan...</span>';
+    btn.disabled  = true;
+
+    /* ── Manga → simple save, no seasons ── */
+    if (contentType === 'manga') {
+        setAiStatus('Saving...');
         try {
-            await runTransaction(db, async (tx) => {
-                const ratingSnap = await tx.get(ratingDocRef);
-                const userSnap   = await tx.get(userRatingRef);
-                const prevRating = userSnap.exists() ? userSnap.data().rating : 0;
-                const isNew      = !userSnap.exists();
-
-                let totalVotes = ratingSnap.exists() ? (ratingSnap.data().totalVotes || 0) : 0;
-                let totalSum   = ratingSnap.exists() ? (ratingSnap.data().totalSum   || 0) : 0;
-                let dist       = ratingSnap.exists() ? (ratingSnap.data().distribution || {}) : {};
-
-                if (!isNew) {
-                    totalSum -= prevRating;
-                    dist[prevRating] = Math.max(0, (dist[prevRating] || 1) - 1);
-                } else {
-                    totalVotes += 1;
-                }
-                totalSum += selectedRating;
-                dist[selectedRating] = (dist[selectedRating] || 0) + 1;
-
-                tx.set(ratingDocRef, {
-                    totalVotes, totalSum, distribution: dist,
-                    animeTitle: document.getElementById('title').innerText,
-                    lastUpdated: serverTimestamp()
-                }, { merge: true });
-
-                tx.set(userRatingRef, {
-                    rating: selectedRating, uid: user.uid,
-                    timestamp: serverTimestamp()
-                });
+            await setDoc(doc(db,"users",user.uid,"watchlist",String(malId)), {
+                malId:parseInt(malId), title,
+                image:currentData.images.jpg.image_url,
+                status, type:contentType,
+                totalEpisodes:currentData.chapters||0,
+                watchedEpisodes:status==='Completed'?(currentData.chapters||0):0,
+                season:1, addedAt:serverTimestamp()
             });
-
-            userPrevRating = selectedRating;
-            updateRateButton(selectedRating);
-            document.getElementById('rateModal').classList.remove('show');
-        } catch (e) { console.error(e); alert("Failed to save rating."); }
-    };
-
-    function setAddedState(status) {
-        const btn = document.getElementById('addBtn');
-        btn.innerHTML = '<i class="fa-solid fa-check"></i> <span>Added</span>';
-        btn.classList.add('added');
-        if (status) document.getElementById('statusSelect').value = status;
-    }
-
-    function setAiStatus(msg) {
-        document.getElementById('aiStatusMsg').innerHTML = msg
-            ? `<i class="fa-solid fa-circle-notch fa-spin" style="font-size:10px;"></i> ${msg}` : '';
-    }
-
-    /* ════════════════════════════════════════════════════════
-       ADD TO WATCHLIST — AI Season Detection
-       Flow:
-         1. Call /api/gemini-seasons → get all season titles
-         2. For each season title, search Jikan API
-         3. Build seasons[] array
-         4. Save as one "series card" document to Firestore
-    ════════════════════════════════════════════════════════ */
-    document.getElementById('addBtn').onclick = async () => {
-        const user = auth.currentUser;
-        if (!user) { alert("Please login first"); return; }
-
-        const btn    = document.getElementById('addBtn');
-        const status = document.getElementById('statusSelect').value;
-        const title  = currentData.title_english || currentData.title;
-
-        /* ── Manga or char → simple single save, no seasons ── */
-        if (contentType === 'manga') {
-            btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> <span>Saving...</span>';
-            btn.disabled  = true;
-            try {
-                await setDoc(doc(db, "users", user.uid, "watchlist", String(malId)), {
-                    malId: parseInt(malId), title,
-                    image: currentData.images.jpg.image_url,
-                    status, type: contentType,
-                    totalEpisodes: currentData.chapters || 0,
-                    watchedEpisodes: status === 'Completed' ? (currentData.chapters || 0) : 0,
-                    season: 1,
-                    addedAt: serverTimestamp()
-                });
-                setAddedState(status);
-            } catch (e) { console.error(e); }
-            btn.disabled = false;
-            setAiStatus('');
-            return;
-        }
-
-        /* ── Anime → AI season detection ── */
-        btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> <span>AI Scan...</span>';
-        btn.disabled  = true;
-        setAiStatus('Finding all seasons with AI...');
-
-        try {
-            /* STEP 1: Ask Gemini for all seasons */
-            let seasonsData = null;
-            try {
-                const gemRes = await fetch('/api/gemini-seasons', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ title })
-                });
-                if (gemRes.ok) seasonsData = await gemRes.json();
-            } catch (e) {
-                console.warn('Gemini API error, falling back to simple save:', e);
-            }
-
-            /* ── If AI failed or single season → simple save ── */
-            if (!seasonsData || !Array.isArray(seasonsData.seasons) || seasonsData.seasons.length <= 1) {
-                setAiStatus('Saving...');
-                await simpleSave(user, title, status);
-                setAddedState(status);
-                btn.disabled = false;
-                setAiStatus('');
-                return;
-            }
-
-            /* STEP 2: Check if this series already exists in user's watchlist */
-            const wlSnap = await getDocs(collection(db, "users", user.uid, "watchlist"));
-            let alreadyAdded = false;
-            wlSnap.forEach(d => {
-                const item = d.data();
-                if (item.seriesName === seasonsData.seriesName) alreadyAdded = true;
-                if (Array.isArray(item.seasons) &&
-                    item.seasons.some(s => String(s.malId) === String(malId))) {
-                    alreadyAdded = true;
-                }
-            });
-
-            if (alreadyAdded) {
-                setAddedState(status);
-                btn.disabled = false;
-                setAiStatus('');
-                return;
-            }
-
-            /* STEP 3: Jikan se sirf malId + image lo (episodes AI ne diya hai) */
-            const seasons = [];
-            setAiStatus(`Found ${seasonsData.seasons.length} seasons — loading covers...`);
-
-            for (let i = 0; i < seasonsData.seasons.length; i++) {
-                const s = seasonsData.seasons[i];
-
-                /* Delay between Jikan calls */
-                if (i > 0) await new Promise(r => setTimeout(r, 350));
-
-                let malIdFound = null;
-                let imageFound = currentData.images.jpg.image_url; // fallback = current anime image
-
-                try {
-                    const jRes  = await fetch(
-                        `https://api.jikan.moe/v4/anime?q=${encodeURIComponent(s.query)}&type=tv&limit=3&sfw`
-                    );
-                    const jData = await jRes.json();
-
-                    if (jData.data && jData.data.length > 0) {
-                        const lq   = s.query.toLowerCase();
-                        const best = jData.data.find(a =>
-                            (a.title || '').toLowerCase() === lq ||
-                            (a.title_english || '').toLowerCase() === lq
-                        ) || jData.data[0];
-
-                        malIdFound  = best.mal_id;
-                        imageFound  = best.images.jpg.image_url;
-                    }
-                } catch (e) {
-                    console.warn(`Jikan image lookup failed for "${s.query}" — using fallback`);
-                }
-
-                /* AI ne episodes, isAiring, latestEpisode sab diya hai */
-                seasons.push({
-                    num:             s.num,
-                    malId:           malIdFound || parseInt(malId), // fallback to current
-                    title:           s.query,                        // Gemini ka title
-                    episodes:        s.episodes        || 0,         // ← AI se
-                    isAiring:        s.isAiring        || false,     // ← AI se
-                    latestEpisode:   s.latestEpisode   || s.episodes || 0, // ← AI se
-                    watchedEpisodes: status === 'Completed' ? (s.episodes || 0) : 0,
-                    image:           imageFound,
-                    episodesLastUpdated: Date.now()
-                });
-            }
-
-            /* STEP 4: Save to Firestore */
-            setAiStatus('Saving to your list...');
-
-            const docData = {
-                malId:        parseInt(malId),
-                seriesName:   seasonsData.seriesName,
-                title:        seasonsData.seriesName,
-                image:        seasons[0]?.image || currentData.images.jpg.image_url,
-                type:         contentType,
-                status,
-                userScore:    0,
-                isSeriesCard: true,
-                activeSeason: seasons[0]?.num || 1,
-                seasons,
-                addedAt:      serverTimestamp()
-            };
-
-            await setDoc(
-                doc(db, "users", user.uid, "watchlist", String(malId)),
-                docData
-            );
-            await logActivity(
-                seasonsData.seriesName,
-                status === 'Watching'  ? 'started watching' :
-                status === 'Completed' ? 'completed' : 'added to list'
-            );
-
+            await logActivity(title, status);
             setAddedState(status);
+        } catch(e) { console.error(e); }
+        btn.disabled=false; setAiStatus(''); return;
+    }
 
-        } catch (e) {
-            console.error('Add to watchlist error:', e);
-            /* Final fallback */
-            try { await simpleSave(user, title, status); setAddedState(status); }
-            catch (e2) { alert("Failed to add. Please try again."); }
+    /* ── STEP 1: Check already added ── */
+    const wSnap = await getDocs(collection(db,"users",user.uid,"watchlist"));
+    let alreadyAdded = false;
+    wSnap.forEach(d => {
+        const item = d.data();
+        if (String(item.malId) === String(malId)) alreadyAdded = true;
+        if (Array.isArray(item.seasons) &&
+            item.seasons.some(s => String(s.malId) === String(malId))) alreadyAdded = true;
+    });
+    if (alreadyAdded) {
+        setAddedState(status); btn.disabled=false; setAiStatus(''); return;
+    }
+
+    /* ── STEP 2: Gemini → all seasons + episode data ── */
+    setAiStatus('AI scanning all seasons...');
+    let seasonsData = null;
+    try {
+        const gemRes = await fetch('/api/gemini-seasons', {
+            method:'POST', headers:{'Content-Type':'application/json'},
+            body: JSON.stringify({ title })
+        });
+        if (gemRes.ok) seasonsData = await gemRes.json();
+    } catch(e) { console.warn('Gemini seasons error:', e); }
+
+    /* Fallback if Gemini failed → use current Jikan data as single season */
+    if (!seasonsData || !Array.isArray(seasonsData.seasons) || seasonsData.seasons.length === 0) {
+        seasonsData = {
+            seriesName: title,
+            seasons: [{
+                num: 1,
+                query: currentData.title || title,
+                episodes: currentData.episodes || 0,
+                isAiring: currentData.airing || false,
+                latestEpisode: currentData.episodes || 0
+            }]
+        };
+    }
+
+    /* ── STEP 3: Jikan → image + malId per season (cover only) ── */
+    const seasons = [];
+    for (let i=0; i<seasonsData.seasons.length; i++) {
+        const s = seasonsData.seasons[i];
+        setAiStatus(`Loading Season ${s.num} of ${seasonsData.seasons.length}...`);
+        if (i > 0) await new Promise(r => setTimeout(r, 350));
+
+        /* Default: use current anime's malId & image */
+        let snMalId = parseInt(malId);
+        let snImage = currentData.images.jpg.image_url;
+
+        /* Only search Jikan when there are multiple seasons */
+        if (seasonsData.seasons.length > 1) {
+            try {
+                const jRes  = await fetch(
+                    `https://api.jikan.moe/v4/anime?q=${encodeURIComponent(s.query)}&type=tv&limit=5&sfw`
+                );
+                const jData = await jRes.json();
+                if (jData.data?.length > 0) {
+                    const lq   = s.query.toLowerCase();
+                    const best = jData.data.find(a =>
+                        (a.title||'').toLowerCase()===lq ||
+                        (a.title_english||'').toLowerCase()===lq
+                    ) || jData.data[0];
+                    snMalId = best.mal_id;
+                    snImage = best.images.jpg.image_url;
+                }
+            } catch(e) { console.warn('Jikan image lookup failed:', s.query); }
         }
 
-        btn.disabled = false;
-        setAiStatus('');
-    };
-
-    /* Simple single-entry save (fallback / manga) */
-    async function simpleSave(user, title, status) {
-        await setDoc(doc(db, "users", user.uid, "watchlist", String(malId)), {
-            malId: parseInt(malId), title,
-            image: currentData.images.jpg.image_url,
-            status, type: contentType,
-            totalEpisodes:   currentData.episodes || 0,
-            watchedEpisodes: status === 'Completed' ? (currentData.episodes || 0) : 0,
-            season: 1,
-            addedAt: serverTimestamp()
+        seasons.push({
+            num:             s.num,
+            malId:           snMalId,
+            title:           s.query || title,
+            episodes:        s.episodes        || 0,
+            isAiring:        s.isAiring        || false,
+            latestEpisode:   s.latestEpisode   || s.episodes || 0,
+            watchedEpisodes: status==='Completed' ? (s.episodes||0) : 0,
+            image:           snImage,
+            episodesLastUpdated: now
         });
-        await logActivity(title,
-            status === 'Watching'  ? 'started watching' :
-            status === 'Completed' ? 'completed' : 'added to list');
     }
 
-    async function logActivity(animeTitle, actionMsg) {
-        const user = auth.currentUser;
-        if (!user) return;
-        try {
-            const snap = await getDoc(doc(db, "users", user.uid));
-            const ud   = snap.exists() ? snap.data() : {};
-            await addDoc(collection(db, "activities"), {
-                uid: user.uid,
-                userName: ud.username || user.displayName || "Anonymous",
-                userImg:  ud.avatar || 'https://cdn-icons-png.flaticon.com/512/149/149071.png',
-                animeTitle, action: actionMsg, malId, type: contentType,
-                timestamp: serverTimestamp()
-            });
-        } catch (e) { console.error(e); }
+    /* ── STEP 4: Save to Firestore as isSeriesCard ── */
+    setAiStatus('Saving to your list...');
+    try {
+        await setDoc(doc(db,"users",user.uid,"watchlist",String(malId)), {
+            malId:        parseInt(malId),
+            seriesName:   seasonsData.seriesName,
+            title:        seasonsData.seriesName,
+            image:        seasons[0]?.image || currentData.images.jpg.image_url,
+            type:         contentType,
+            status,
+            userScore:    0,
+            isSeriesCard: true,          // ← watchlist.html is this flag ke liye wait karta tha
+            activeSeason: seasons[0]?.num || 1,
+            seasons,
+            addedAt:      serverTimestamp(),
+            addedAtMs:    now            // immediate AI fetch ke liye
+        });
+        await logActivity(seasonsData.seriesName, status);
+        setAddedState(status);
+    } catch(e) {
+        console.error('Save error:', e);
+        alert("Failed to add. Please try again.");
     }
 
-    /* Synopsis read more */
-    const synopsisEl  = document.getElementById('synopsis');
-    const readMoreBtn = document.getElementById('readMoreBtn');
-    let expanded = false;
-    readMoreBtn.onclick = () => {
-        expanded = !expanded;
-        synopsisEl.classList.toggle('clamped', !expanded);
-        readMoreBtn.innerHTML = expanded
-            ? '<i class="fa-solid fa-chevron-up"></i> Read Less'
-            : '<i class="fa-solid fa-chevron-down"></i> Read More';
-    };
+    btn.disabled=false; setAiStatus('');
+};
 
-    async function fetchCharacters() {
-        try {
-            const res  = await fetch(`https://api.jikan.moe/v4/${contentType}/${malId}/characters`);
-            const json = await res.json();
-            const list = document.getElementById('characters-list');
-            if (!json.data?.length) {
-                list.innerHTML = '<p style="color:var(--dim);font-size:13px;">No character data.</p>';
-                return;
-            }
-            list.innerHTML = json.data.slice(0, 8).map((item, i) => {
-                const va = item.voice_actors?.find(v => v.language === 'Japanese');
-                return `<div class="char-card" style="animation-delay:${i * 0.05}s">
-                    <div class="char-side">
-                        <img class="char-img" src="${item.character.images.jpg.image_url}" alt="">
-                        <div>
-                            <div class="char-name">${item.character.name}</div>
-                            <div class="char-role">${item.role}</div>
-                        </div>
-                    </div>
-                    ${va ? `<div class="char-side" style="flex-direction:row-reverse;">
-                        <img class="char-img" src="${va.person.images.jpg.image_url}" alt="">
-                        <div style="text-align:right;">
-                            <div class="char-name">${va.person.name}</div>
-                            <div class="char-va">Japanese VA</div>
-                        </div>
-                    </div>` : ''}
-                </div>`;
-            }).join('');
-        } catch (e) { console.error(e); }
-    }
+async function logActivity(animeTitle, status) {
+    const user = auth.currentUser; if (!user) return;
+    try {
+        const snap = await getDoc(doc(db,"users",user.uid));
+        const ud   = snap.exists() ? snap.data() : {};
+        await addDoc(collection(db,"activities"), {
+            uid: user.uid,
+            userName: ud.username || user.displayName || "Anonymous",
+            userImg:  ud.avatar || 'https://cdn-icons-png.flaticon.com/512/149/149071.png',
+            animeTitle, malId, type: contentType,
+            action: status==='Watching'  ? 'started watching' :
+                    status==='Completed' ? 'completed' : 'added to list',
+            timestamp: serverTimestamp()
+        });
+    } catch(e) { console.error(e); }
+}
 
-    async function fetchRecommendations() {
-        try {
-            const res  = await fetch(`https://api.jikan.moe/v4/${contentType}/${malId}/recommendations`);
-            const json = await res.json();
-            const grid = document.getElementById('recommendations-grid');
-            if (!json.data?.length) {
-                grid.innerHTML = '<p style="color:var(--dim);font-size:13px;">No recommendations.</p>';
-                return;
-            }
-            grid.innerHTML = json.data.slice(0, 6).map((rec, i) => `
-                <div class="rec-card" style="animation-delay:${i * 0.06}s"
-                     onclick="location.href='details.html?id=${rec.entry.mal_id}&type=${contentType}'">
-                    <img src="${rec.entry.images.jpg.image_url}" alt="">
-                    <div class="rec-title">${rec.entry.title}</div>
-                </div>`).join('');
-        } catch (e) { console.error(e); }
-    }
+const synopsisEl  = document.getElementById('synopsis');
+const readMoreBtn = document.getElementById('readMoreBtn');
+let expanded = false;
+readMoreBtn.onclick = () => {
+    expanded = !expanded;
+    synopsisEl.classList.toggle('clamped', !expanded);
+    readMoreBtn.innerHTML = expanded
+        ? '<i class="fa-solid fa-chevron-up"></i> Read Less'
+        : '<i class="fa-solid fa-chevron-down"></i> Read More';
+};
 
-    function loadComments() {
-        if (!malId) return;
-        const q = query(
-            collection(db, "anime_comments", String(malId), "entries"),
-            orderBy("timestamp", "desc")
-        );
-        onSnapshot(q, (snapshot) => {
-            const currentUser = auth.currentUser;
+async function fetchCharacters() {
+    try {
+        const res  = await fetch(`https://api.jikan.moe/v4/${contentType}/${malId}/characters`);
+        const json = await res.json();
+        const list = document.getElementById('characters-list');
+        if (!json.data?.length) { list.innerHTML='<p style="color:var(--dim);font-size:13px;">No character data.</p>'; return; }
+        list.innerHTML = json.data.slice(0,8).map((item,i) => {
+            const va = item.voice_actors?.find(v=>v.language==='Japanese');
+            return `<div class="char-card" style="animation-delay:${i*.05}s">
+                <div class="char-side"><img class="char-img" src="${item.character.images.jpg.image_url}">
+                <div><div class="char-name">${item.character.name}</div><div class="char-role">${item.role}</div></div></div>
+                ${va?`<div class="char-side" style="flex-direction:row-reverse;">
+                <img class="char-img" src="${va.person.images.jpg.image_url}">
+                <div style="text-align:right;"><div class="char-name">${va.person.name}</div>
+                <div class="char-va">Japanese VA</div></div></div>`:''}
+            </div>`;
+        }).join('');
+    } catch(e) { console.error(e); }
+}
+
+async function fetchRecommendations() {
+    try {
+        const res  = await fetch(`https://api.jikan.moe/v4/${contentType}/${malId}/recommendations`);
+        const json = await res.json();
+        const grid = document.getElementById('recommendations-grid');
+        if (!json.data?.length) { grid.innerHTML='<p style="color:var(--dim);font-size:13px;">No recommendations.</p>'; return; }
+        grid.innerHTML = json.data.slice(0,6).map((rec,i) =>
+            `<div class="rec-card" style="animation-delay:${i*.06}s"
+                 onclick="location.href='details.html?id=${rec.entry.mal_id}&type=${contentType}'">
+                <img src="${rec.entry.images.jpg.image_url}">
+                <div class="rec-title">${rec.entry.title}</div>
+            </div>`).join('');
+    } catch(e) { console.error(e); }
+}
+
+function loadComments() {
+    if (!malId) return;
+    onSnapshot(
+        query(collection(db,"anime_comments",String(malId),"entries"), orderBy("timestamp","desc")),
+        snap => {
+            const cu   = auth.currentUser;
             const list = document.getElementById('commentsList');
-            if (snapshot.empty) {
+            if (snap.empty) {
                 list.innerHTML = '<p style="color:var(--dim);font-size:13px;text-align:center;">No comments yet. Be the first!</p>';
                 return;
             }
-            list.innerHTML = snapshot.docs.map((d, i) => {
-                const data    = d.data();
-                const isOwner = currentUser && currentUser.uid === data.uid;
-                const time    = data.timestamp?.toDate ? timeAgo(data.timestamp.toDate()) : 'Just now';
-                return `<div class="comment-card" style="animation-delay:${i * 0.04}s">
+            list.innerHTML = snap.docs.map((d,i) => {
+                const data = d.data(), isOwner = cu && cu.uid===data.uid;
+                const time = data.timestamp?.toDate ? timeAgo(data.timestamp.toDate()) : 'Just now';
+                return `<div class="comment-card" style="animation-delay:${i*.04}s">
                     <div class="comment-head">
                         <span class="comment-user">${data.userName}</span>
-                        <div class="comment-meta">
-                            <span class="comment-time">${time}</span>
-                            ${isOwner ? `<button class="comment-del" onclick="deleteComment('${d.id}')">
-                                <i class="fa-solid fa-trash"></i></button>` : ''}
-                        </div>
+                        <div class="comment-meta"><span class="comment-time">${time}</span>
+                        ${isOwner?`<button class="comment-del" onclick="deleteComment('${d.id}')">
+                            <i class="fa-solid fa-trash"></i></button>`:''}</div>
                     </div>
                     <p class="comment-text">${data.text}</p>
                 </div>`;
             }).join('');
-        });
-    }
+        }
+    );
+}
+window.deleteComment = async id => {
+    if (!confirm("Delete this comment?")) return;
+    try { await deleteDoc(doc(db,"anime_comments",String(malId),"entries",id)); }
+    catch(e) { alert("Failed to delete."); }
+};
 
-    window.deleteComment = async (id) => {
-        if (!confirm("Delete this comment?")) return;
-        try { await deleteDoc(doc(db, "anime_comments", String(malId), "entries", id)); }
-        catch (e) { alert("Failed to delete."); }
-    };
-
-    const commentInput = document.getElementById('commentInput');
-    const charCount    = document.getElementById('charCount');
-    commentInput.addEventListener('input', () => {
-        charCount.innerText = commentInput.value.length;
-        charCount.style.color = commentInput.value.length > 270 ? '#ff6b6b' : 'var(--dim)';
+const commentInput = document.getElementById('commentInput');
+const charCount    = document.getElementById('charCount');
+commentInput.addEventListener('input', () => {
+    charCount.innerText = commentInput.value.length;
+    charCount.style.color = commentInput.value.length>270 ? '#ff6b6b' : 'var(--dim)';
+});
+document.getElementById('postCommentBtn').onclick = async () => {
+    const user = auth.currentUser;
+    if (!user) return alert("Please login to comment");
+    const text = commentInput.value.trim();
+    if (!text) return alert("Write something first");
+    await addDoc(collection(db,"anime_comments",String(malId),"entries"), {
+        uid:user.uid, userName:user.displayName||"User", text, timestamp:new Date()
     });
-
-    document.getElementById('postCommentBtn').onclick = async () => {
-        const user = auth.currentUser;
-        if (!user) return alert("Please login to comment");
-        const text = commentInput.value.trim();
-        if (!text) return alert("Write something first");
-        await addDoc(collection(db, "anime_comments", String(malId), "entries"), {
-            uid: user.uid, userName: user.displayName || "User",
-            text, timestamp: new Date()
-        });
-        commentInput.value  = '';
-        charCount.innerText = '0';
-    };
+    commentInput.value=''; charCount.innerText='0';
+};
 </script>
 </body>
 </html>
