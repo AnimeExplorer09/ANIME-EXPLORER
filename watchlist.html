@@ -267,8 +267,9 @@ async function autoFetchEpisodes(uid,isNewAnime=false,specificMalId=null){
 
         const staleSeasons=anime.seasons.filter(sn=>{
             if(isNewAnime)return true;
+            if(sn.episodes===0)return true;
             const lastUp=sn.episodesLastUpdated||0;
-            const ongoing=sn.isAiring||sn.episodes===0;
+            const ongoing=sn.isAiring;
             return (now-lastUp)>(ongoing?THREE_HOURS:THREE_DAYS);
         });
         if(staleSeasons.length===0)continue;
