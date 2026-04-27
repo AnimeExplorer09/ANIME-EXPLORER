@@ -11,40 +11,33 @@ export default async function handler(req, res) {
   const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
   if (!GEMINI_API_KEY) return res.status(500).json({ error: 'GEMINI_API_KEY not configured' });
 
-  const prompt = `You are a MyAnimeList anime database expert with complete up-to-date knowledge.
+  const prompt = `You are a MyAnimeList anime database expert with complete and up-to-date knowledge.
 
-For the anime titled "${title}", find ALL separate TV seasons on MyAnimeList.
+For the anime titled "${title}", list ALL separate TV seasons that exist as entries on MyAnimeList.
 
-Return ONLY this exact JSON (no markdown, no explanation):
+Return ONLY this exact JSON (no markdown, no explanation, just raw JSON):
 {
   "seriesName": "Clean English series name e.g. Attack on Titan",
   "seasons": [
     {
       "num": 1,
-      "query": "Exact MAL Japanese romanized title for searching",
+      "query": "Exact Japanese romanized title as on MAL for image search",
       "episodes": 25,
       "isAiring": false,
       "latestEpisode": 25
-    },
-    {
-      "num": 2,
-      "query": "Exact MAL title for season 2",
-      "episodes": 12,
-      "isAiring": true,
-      "latestEpisode": 8
     }
   ]
 }
 
-Rules:
-- Only main TV series (NO Movies, OVAs, Specials)
-- seriesName = clean English title
-- query = Japanese romanized title exactly as on MAL (for image/ID lookup)
-- episodes = total episode count (best estimate if not finalized, 0 only if truly unknown)
-- isAiring = true if this season is currently broadcasting right now
-- latestEpisode = latest episode that has actually aired (if finished, same as episodes)
-- For single-entry long-running anime (Naruto, One Piece) return 1 item only
-- Return ONLY raw JSON, nothing else`;
+IMPORTANT RULES:
+- Include ONLY main TV series (absolutely NO Movies, OVAs, Specials, Music)
+- seriesName = clean English (not romanized Japanese)
+- query = exact Japanese romanized title as it appears on MyAnimeList
+- episodes = total episode count. For ongoing use your best current estimate. NEVER use 0 unless truly unknown
+- isAiring = true ONLY if this season is actively broadcasting NEW episodes right now in 2025/2026
+- latestEpisode = latest episode number that has actually aired. If finished same as episodes
+- For long-running single-entry anime like One Piece, Naruto, Bleach that are NOT split into numbered seasons on MAL: return exactly 1 entry with current episode count
+- Return ONLY the raw JSON object, nothing else at all`;
 
   try {
     const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GEMINI_API_KEY}`;
@@ -56,7 +49,6 @@ Rules:
         generationConfig: { temperature: 0.1, maxOutputTokens: 1024 }
       })
     });
-
     const data = await response.json();
     if (data.error) return res.status(400).json({ error: `Gemini: ${data.error.message}` });
 
@@ -64,9 +56,9 @@ Rules:
     raw = raw.replace(/^```json\s*/i,'').replace(/^```\s*/i,'').replace(/\s*```$/i,'').trim();
 
     const parsed = JSON.parse(raw);
-    if (!parsed.seriesName || !Array.isArray(parsed.seasons)) {
-      return res.status(500).json({ error: 'Invalid Gemini response structure' });
-    }
+    if (!parsed.seriesName || !Array.isArray(parsed.seasons) || parsed.seasons.length === 0)
+      return res.status(500).json({ error: 'Invalid Gemini response' });
+
     return res.status(200).json(parsed);
   } catch (err) {
     console.error('gemini-seasons error:', err);
