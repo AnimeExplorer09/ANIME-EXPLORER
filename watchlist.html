@@ -367,7 +367,7 @@ function rebuildBookCard(card,anime){
     const isOngoing=activeSn.isAiring===true;
     const score=anime.userScore||0;
     const pct=total>0?Math.min(100,Math.round((ep/total)*100)):(sl.includes('complet')?100:0);
-    const epText=total>0?`${ep}/${total}`:`${ep}/?`;
+    const epText=total>0?`${ep}/${total}`:(isOngoing?`${ep}/…`:`${ep}/?`);
     const hasNewEp=isOngoing&&latest>0&&ep<latest;
     const airingDot=isOngoing?`<span class="airing-dot"><span></span>AIRING</span>`:'';
     const newEpBadge=hasNewEp?`<span class="new-ep-badge">EP ${latest} OUT</span>`:'';
@@ -539,7 +539,8 @@ function renderSimpleCard(anime){
     const sl=(anime.status||'').toLowerCase();
     const sc=getStatusColor(sl);
     const pct=sl.includes('complet')?100:total>0?(watched/total)*100:0;
-    const epText=total>0?`${watched}/${total}`:`${watched}/?`;
+    const isAiring=anime.isAiring===true;
+    const epText=total>0?`${watched}/${total}`:(isAiring?`${watched}/…`:`${watched}/?`);
     const label=currentType==='manga'?'V':'S';
     const div=document.createElement('div');
     div.className='simple-card';div.dataset.mid=anime.malId;
