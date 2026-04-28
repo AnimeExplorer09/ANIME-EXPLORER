@@ -490,14 +490,17 @@ function setAddedState(status) {
 }
 
 /* ═══════════════════════════════════════════════════════
-   ADD TO WATCHLIST — FULL AI FLOW
+   ADD TO WATCHLIST — AniList + Gemini + Jikan Flow
    ─────────────────────────────────────────────────────
-   ALL anime (single or multi season) saved as isSeriesCard
-   with seasons[] array — watchlist.html reads this format.
+   gemini-seasons.js ab poora kaam karta hai:
+     AniList  → seasons relations + real-time episode count
+     Gemini   → filter real seasons, remove OVAs/movies
+     Jikan    → malId + cover image (already done in API)
 
-   Gemini  → series name + ALL seasons with episodes/airing
-   Jikan   → image + malId per season (for covers only)
-   Fallback→ if Gemini fails, use Jikan data directly
+   details.html ka kaam:
+     1. Already added check
+     2. gemini-seasons API call
+     3. Directly Firestore me save (no extra Jikan loop!)
 ═══════════════════════════════════════════════════════ */
 document.getElementById('addBtn').onclick = async () => {
     const user = auth.currentUser;
@@ -542,75 +545,54 @@ document.getElementById('addBtn').onclick = async () => {
         setAddedState(status); btn.disabled=false; setAiStatus(''); return;
     }
 
-    /* ── STEP 2: Gemini → all seasons + episode data ── */
-    setAiStatus('AI scanning all seasons...');
+    /* ── STEP 2: gemini-seasons API call ──
+       API ab AniList + Gemini + Jikan sab handle karta hai.
+       Returns: { seriesName, seasons: [{ num, malId, title,
+         episodes, isAiring, latestEpisode, image }] }
+    ── */
+    setAiStatus('AI scanning seasons + episodes...');
     let seasonsData = null;
     try {
         const gemRes = await fetch('/api/gemini-seasons', {
-            method:'POST', headers:{'Content-Type':'application/json'},
+            method:'POST',
+            headers:{'Content-Type':'application/json'},
             body: JSON.stringify({ title })
         });
         if (gemRes.ok) seasonsData = await gemRes.json();
-    } catch(e) { console.warn('Gemini seasons error:', e); }
+        else console.warn('gemini-seasons response not ok:', gemRes.status);
+    } catch(e) { console.warn('gemini-seasons fetch error:', e); }
 
-    /* Fallback if Gemini failed → use current Jikan data as single season */
+    /* ── Fallback: Gemini ya AniList fail ho gaya ── */
     if (!seasonsData || !Array.isArray(seasonsData.seasons) || seasonsData.seasons.length === 0) {
+        console.warn('Using Jikan fallback for single season');
         seasonsData = {
             seriesName: title,
             seasons: [{
-                num: 1,
-                query: currentData.title || title,
-                episodes: currentData.episodes || 0,
-                isAiring: currentData.airing || false,
-                latestEpisode: currentData.episodes || 0
+                num:           1,
+                malId:         parseInt(malId),
+                title:         currentData.title || title,
+                episodes:      currentData.episodes || 0,
+                isAiring:      currentData.airing  || false,
+                latestEpisode: currentData.episodes || 0,
+                image:         currentData.images.jpg.image_url,
+                watchedEpisodes: 0,
+                episodesLastUpdated: now
             }]
         };
     }
 
-    /* ── STEP 3: Jikan → image + malId per season (cover only) ── */
-    const seasons = [];
-    for (let i=0; i<seasonsData.seasons.length; i++) {
-        const s = seasonsData.seasons[i];
-        setAiStatus(`Loading Season ${s.num} of ${seasonsData.seasons.length}...`);
-        if (i > 0) await new Promise(r => setTimeout(r, 350));
+    /* ── STEP 3: seasons[] already complete from API ──
+       Bas watchedEpisodes set karo status ke hisab se
+    ── */
+    const seasons = seasonsData.seasons.map(s => ({
+        ...s,
+        malId:           s.malId  || parseInt(malId),
+        image:           s.image  || currentData.images.jpg.image_url,
+        watchedEpisodes: status === 'Completed' ? (s.episodes || 0) : (s.watchedEpisodes || 0),
+        episodesLastUpdated: s.episodesLastUpdated || now
+    }));
 
-        /* Default: use current anime's malId & image */
-        let snMalId = parseInt(malId);
-        let snImage = currentData.images.jpg.image_url;
-
-        /* Only search Jikan when there are multiple seasons */
-        if (seasonsData.seasons.length > 1) {
-            try {
-                const jRes  = await fetch(
-                    `https://api.jikan.moe/v4/anime?q=${encodeURIComponent(s.query)}&type=tv&limit=5&sfw`
-                );
-                const jData = await jRes.json();
-                if (jData.data?.length > 0) {
-                    const lq   = s.query.toLowerCase();
-                    const best = jData.data.find(a =>
-                        (a.title||'').toLowerCase()===lq ||
-                        (a.title_english||'').toLowerCase()===lq
-                    ) || jData.data[0];
-                    snMalId = best.mal_id;
-                    snImage = best.images.jpg.image_url;
-                }
-            } catch(e) { console.warn('Jikan image lookup failed:', s.query); }
-        }
-
-        seasons.push({
-            num:             s.num,
-            malId:           snMalId,
-            title:           s.query || title,
-            episodes:        s.episodes        || 0,
-            isAiring:        s.isAiring        || false,
-            latestEpisode:   s.latestEpisode   || s.episodes || 0,
-            watchedEpisodes: status==='Completed' ? (s.episodes||0) : 0,
-            image:           snImage,
-            episodesLastUpdated: now
-        });
-    }
-
-    /* ── STEP 4: Save to Firestore as isSeriesCard ── */
+    /* ── STEP 4: Save to Firestore ── */
     setAiStatus('Saving to your list...');
     try {
         await setDoc(doc(db,"users",user.uid,"watchlist",String(malId)), {
@@ -621,11 +603,11 @@ document.getElementById('addBtn').onclick = async () => {
             type:         contentType,
             status,
             userScore:    0,
-            isSeriesCard: true,          // ← watchlist.html is this flag ke liye wait karta tha
+            isSeriesCard: true,
             activeSeason: seasons[0]?.num || 1,
             seasons,
             addedAt:      serverTimestamp(),
-            addedAtMs:    now            // immediate AI fetch ke liye
+            addedAtMs:    now
         });
         await logActivity(seasonsData.seriesName, status);
         setAddedState(status);
