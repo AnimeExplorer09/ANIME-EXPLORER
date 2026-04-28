@@ -499,11 +499,11 @@ function setAddedState(status) {
    Firestore→ save
 ═══════════════════════════════════════════════════════ */
 
-/* AniList se episode count fetch karo — real-time, free */
-async function fetchAniListEpisodes(searchTitle) {
+// AniList se episode count fetch karo using exact malId
+async function fetchAniListEpisodes(idMal) {
     const query = `
-    query ($search: String) {
-        Media(search: $search, type: ANIME) {
+    query ($idMal: Int) {
+        Media(idMal: $idMal, type: ANIME) {
             episodes
             status
             nextAiringEpisode { episode }
@@ -516,12 +516,12 @@ async function fetchAniListEpisodes(searchTitle) {
         const res  = await fetch('https://graphql.anilist.co', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
-            body: JSON.stringify({ query, variables: { search: searchTitle } })
+            body: JSON.stringify({ query, variables: { idMal: parseInt(idMal) } })
         });
         const data = await res.json();
         const media = data?.data?.Media;
         if (!media) return { episodes: 0, isAiring: false, latestEpisode: 0 };
-
+        
         if (media.status === 'FINISHED') {
             return {
                 episodes:      media.episodes || 0,
@@ -536,6 +536,8 @@ async function fetchAniListEpisodes(searchTitle) {
                 latest = media.airingSchedule.nodes[0].episode;
             else if (media.episodes)
                 latest = media.episodes;
+            
+            // Total episodes ko latest ke barabar set karna taaki '?' mark na aaye
             return { episodes: latest, isAiring: true, latestEpisode: latest };
         }
         return { episodes: media.episodes || 0, isAiring: false, latestEpisode: media.episodes || 0 };
@@ -544,6 +546,7 @@ async function fetchAniListEpisodes(searchTitle) {
         return { episodes: 0, isAiring: false, latestEpisode: 0 };
     }
 }
+
 
 document.getElementById('addBtn').onclick = async () => {
     const user = auth.currentUser;
@@ -588,11 +591,9 @@ document.getElementById('addBtn').onclick = async () => {
         setAddedState(status); btn.disabled=false; setAiStatus(''); return;
     }
 
-    /* ── STEP 2: AniList → episodes for THIS anime ──
-       Jikan ka naam use karke AniList se real episode count lo
-    ── */
+        /* ── STEP 2: AniList → episodes for THIS anime ── */
     setAiStatus('Fetching episodes from AniList...');
-    const aniData = await fetchAniListEpisodes(currentData.title || title);
+    const aniData = await fetchAniListEpisodes(malId); // Yahan title ki jagah malId kar diya
     console.log('AniList data:', aniData);
 
     /* ── STEP 3: gemini-seasons → detect all seasons ── */
@@ -601,8 +602,9 @@ document.getElementById('addBtn').onclick = async () => {
     try {
         const gemRes = await fetch('/api/gemini-seasons', {
             method:'POST', headers:{'Content-Type':'application/json'},
-            body: JSON.stringify({ title })
+            body: JSON.stringify({ title, malId }) // Yahan malId ko API me bhej rahe hain
         });
+
         if (gemRes.ok) seasonsData = await gemRes.json();
     } catch(e) { console.warn('gemini-seasons error:', e); }
 
