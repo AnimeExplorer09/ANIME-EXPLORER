@@ -19,11 +19,11 @@ export default async function handler(req, res) {
     let isAiring = s.isAiring || false;
     let latestEpisode = s.latestEpisode || 0;
 
-        // AniList → real-time episode data via exact malId
+    // AniList → real-time episode data via relations approach
     try {
       const aniQuery = `
-        query ($idMal: Int) {
-          Media(idMal: $idMal, type: ANIME) {
+        query ($search: String) {
+          Media(search: $search, type: ANIME) {
             episodes
             status
             nextAiringEpisode { episode }
@@ -36,9 +36,8 @@ export default async function handler(req, res) {
       const aRes = await fetch('https://graphql.anilist.co', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
-        body: JSON.stringify({ query: aniQuery, variables: { idMal: parseInt(s.malId) } })
+        body: JSON.stringify({ query: aniQuery, variables: { search: s.title } })
       });
-      
       const aData = await aRes.json();
       const media = aData?.data?.Media;
 
