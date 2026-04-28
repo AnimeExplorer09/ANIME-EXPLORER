@@ -5,9 +5,8 @@ export default async function handler(req, res) {
   if (req.method === 'OPTIONS') return res.status(200).end();
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
 
-    const { title, malId } = req.body;
+  const { title } = req.body;
   if (!title) return res.status(400).json({ error: 'Title required' });
-
 
   const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
   if (!GEMINI_API_KEY) return res.status(500).json({ error: 'GEMINI_API_KEY not set' });
@@ -17,11 +16,11 @@ export default async function handler(req, res) {
      (relations include sequels, prequels, side stories etc.)
      Also fetches episode count + airing status per entry
   ════════════════════════════════════════════════════ */
-    let aniListData = null;
+  let aniListData = null;
   try {
     const aniQuery = `
-      query ($idMal: Int) {
-        Media(idMal: $idMal, type: ANIME) {
+      query ($search: String) {
+        Media(search: $search, type: ANIME) {
           title { romaji english }
           episodes
           status
@@ -51,9 +50,8 @@ export default async function handler(req, res) {
     const aRes = await fetch('https://graphql.anilist.co', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
-      body: JSON.stringify({ query: aniQuery, variables: { idMal: parseInt(malId) } })
+      body: JSON.stringify({ query: aniQuery, variables: { search: title } })
     });
-
     const aData = await aRes.json();
     if (aData?.data?.Media) aniListData = aData.data.Media;
   } catch(e) {
@@ -133,7 +131,7 @@ Rules:
   let geminiSeasons = null;
   try {
     const gRes = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-lite:generateContent?key=${GEMINI_API_KEY}`,
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${GEMINI_API_KEY}`,
       {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
