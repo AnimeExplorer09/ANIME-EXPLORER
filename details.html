@@ -505,9 +505,6 @@ async function fetchAniListEpisodes(malId) {
             episodes
             status
             nextAiringEpisode { episode }
-            airingSchedule(notYetAired: false, perPage: 1, sort: TIME_DESC) {
-                nodes { episode }
-            }
         }
     }`;
 
@@ -517,29 +514,27 @@ async function fetchAniListEpisodes(malId) {
             headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
             body: JSON.stringify({ query, variables: { idMal: parseInt(malId) } })
         });
-        const data = await res.json();
-        const media = data?.data?.Media;
-        if (!media) return { episodes: 0, isAiring: false, latestEpisode: 0 };
-
-        let totalEps = media.episodes || 0;
+        const result = await res.json();
+        const media = result?.data?.Media;
         
-        // Ongoing anime (One Piece) fix
-        if (media.status === 'RELEASING') {
-            if (media.nextAiringEpisode) {
-                totalEps = media.nextAiringEpisode.episode - 1;
-            } else if (media.airingSchedule?.nodes?.[0]) {
-                totalEps = media.airingSchedule.nodes[0].episode;
-            }
+        if (!media) return { episodes: 0, isAiring: false };
+
+        // Logic: Agar episodes null hain, toh nextAiring - 1 lo. 
+        // Agar vo bhi nahi hai, toh 0.
+        let total = media.episodes; 
+        if (!total && media.status === 'RELEASING' && media.nextAiringEpisode) {
+            total = media.nextAiringEpisode.episode - 1;
+        } else if (!total) {
+            total = 0;
         }
 
         return {
-            episodes: totalEps,
-            isAiring: media.status === 'RELEASING',
-            latestEpisode: totalEps // Yeh line add ki gayi hai
+            episodes: total,
+            isAiring: media.status === 'RELEASING'
         };
     } catch (e) {
-        console.error('AniList error:', e);
-        return { episodes: 0, isAiring: false, latestEpisode: 0 };
+        console.error('AniList Fetch Error:', e);
+        return { episodes: 0, isAiring: false };
     }
 }
 
@@ -635,16 +630,16 @@ document.getElementById('addBtn').onclick = async () => {
                 episodesLastUpdated: now
             });
         }
-        } else {
+            } else {
         // Single season — use AniList episodes directly
+        // Yahan aniData.episodes use karna zaruri hai
         seasons = [{
             num:             1,
             malId:           parseInt(malId),
             title:           currentData.title_english || currentData.title || title,
-            episodes:        aniData.episodes,
-            isAiring:        aniData.isAiring,
-            latestEpisode:   aniData.latestEpisode || aniData.episodes, // Fix here
-            watchedEpisodes: status==='Completed' ? (aniData.episodes||0) : 0,
+            episodes:        aniData.episodes || 0, // Yahan '?' nahi aayega ab
+            isAiring:        aniData.isAiring || false,
+            watchedEpisodes: status === 'Completed' ? (aniData.episodes || 0) : 0,
             image:           image,
             episodesLastUpdated: now
         }];
