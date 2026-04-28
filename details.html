@@ -334,26 +334,16 @@ async function fetchDetails() {
             document.getElementById('episodes').innerText = data.chapters || '?';
             document.getElementById('type').innerText     = data.type || 'Manga';
             document.getElementById('year').innerText     = data.published?.prop?.from?.year || '—';
-              } else if (contentType === 'char') {
+        } else if (contentType === 'char') {
             document.getElementById('actionCard').classList.add('hidden');
             document.getElementById('ratingPanel').classList.add('hidden');
             document.getElementById('episodes').innerText = 'N/A';
             document.getElementById('year').innerText     = 'N/A';
-               } else {
-            // Yahan change karein:
-            const eps = data.episodes;
-            if (eps) {
-                document.getElementById('episodes').innerText = eps;
-            } else {
-                // Agar episodes null hai, toh "Ongoing" dikhayein
-                document.getElementById('episodes').innerText = data.status.includes('Airing') ? "Ongoing" : "0";
-            }
-            
+        } else {
+            document.getElementById('episodes').innerText = data.episodes || '?';
             document.getElementById('year').innerText     = data.year || '—';
             document.getElementById('type').innerText     = data.type || 'TV';
         }
-
-
         if (data.genres) {
             document.getElementById('genres').innerHTML = data.genres
                 .map(g=>`<span class="genre-tag">${g.name}</span>`).join('');
@@ -508,48 +498,57 @@ function setAddedState(status) {
    Gemini   → seasons identify karo (relations se)
    Firestore→ save
 ═══════════════════════════════════════════════════════ */
-async function fetchAniListEpisodes(malId) {
+
+/* AniList se episode count fetch karo
+   Logic (uss test code jaisa):
+   - Agar episodes hai → use it (finished anime)
+   - Agar nextAiringEpisode hai → episode - 1 (ongoing anime)
+   - Dono nahi → 0
+*/
+async function fetchAniListEpisodes(searchTitle) {
     const query = `
-    query ($idMal: Int) {
-        Media(idMal: $idMal, type: ANIME) {
+    query ($search: String) {
+        Media(search: $search, type: ANIME) {
+            title { romaji }
             episodes
             status
             nextAiringEpisode { episode }
         }
     }`;
-
     try {
         const res = await fetch('https://graphql.anilist.co', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
-            body: JSON.stringify({ query, variables: { idMal: parseInt(malId) } })
+            body: JSON.stringify({ query, variables: { search: searchTitle } })
         });
-        const result = await res.json();
-        const media = result?.data?.Media;
-        
-        if (!media) return { episodes: 0, isAiring: false };
+        const data = await res.json();
+        const anime = data?.data?.Media;
+        if (!anime) return { episodes: 0, isAiring: false, latestEpisode: 0 };
 
-        // Logic: Agar episodes null hain, toh nextAiring - 1 lo. 
-        // Agar vo bhi nahi hai, toh 0.
-        let total = media.episodes; 
-        if (!total && media.status === 'RELEASING' && media.nextAiringEpisode) {
-            total = media.nextAiringEpisode.episode - 1;
-        } else if (!total) {
-            total = 0;
+        console.log('AniList raw:', anime.title?.romaji, '| episodes:', anime.episodes, '| nextAiring:', anime.nextAiringEpisode?.episode, '| status:', anime.status);
+
+        let currentEp;
+        let isAiring = anime.status === 'RELEASING';
+
+        // Exact same logic as test code
+        if (anime.episodes) {
+            currentEp = anime.episodes;
+        } else if (anime.nextAiringEpisode) {
+            currentEp = anime.nextAiringEpisode.episode - 1;
+        } else {
+            currentEp = 0;
         }
 
         return {
-            episodes: total,
-            isAiring: media.status === 'RELEASING'
+            episodes:      currentEp,
+            isAiring:      isAiring,
+            latestEpisode: currentEp
         };
-    } catch (e) {
-        console.error('AniList Fetch Error:', e);
-        return { episodes: 0, isAiring: false };
+    } catch(e) {
+        console.warn('AniList fetch failed:', e);
+        return { episodes: 0, isAiring: false, latestEpisode: 0 };
     }
 }
-
-
-
 
 document.getElementById('addBtn').onclick = async () => {
     const user = auth.currentUser;
@@ -594,9 +593,11 @@ document.getElementById('addBtn').onclick = async () => {
         setAddedState(status); btn.disabled=false; setAiStatus(''); return;
     }
 
-        /* ── STEP 2: AniList → episodes for THIS anime ── */
+    /* ── STEP 2: AniList → episodes for THIS anime ──
+       Jikan ka naam use karke AniList se real episode count lo
+    ── */
     setAiStatus('Fetching episodes from AniList...');
-    const aniData = await fetchAniListEpisodes(malId); // Yahan title ki jagah malId kar diya
+    const aniData = await fetchAniListEpisodes(currentData.title || title);
     console.log('AniList data:', aniData);
 
     /* ── STEP 3: gemini-seasons → detect all seasons ── */
@@ -605,9 +606,8 @@ document.getElementById('addBtn').onclick = async () => {
     try {
         const gemRes = await fetch('/api/gemini-seasons', {
             method:'POST', headers:{'Content-Type':'application/json'},
-            body: JSON.stringify({ title, malId }) // Yahan malId ko API me bhej rahe hain
+            body: JSON.stringify({ title })
         });
-
         if (gemRes.ok) seasonsData = await gemRes.json();
     } catch(e) { console.warn('gemini-seasons error:', e); }
 
@@ -640,20 +640,20 @@ document.getElementById('addBtn').onclick = async () => {
                 episodesLastUpdated: now
             });
         }
-            } else {
+    } else {
         // Single season — use AniList episodes directly
-        // Yahan aniData.episodes use karna zaruri hai
         seasons = [{
             num:             1,
             malId:           parseInt(malId),
-            title:           currentData.title_english || currentData.title || title,
-            episodes:        aniData.episodes || 0, // Yahan '?' nahi aayega ab
-            isAiring:        aniData.isAiring || false,
-            watchedEpisodes: status === 'Completed' ? (aniData.episodes || 0) : 0,
+            title:           currentData.title || title,
+            episodes:        aniData.episodes,
+            isAiring:        aniData.isAiring,
+            latestEpisode:   aniData.latestEpisode,
+            watchedEpisodes: status==='Completed' ? (aniData.episodes||0) : 0,
             image:           image,
             episodesLastUpdated: now
         }];
-        seasonsData = { seriesName: currentData.title_english || currentData.title || title };
+        seasonsData = { seriesName: title };
     }
 
     /* ── STEP 4: Firestore me save ── */
