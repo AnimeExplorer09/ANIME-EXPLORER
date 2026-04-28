@@ -334,16 +334,25 @@ async function fetchDetails() {
             document.getElementById('episodes').innerText = data.chapters || '?';
             document.getElementById('type').innerText     = data.type || 'Manga';
             document.getElementById('year').innerText     = data.published?.prop?.from?.year || '—';
-        } else if (contentType === 'char') {
+              } else if (contentType === 'char') {
             document.getElementById('actionCard').classList.add('hidden');
             document.getElementById('ratingPanel').classList.add('hidden');
             document.getElementById('episodes').innerText = 'N/A';
             document.getElementById('year').innerText     = 'N/A';
         } else {
-            document.getElementById('episodes').innerText = data.episodes || '?';
+            // PURANE CODE KO HATA KAR YE REPLACE KAREIN:
+            const eps = data.episodes;
+            if (eps) {
+                document.getElementById('episodes').innerText = eps;
+            } else {
+                // Agar episodes null hai, toh "Ongoing" ya "0" dikhayein
+                document.getElementById('episodes').innerText = data.status.includes('Airing') ? "Ongoing" : "0";
+            }
+            
             document.getElementById('year').innerText     = data.year || '—';
             document.getElementById('type').innerText     = data.type || 'TV';
         }
+
         if (data.genres) {
             document.getElementById('genres').innerHTML = data.genres
                 .map(g=>`<span class="genre-tag">${g.name}</span>`).join('');
