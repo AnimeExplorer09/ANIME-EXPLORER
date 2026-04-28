@@ -490,38 +490,81 @@ function setAddedState(status) {
 }
 
 /* ═══════════════════════════════════════════════════════
-   ADD TO WATCHLIST — AniList + Gemini + Jikan Flow
+   ADD TO WATCHLIST
    ─────────────────────────────────────────────────────
-   gemini-seasons.js ab poora kaam karta hai:
-     AniList  → seasons relations + real-time episode count
-     Gemini   → filter real seasons, remove OVAs/movies
-     Jikan    → malId + cover image (already done in API)
-
-   details.html ka kaam:
-     1. Already added check
-     2. gemini-seasons API call
-     3. Directly Firestore me save (no extra Jikan loop!)
+   Flow:
+   Jikan    → naam, ID, image (currentData me already hai)
+   AniList  → uss naam se episodes + airing status fetch
+   Gemini   → seasons identify karo (relations se)
+   Firestore→ save
 ═══════════════════════════════════════════════════════ */
+
+/* AniList se episode count fetch karo — real-time, free */
+async function fetchAniListEpisodes(searchTitle) {
+    const query = `
+    query ($search: String) {
+        Media(search: $search, type: ANIME) {
+            episodes
+            status
+            nextAiringEpisode { episode }
+            airingSchedule(notYetAired: false, perPage: 1, sort: TIME_DESC) {
+                nodes { episode }
+            }
+        }
+    }`;
+    try {
+        const res  = await fetch('https://graphql.anilist.co', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+            body: JSON.stringify({ query, variables: { search: searchTitle } })
+        });
+        const data = await res.json();
+        const media = data?.data?.Media;
+        if (!media) return { episodes: 0, isAiring: false, latestEpisode: 0 };
+
+        if (media.status === 'FINISHED') {
+            return {
+                episodes:      media.episodes || 0,
+                isAiring:      false,
+                latestEpisode: media.episodes || 0
+            };
+        } else if (media.status === 'RELEASING') {
+            let latest = 0;
+            if (media.nextAiringEpisode?.episode)
+                latest = media.nextAiringEpisode.episode - 1;
+            else if (media.airingSchedule?.nodes?.[0]?.episode)
+                latest = media.airingSchedule.nodes[0].episode;
+            else if (media.episodes)
+                latest = media.episodes;
+            return { episodes: latest, isAiring: true, latestEpisode: latest };
+        }
+        return { episodes: media.episodes || 0, isAiring: false, latestEpisode: media.episodes || 0 };
+    } catch(e) {
+        console.warn('AniList fetch failed:', e);
+        return { episodes: 0, isAiring: false, latestEpisode: 0 };
+    }
+}
+
 document.getElementById('addBtn').onclick = async () => {
     const user = auth.currentUser;
     if (!user) { alert("Please login first"); return; }
 
     const btn    = document.getElementById('addBtn');
     const status = document.getElementById('statusSelect').value;
+    // Jikan se pehle se naam + image + ID mil gaya hai currentData me
     const title  = currentData.title_english || currentData.title;
+    const image  = currentData.images.jpg.image_url;
     const now    = Date.now();
 
     btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> <span>AI Scan...</span>';
     btn.disabled  = true;
 
-    /* ── Manga → simple save, no seasons ── */
+    /* ── Manga → simple save ── */
     if (contentType === 'manga') {
         setAiStatus('Saving...');
         try {
             await setDoc(doc(db,"users",user.uid,"watchlist",String(malId)), {
-                malId:parseInt(malId), title,
-                image:currentData.images.jpg.image_url,
-                status, type:contentType,
+                malId:parseInt(malId), title, image, status, type:contentType,
                 totalEpisodes:currentData.chapters||0,
                 watchedEpisodes:status==='Completed'?(currentData.chapters||0):0,
                 season:1, addedAt:serverTimestamp()
@@ -545,61 +588,77 @@ document.getElementById('addBtn').onclick = async () => {
         setAddedState(status); btn.disabled=false; setAiStatus(''); return;
     }
 
-    /* ── STEP 2: gemini-seasons API call ──
-       API ab AniList + Gemini + Jikan sab handle karta hai.
-       Returns: { seriesName, seasons: [{ num, malId, title,
-         episodes, isAiring, latestEpisode, image }] }
+    /* ── STEP 2: AniList → episodes for THIS anime ──
+       Jikan ka naam use karke AniList se real episode count lo
     ── */
-    setAiStatus('AI scanning seasons + episodes...');
+    setAiStatus('Fetching episodes from AniList...');
+    const aniData = await fetchAniListEpisodes(currentData.title || title);
+    console.log('AniList data:', aniData);
+
+    /* ── STEP 3: gemini-seasons → detect all seasons ── */
+    setAiStatus('AI detecting all seasons...');
     let seasonsData = null;
     try {
         const gemRes = await fetch('/api/gemini-seasons', {
-            method:'POST',
-            headers:{'Content-Type':'application/json'},
+            method:'POST', headers:{'Content-Type':'application/json'},
             body: JSON.stringify({ title })
         });
         if (gemRes.ok) seasonsData = await gemRes.json();
-        else console.warn('gemini-seasons response not ok:', gemRes.status);
-    } catch(e) { console.warn('gemini-seasons fetch error:', e); }
+    } catch(e) { console.warn('gemini-seasons error:', e); }
 
-    /* ── Fallback: Gemini ya AniList fail ho gaya ── */
-    if (!seasonsData || !Array.isArray(seasonsData.seasons) || seasonsData.seasons.length === 0) {
-        console.warn('Using Jikan fallback for single season');
-        seasonsData = {
-            seriesName: title,
-            seasons: [{
-                num:           1,
-                malId:         parseInt(malId),
-                title:         currentData.title || title,
-                episodes:      currentData.episodes || 0,
-                isAiring:      currentData.airing  || false,
-                latestEpisode: currentData.episodes || 0,
-                image:         currentData.images.jpg.image_url,
-                watchedEpisodes: 0,
+    let seasons = [];
+
+    if (seasonsData && Array.isArray(seasonsData.seasons) && seasonsData.seasons.length > 0) {
+        // Multi-season anime
+        setAiStatus(`Found ${seasonsData.seasons.length} seasons...`);
+
+        for (let i = 0; i < seasonsData.seasons.length; i++) {
+            const s = seasonsData.seasons[i];
+            let epData = { episodes: s.episodes||0, isAiring: s.isAiring||false, latestEpisode: s.latestEpisode||0 };
+
+            // Season 1 = current anime (AniList data already fetched)
+            if (s.num === 1 && i === 0) {
+                if (aniData.episodes > 0) epData = aniData;
+            }
+            // Other seasons: AniList se fetch karo (already done in gemini-seasons API)
+            // s.episodes already has AniList data from gemini-seasons.js
+
+            seasons.push({
+                num:             s.num,
+                malId:           s.malId  || parseInt(malId),
+                title:           s.title  || title,
+                episodes:        epData.episodes,
+                isAiring:        epData.isAiring,
+                latestEpisode:   epData.latestEpisode,
+                watchedEpisodes: status==='Completed' ? (epData.episodes||0) : 0,
+                image:           s.image  || image,
                 episodesLastUpdated: now
-            }]
-        };
+            });
+        }
+    } else {
+        // Single season — use AniList episodes directly
+        seasons = [{
+            num:             1,
+            malId:           parseInt(malId),
+            title:           currentData.title || title,
+            episodes:        aniData.episodes,
+            isAiring:        aniData.isAiring,
+            latestEpisode:   aniData.latestEpisode,
+            watchedEpisodes: status==='Completed' ? (aniData.episodes||0) : 0,
+            image:           image,
+            episodesLastUpdated: now
+        }];
+        seasonsData = { seriesName: title };
     }
 
-    /* ── STEP 3: seasons[] already complete from API ──
-       Bas watchedEpisodes set karo status ke hisab se
-    ── */
-    const seasons = seasonsData.seasons.map(s => ({
-        ...s,
-        malId:           s.malId  || parseInt(malId),
-        image:           s.image  || currentData.images.jpg.image_url,
-        watchedEpisodes: status === 'Completed' ? (s.episodes || 0) : (s.watchedEpisodes || 0),
-        episodesLastUpdated: s.episodesLastUpdated || now
-    }));
-
-    /* ── STEP 4: Save to Firestore ── */
+    /* ── STEP 4: Firestore me save ── */
     setAiStatus('Saving to your list...');
     try {
         await setDoc(doc(db,"users",user.uid,"watchlist",String(malId)), {
             malId:        parseInt(malId),
-            seriesName:   seasonsData.seriesName,
-            title:        seasonsData.seriesName,
-            image:        seasons[0]?.image || currentData.images.jpg.image_url,
+            seriesName:   seasonsData?.seriesName || title,
+            title:        seasonsData?.seriesName || title,
+            image:        seasons[0]?.image || image,
             type:         contentType,
             status,
             userScore:    0,
@@ -609,7 +668,7 @@ document.getElementById('addBtn').onclick = async () => {
             addedAt:      serverTimestamp(),
             addedAtMs:    now
         });
-        await logActivity(seasonsData.seriesName, status);
+        await logActivity(seasonsData?.seriesName || title, status);
         setAddedState(status);
     } catch(e) {
         console.error('Save error:', e);
