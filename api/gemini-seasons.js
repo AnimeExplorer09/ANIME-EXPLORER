@@ -232,15 +232,14 @@ Rules:
 
 /* ── Helpers to get episode count from AniList node ── */
 function getEpisodeCount(media) {
-  if (media.status === 'FINISHED' && media.episodes) return media.episodes;
+  if (media.episodes) return media.episodes;
   if (media.status === 'RELEASING') {
     if (media.nextAiringEpisode?.episode)
       return media.nextAiringEpisode.episode - 1;
     if (media.airingSchedule?.nodes?.[0]?.episode)
       return media.airingSchedule.nodes[0].episode;
-    if (media.episodes) return media.episodes;
   }
-  return media.episodes || 0;
+  return 0;
 }
 
 function getLatestEpisode(media) {

@@ -43,22 +43,20 @@ export default async function handler(req, res) {
       const media = aData?.data?.Media;
 
       if (media) {
-        if (media.status === 'FINISHED' && media.episodes) {
+        if (media.episodes) {
           episodes      = media.episodes;
           latestEpisode = media.episodes;
-          isAiring      = false;
-        } else if (media.status === 'RELEASING') {
-          isAiring = true;
-          if (media.nextAiringEpisode?.episode) {
-            latestEpisode = media.nextAiringEpisode.episode - 1;
-            episodes      = latestEpisode;
-          } else if (media.airingSchedule?.nodes?.[0]?.episode) {
-            latestEpisode = media.airingSchedule.nodes[0].episode;
-            episodes      = latestEpisode;
-          } else if (media.episodes) {
-            episodes      = media.episodes;
-            latestEpisode = media.episodes;
-          }
+          isAiring      = media.status === 'RELEASING';
+        } else if (media.status === 'RELEASING' && media.nextAiringEpisode?.episode) {
+          episodes      = media.nextAiringEpisode.episode - 1;
+          latestEpisode = media.nextAiringEpisode.episode - 1;
+          isAiring      = true;
+        } else if (media.status === 'RELEASING' && media.airingSchedule?.nodes?.[0]?.episode) {
+          episodes      = media.airingSchedule.nodes[0].episode;
+          latestEpisode = media.airingSchedule.nodes[0].episode;
+          isAiring      = true;
+        } else {
+          isAiring = media.status === 'RELEASING';
         }
       }
     } catch(e) {
