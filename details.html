@@ -498,9 +498,7 @@ function setAddedState(status) {
    Gemini   → seasons identify karo (relations se)
    Firestore→ save
 ═══════════════════════════════════════════════════════ */
-
-// AniList se episode count fetch karo using exact malId
-async function fetchAniListEpisodes(idMal) {
+async function fetchAniListEpisodes(malId) {
     const query = `
     query ($idMal: Int) {
         Media(idMal: $idMal, type: ANIME) {
@@ -512,40 +510,40 @@ async function fetchAniListEpisodes(idMal) {
             }
         }
     }`;
+
     try {
-        const res  = await fetch('https://graphql.anilist.co', {
+        const res = await fetch('https://graphql.anilist.co', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
-            body: JSON.stringify({ query, variables: { idMal: parseInt(idMal) } })
+            body: JSON.stringify({ query, variables: { idMal: parseInt(malId) } })
         });
         const data = await res.json();
         const media = data?.data?.Media;
         if (!media) return { episodes: 0, isAiring: false, latestEpisode: 0 };
+
+        let totalEps = media.episodes || 0;
         
-        if (media.status === 'FINISHED') {
-            return {
-                episodes:      media.episodes || 0,
-                isAiring:      false,
-                latestEpisode: media.episodes || 0
-            };
-        } else if (media.status === 'RELEASING') {
-            let latest = 0;
-            if (media.nextAiringEpisode?.episode)
-                latest = media.nextAiringEpisode.episode - 1;
-            else if (media.airingSchedule?.nodes?.[0]?.episode)
-                latest = media.airingSchedule.nodes[0].episode;
-            else if (media.episodes)
-                latest = media.episodes;
-            
-            // Total episodes ko latest ke barabar set karna taaki '?' mark na aaye
-            return { episodes: latest, isAiring: true, latestEpisode: latest };
+        // Ongoing anime (One Piece) fix
+        if (media.status === 'RELEASING') {
+            if (media.nextAiringEpisode) {
+                totalEps = media.nextAiringEpisode.episode - 1;
+            } else if (media.airingSchedule?.nodes?.[0]) {
+                totalEps = media.airingSchedule.nodes[0].episode;
+            }
         }
-        return { episodes: media.episodes || 0, isAiring: false, latestEpisode: media.episodes || 0 };
-    } catch(e) {
-        console.warn('AniList fetch failed:', e);
+
+        return {
+            episodes: totalEps,
+            isAiring: media.status === 'RELEASING',
+            latestEpisode: totalEps // Yeh line add ki gayi hai
+        };
+    } catch (e) {
+        console.error('AniList error:', e);
         return { episodes: 0, isAiring: false, latestEpisode: 0 };
     }
 }
+
+
 
 
 document.getElementById('addBtn').onclick = async () => {
@@ -637,20 +635,20 @@ document.getElementById('addBtn').onclick = async () => {
                 episodesLastUpdated: now
             });
         }
-    } else {
+        } else {
         // Single season — use AniList episodes directly
         seasons = [{
             num:             1,
             malId:           parseInt(malId),
-            title:           currentData.title || title,
+            title:           currentData.title_english || currentData.title || title,
             episodes:        aniData.episodes,
             isAiring:        aniData.isAiring,
-            latestEpisode:   aniData.latestEpisode,
+            latestEpisode:   aniData.latestEpisode || aniData.episodes, // Fix here
             watchedEpisodes: status==='Completed' ? (aniData.episodes||0) : 0,
             image:           image,
             episodesLastUpdated: now
         }];
-        seasonsData = { seriesName: title };
+        seasonsData = { seriesName: currentData.title_english || currentData.title || title };
     }
 
     /* ── STEP 4: Firestore me save ── */
