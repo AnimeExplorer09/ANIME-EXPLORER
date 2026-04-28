@@ -9,39 +9,37 @@ export default async function handler(req, res) {
   if (!Array.isArray(seasons) || seasons.length === 0)
     return res.status(400).json({ error: 'seasons array required' });
 
-  // For each season: fetch latest episode from AniList (real-time, free, no auth)
-  // Fallback to Jikan for finished anime
   const results = [];
 
   for (let i = 0; i < seasons.length; i++) {
     const s = seasons[i];
     if (i > 0) await new Promise(r => setTimeout(r, 300));
 
-    let episodes      = s.episodes || 0;
-    let isAiring      = s.isAiring || false;
+    let episodes = s.episodes || 0;
+    let isAiring = s.isAiring || false;
     let latestEpisode = s.latestEpisode || 0;
 
-    // ── AniList: real-time episode data ──
+    // AniList → real-time episode data via relations approach
     try {
-      // Search by title — more reliable than MAL ID cross-reference
-      const aniQuery = `{
-        Media(search: ${JSON.stringify(s.title)}, type: ANIME, format_in: [TV]) {
-          episodes
-          status
-          nextAiringEpisode { episode }
-          airingSchedule(notYetAired: false, perPage: 1, sort: TIME_DESC) {
-            nodes { episode }
+      const aniQuery = `
+        query ($search: String) {
+          Media(search: $search, type: ANIME) {
+            episodes
+            status
+            nextAiringEpisode { episode }
+            airingSchedule(notYetAired: false, perPage: 1, sort: TIME_DESC) {
+              nodes { episode }
+            }
           }
-        }
-      }`;
+        }`;
 
       const aRes = await fetch('https://graphql.anilist.co', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
-        body: JSON.stringify({ query: aniQuery })
+        body: JSON.stringify({ query: aniQuery, variables: { search: s.title } })
       });
       const aData = await aRes.json();
-      const media  = aData?.data?.Media;
+      const media = aData?.data?.Media;
 
       if (media) {
         if (media.status === 'FINISHED' && media.episodes) {
@@ -64,12 +62,10 @@ export default async function handler(req, res) {
       }
     } catch(e) {
       console.warn('AniList failed for:', s.title);
-
-      // ── Jikan fallback (only for finished anime — returns null for ongoing) ──
+      // Fallback: Jikan (only reliable for finished anime)
       try {
         if (s.malId) {
-          await new Promise(r => setTimeout(r, 300));
-          const jRes = await fetch(`https://api.jikan.moe/v4/anime/${s.malId}`);
+          const jRes  = await fetch(`https://api.jikan.moe/v4/anime/${s.malId}`);
           const jData = await jRes.json();
           if (jData.data?.episodes) {
             episodes      = jData.data.episodes;
