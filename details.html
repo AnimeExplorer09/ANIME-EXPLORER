@@ -340,13 +340,12 @@ async function fetchDetails() {
             document.getElementById('episodes').innerText = 'N/A';
             document.getElementById('year').innerText     = 'N/A';
                } else {
-            // Yahan change karein:
-            const eps = data.episodes;
-            if (eps) {
-                document.getElementById('episodes').innerText = eps;
+            // Agar Jikan me episodes hai toh dikhao, warna AniList se fetch karo
+            if (data.episodes) {
+                document.getElementById('episodes').innerText = data.episodes;
             } else {
-                // Agar episodes null hai, toh "Ongoing" dikhayein
-                document.getElementById('episodes').innerText = data.status.includes('Airing') ? "Ongoing" : "0";
+                const aniData = await fetchAniListEpisodes(malId);
+                document.getElementById('episodes').innerText = aniData.episodes > 0 ? aniData.episodes : '0';
             }
             
             document.getElementById('year').innerText     = data.year || '—';
@@ -529,12 +528,13 @@ async function fetchAniListEpisodes(malId) {
         
         if (!media) return { episodes: 0, isAiring: false };
 
-        // Logic: Agar episodes null hain, toh nextAiring - 1 lo. 
-        // Agar vo bhi nahi hai, toh 0.
-        let total = media.episodes; 
-        if (!total && media.status === 'RELEASING' && media.nextAiringEpisode) {
+        // Logic: Agar episodes hai toh dikhao, nahi toh nextAiringEpisode - 1, nahi toh 0.
+        let total;
+        if (media.episodes) {
+            total = media.episodes;
+        } else if (media.nextAiringEpisode?.episode) {
             total = media.nextAiringEpisode.episode - 1;
-        } else if (!total) {
+        } else {
             total = 0;
         }
 
