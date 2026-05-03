@@ -22,9 +22,19 @@ export default async function handler(req, res) {
             parts: [{
               text: `Search the internet and find all TV seasons of the anime "${title}".
 
+VERY IMPORTANT - Title cleanup:
+The title "${title}" may contain season info like "Season 4", "Part 2", "Final Season", "Arc name" etc.
+IGNORE all season/part/arc suffixes and find the BASE anime series.
+Examples:
+- "Attack on Titan Final Season" → base is "Attack on Titan" → find ALL seasons
+- "Shingeki no Kyojin Season 3" → base is "Shingeki no Kyojin" → find ALL seasons  
+- "Demon Slayer Swordsmith Village Arc" → base is "Demon Slayer" → find ALL seasons
+- "One Piece" → already base name → find the single entry
+Always return ALL seasons of the complete series, not just the one mentioned in the title.
+
 Return ONLY this JSON, no markdown, no extra text:
 {
-  "seriesName": "English series name",
+  "seriesName": "Clean English base series name (no season numbers)",
   "seasons": [
     {
       "num": 1,
@@ -38,10 +48,12 @@ Return ONLY this JSON, no markdown, no extra text:
 
 Rules:
 - Search internet for latest accurate info
+- seriesName = clean base name WITHOUT any season/part numbers
 - Only main TV seasons (no movies, OVAs, specials)
 - episodes = total if finished, latest aired number if ongoing
 - isAiring = true if currently airing new episodes
 - For single long-running anime (One Piece, Naruto) return 1 season with current episode count
+- Start from Season 1, include ALL seasons in order
 - Return ONLY raw JSON`
             }]
           }],
