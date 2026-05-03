@@ -9,75 +9,64 @@ export default async function handler(req, res) {
   if (!Array.isArray(seasons) || seasons.length === 0)
     return res.status(400).json({ error: 'seasons array required' });
 
-  const results = [];
+  const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
+  if (!GEMINI_API_KEY) return res.status(500).json({ error: 'GEMINI_API_KEY not set' });
 
-  for (let i = 0; i < seasons.length; i++) {
-    const s = seasons[i];
-    if (i > 0) await new Promise(r => setTimeout(r, 300));
+  const list = seasons.map(s => `Season ${s.num}: "${s.title}"`).join('\n');
 
-    let episodes = s.episodes || 0;
-    let isAiring = s.isAiring || false;
-    let latestEpisode = s.latestEpisode || 0;
-
-    // AniList → real-time episode data via relations approach
-    try {
-      const aniQuery = `
-        query ($search: String) {
-          Media(search: $search, type: ANIME) {
-            episodes
-            status
-            nextAiringEpisode { episode }
-            airingSchedule(notYetAired: false, perPage: 1, sort: TIME_DESC) {
-              nodes { episode }
-            }
-          }
-        }`;
-
-      const aRes = await fetch('https://graphql.anilist.co', {
+  try {
+    const response = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${GEMINI_API_KEY}`,
+      {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
-        body: JSON.stringify({ query: aniQuery, variables: { search: s.title } })
-      });
-      const aData = await aRes.json();
-      const media = aData?.data?.Media;
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          contents: [{
+            parts: [{
+              text: `Search the internet for the latest episode information for these anime seasons:
 
-      if (media) {
-        if (media.status === 'FINISHED' && media.episodes) {
-          episodes      = media.episodes;
-          latestEpisode = media.episodes;
-          isAiring      = false;
-        } else if (media.status === 'RELEASING') {
-          isAiring = true;
-          if (media.nextAiringEpisode?.episode) {
-            latestEpisode = media.nextAiringEpisode.episode - 1;
-            episodes      = latestEpisode;
-          } else if (media.airingSchedule?.nodes?.[0]?.episode) {
-            latestEpisode = media.airingSchedule.nodes[0].episode;
-            episodes      = latestEpisode;
-          } else if (media.episodes) {
-            episodes      = media.episodes;
-            latestEpisode = media.episodes;
-          }
-        }
-      }
-    } catch(e) {
-      console.warn('AniList failed for:', s.title);
-      // Fallback: Jikan (only reliable for finished anime)
-      try {
-        if (s.malId) {
-          const jRes  = await fetch(`https://api.jikan.moe/v4/anime/${s.malId}`);
-          const jData = await jRes.json();
-          if (jData.data?.episodes) {
-            episodes      = jData.data.episodes;
-            latestEpisode = jData.data.episodes;
-            isAiring      = jData.data.airing || false;
-          }
-        }
-      } catch(e2) { console.warn('Jikan also failed:', e2); }
+${list}
+
+Return ONLY this JSON, no markdown:
+{
+  "results": [
+    {
+      "num": 1,
+      "episodes": 1159,
+      "isAiring": true,
+      "latestEpisode": 1159
     }
+  ]
+}
 
-    results.push({ num: s.num, episodes, isAiring, latestEpisode });
+Rules:
+- Search internet for current accurate data
+- episodes = total if finished, latest aired number if ongoing
+- isAiring = true if currently airing
+- NEVER return 0 for popular anime
+- Return ONLY raw JSON`
+            }]
+          }],
+          tools: [{ google_search: {} }]
+        })
+      }
+    );
+
+    const data = await response.json();
+    if (data.error) return res.status(400).json({ error: data.error.message });
+
+    let raw = data?.candidates?.[0]?.content?.parts?.[0]?.text?.trim() || '';
+    raw = raw.replace(/^```json\s*/i,'').replace(/^```\s*/i,'').replace(/\s*```$/i,'').trim();
+    const match = raw.match(/\{[\s\S]*\}/);
+    if (match) raw = match[0];
+
+    const parsed = JSON.parse(raw);
+    if (!Array.isArray(parsed.results))
+      return res.status(500).json({ error: 'Invalid response' });
+
+    return res.status(200).json(parsed);
+  } catch(err) {
+    console.error('gemini-episodes error:', err);
+    return res.status(500).json({ error: err.message });
   }
-
-  return res.status(200).json({ results });
 }
