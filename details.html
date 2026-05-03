@@ -527,12 +527,22 @@ document.getElementById('addBtn').onclick = async () => {
 
     /* Gemini 2.5 Flash + Google Search → seasons + episodes */
     setAiStatus('AI searching latest seasons & episodes...');
+
+    // Base title clean karo — season/part/arc suffix hata do
+    // Taaki AI poori series dhunde, sirf ek season nahi
+    const baseTitle = (currentData.title_english || currentData.title || title)
+        .replace(/\s*:?\s*(season\s*\d+|part\s*\d+|final season|cour\s*\d+|\d+(st|nd|rd|th)\s*season)/gi, '')
+        .replace(/\s*[-:]\s*$/, '')
+        .trim() || title;
+
+    console.log('Original title:', title, '→ Base title:', baseTitle);
+
     let seasonsData = null;
     try {
         const gemRes = await fetch('/api/gemini-seasons',{
             method:'POST',
             headers:{'Content-Type':'application/json'},
-            body:JSON.stringify({title})
+            body:JSON.stringify({title: baseTitle})
         });
         if (gemRes.ok) {
             seasonsData = await gemRes.json();
