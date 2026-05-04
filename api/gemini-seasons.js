@@ -5,11 +5,15 @@ export default async function handler(req, res) {
   if (req.method === 'OPTIONS') return res.status(200).end();
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
 
-  const { title } = req.body;
+  const { title, originalTitle } = req.body;
   if (!title) return res.status(400).json({ error: 'Title required' });
 
   const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
   if (!GEMINI_API_KEY) return res.status(500).json({ error: 'GEMINI_API_KEY not set' });
+
+  const contextHint = originalTitle && originalTitle !== title
+    ? `The user searched for "${originalTitle}" which is part of the "${title}" series.`
+    : '';
 
   try {
     const response = await fetch(
@@ -20,40 +24,31 @@ export default async function handler(req, res) {
         body: JSON.stringify({
           contents: [{
             parts: [{
-              text: `Search the internet and find all TV seasons of the anime "${title}".
+              text: `Search the internet and find ALL TV seasons of the anime series "${title}".
+${contextHint}
 
-VERY IMPORTANT - Title cleanup:
-The title "${title}" may contain season info like "Season 4", "Part 2", "Final Season", "Arc name" etc.
-IGNORE all season/part/arc suffixes and find the BASE anime series.
-Examples:
-- "Attack on Titan Final Season" → base is "Attack on Titan" → find ALL seasons
-- "Shingeki no Kyojin Season 3" → base is "Shingeki no Kyojin" → find ALL seasons  
-- "Demon Slayer Swordsmith Village Arc" → base is "Demon Slayer" → find ALL seasons
-- "One Piece" → already base name → find the single entry
-Always return ALL seasons of the complete series, not just the one mentioned in the title.
+CRITICAL RULES:
+1. "${title}" is the BASE series name - find ALL its seasons from Season 1 onwards
+2. Do NOT treat it as a single season - find the complete series
+3. Return ALL main TV seasons in order (Season 1, 2, 3, 4...)
+4. Each season should have its own entry with correct episode count
+5. Search for latest accurate episode counts online
 
-Return ONLY this JSON, no markdown, no extra text:
+Return ONLY this JSON (no markdown):
 {
-  "seriesName": "Clean English base series name (no season numbers)",
+  "seriesName": "Clean English base name e.g. Re:Zero",
   "seasons": [
-    {
-      "num": 1,
-      "title": "Exact season title",
-      "episodes": 25,
-      "isAiring": false,
-      "latestEpisode": 25
-    }
+    { "num": 1, "title": "Re:Zero -Starting Life in Another World-", "episodes": 25, "isAiring": false, "latestEpisode": 25 },
+    { "num": 2, "title": "Re:Zero -Starting Life in Another World- Season 2", "episodes": 26, "isAiring": false, "latestEpisode": 26 },
+    { "num": 3, "title": "Re:Zero -Starting Life in Another World- Season 3", "episodes": 25, "isAiring": false, "latestEpisode": 25 }
   ]
 }
 
 Rules:
-- Search internet for latest accurate info
-- seriesName = clean base name WITHOUT any season/part numbers
-- Only main TV seasons (no movies, OVAs, specials)
-- episodes = total if finished, latest aired number if ongoing
-- isAiring = true if currently airing new episodes
-- For single long-running anime (One Piece, Naruto) return 1 season with current episode count
-- Start from Season 1, include ALL seasons in order
+- Only TV seasons (no movies/OVA/specials)
+- episodes = total for finished, latest aired for ongoing
+- isAiring = true only if currently airing right now
+- title = exact MAL title for each season
 - Return ONLY raw JSON`
             }]
           }],
@@ -72,9 +67,9 @@ Rules:
 
     const parsed = JSON.parse(raw);
     if (!parsed.seriesName || !Array.isArray(parsed.seasons))
-      return res.status(500).json({ error: 'Invalid response from Gemini' });
+      return res.status(500).json({ error: 'Invalid Gemini response' });
 
-    // Jikan se sirf malId + image lo
+    // Jikan se har season ka malId + image lo
     const now = Date.now();
     for (let i = 0; i < parsed.seasons.length; i++) {
       const s = parsed.seasons[i];
@@ -94,7 +89,6 @@ Rules:
           parsed.seasons[i].image = best.images?.jpg?.image_url || '';
         }
       } catch(e) { console.warn('Jikan image failed:', s.title); }
-
       parsed.seasons[i].watchedEpisodes = 0;
       parsed.seasons[i].episodesLastUpdated = now;
     }
