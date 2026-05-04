@@ -193,8 +193,8 @@
                     <option value="Dropped">Dropped</option>
                 </select>
                 <button id="addBtn" class="add-btn">
-                    <i class="fa-solid fa-plus" id="addIcon"></i>
-                    <span id="addText">Add</span>
+                    <i class="fa-solid fa-plus"></i>
+                    <span>Add</span>
                 </button>
             </div>
             <div id="aiStatusMsg"></div>
@@ -229,6 +229,7 @@
         </div>
     </div>
 </div>
+
 <div id="rateModal" class="modal-overlay">
     <div class="modal-box">
         <div class="modal-icon"><i class="fa-solid fa-star"></i></div>
@@ -296,10 +297,12 @@ function setAiStatus(msg) {
 
 async function fetchDetails() {
     try {
-        const apiPath = contentType==='char'?`characters/${malId}/full`:`${contentType}/${malId}/full`;
-        const res  = await fetch(`https://api.jikan.moe/v4/${apiPath}`);
+        const apiPath = contentType==='char'
+            ? `characters/${malId}/full`
+            : `${contentType}/${malId}/full`;
+        const res    = await fetch(`https://api.jikan.moe/v4/${apiPath}`);
         const {data} = await res.json();
-        currentData = data;
+        currentData  = data;
 
         document.getElementById('loading').classList.add('hidden');
         document.getElementById('content').classList.remove('hidden');
@@ -478,22 +481,31 @@ function setAddedState(status) {
     if (status) document.getElementById('statusSelect').value=status;
 }
 
-/* ════════════════════════════════════════════════════
+/* ════════════════════════════════════════════════════════
    ADD TO WATCHLIST
-   ────────────────────────────────────────────────────
-   Jikan  → naam, image, malId (currentData me already hai)
-   Gemini 2.5 Flash + Google Search → seasons + real-time episodes
-   Firestore → save
-════════════════════════════════════════════════════ */
+   ────────────────────────────────────────────────────────
+   STEP 1: Base title extract karo
+           "Re:Zero Season 4" → "Re:Zero"
+           "AOT Final Season" → "Attack on Titan"
+           Dono originalTitle aur baseTitle Gemini ko bhejo
+
+   STEP 2: Gemini 2.5 Flash + Google Search
+           → Poori series ke ALL seasons dhundo S1 se
+           → Real-time episodes + airing status
+
+   STEP 3: Jikan → malId + image (already in API)
+
+   STEP 4: Firestore → save
+════════════════════════════════════════════════════════ */
 document.getElementById('addBtn').onclick = async () => {
     const user = auth.currentUser;
     if (!user) { alert("Please login first"); return; }
 
-    const btn    = document.getElementById('addBtn');
-    const status = document.getElementById('statusSelect').value;
-    const title  = currentData.title_english || currentData.title;
-    const image  = currentData.images.jpg.image_url;
-    const now    = Date.now();
+    const btn          = document.getElementById('addBtn');
+    const status       = document.getElementById('statusSelect').value;
+    const originalTitle = currentData.title_english || currentData.title;
+    const image        = currentData.images.jpg.image_url;
+    const now          = Date.now();
 
     btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> <span>AI Scan...</span>';
     btn.disabled  = true;
@@ -503,15 +515,15 @@ document.getElementById('addBtn').onclick = async () => {
         setAiStatus('Saving...');
         try {
             await setDoc(doc(db,"users",user.uid,"watchlist",String(malId)),{
-                malId:parseInt(malId),title,image,status,type:contentType,
+                malId:parseInt(malId), title:originalTitle, image, status, type:contentType,
                 totalEpisodes:currentData.chapters||0,
                 watchedEpisodes:status==='Completed'?(currentData.chapters||0):0,
-                season:1,addedAt:serverTimestamp()
+                season:1, addedAt:serverTimestamp()
             });
-            await logActivity(title,status);
+            await logActivity(originalTitle,status);
             setAddedState(status);
         } catch(e){console.error(e);}
-        btn.disabled=false;setAiStatus('');return;
+        btn.disabled=false; setAiStatus(''); return;
     }
 
     /* Already added check */
@@ -525,39 +537,47 @@ document.getElementById('addBtn').onclick = async () => {
     });
     if (alreadyAdded){setAddedState(status);btn.disabled=false;setAiStatus('');return;}
 
-    /* Gemini 2.5 Flash + Google Search → seasons + episodes */
-    setAiStatus('AI searching latest seasons & episodes...');
-
-    // Base title clean karo — season/part/arc suffix hata do
-    // Taaki AI poori series dhunde, sirf ek season nahi
-    const baseTitle = (currentData.title_english || currentData.title || title)
-        .replace(/\s*:?\s*(season\s*\d+|part\s*\d+|final season|cour\s*\d+|\d+(st|nd|rd|th)\s*season)/gi, '')
+    /* ── Base title extract karo ──
+       "Re:Zero Starting Life in Another World Season 4" → "Re:Zero"
+       "Attack on Titan Final Season Part 2" → "Attack on Titan"
+       Regex se season/part/arc/cour/final suffix hata do
+    ── */
+    const baseTitle = originalTitle
+        .replace(/[\s:-]*(season|part|cour|arc|final season|final part)\s*\d*/gi, '')
+        .replace(/[\s:-]*(final|the final|last)\s*(season|chapter|arc)?$/gi, '')
         .replace(/\s*[-:]\s*$/, '')
-        .trim() || title;
+        .trim() || originalTitle;
 
-    console.log('Original title:', title, '→ Base title:', baseTitle);
+    console.log(`Title: "${originalTitle}" → Base: "${baseTitle}"`);
 
+    /* ── Gemini → ALL seasons of base series ── */
+    setAiStatus('AI finding all seasons...');
     let seasonsData = null;
     try {
         const gemRes = await fetch('/api/gemini-seasons',{
             method:'POST',
             headers:{'Content-Type':'application/json'},
-            body:JSON.stringify({title: baseTitle})
+            body: JSON.stringify({
+                title: baseTitle,
+                originalTitle: originalTitle  // Context ke liye
+            })
         });
         if (gemRes.ok) {
             seasonsData = await gemRes.json();
-            console.log('Gemini seasons:', JSON.stringify(seasonsData));
+            console.log('Gemini seasons result:', JSON.stringify(seasonsData));
         } else {
-            console.warn('gemini-seasons failed:', gemRes.status, await gemRes.text());
+            const err = await gemRes.text();
+            console.warn('gemini-seasons failed:', gemRes.status, err);
         }
     } catch(e){console.warn('gemini-seasons error:',e);}
 
-    /* Fallback: single season from Jikan */
+    /* Fallback: single season */
     if (!seasonsData||!Array.isArray(seasonsData.seasons)||seasonsData.seasons.length===0) {
+        console.warn('Gemini failed, using Jikan fallback');
         seasonsData = {
-            seriesName: title,
+            seriesName: baseTitle,
             seasons: [{
-                num:1, title:currentData.title||title,
+                num:1, title:currentData.title||originalTitle,
                 malId:parseInt(malId), image,
                 episodes:currentData.episodes||0,
                 isAiring:currentData.airing||false,
@@ -567,13 +587,13 @@ document.getElementById('addBtn').onclick = async () => {
         };
     }
 
-    /* Build seasons array */
+    /* Build final seasons array */
     const seasons = seasonsData.seasons.map(s=>({
         num:             s.num,
         malId:           s.malId  || parseInt(malId),
-        title:           s.title  || title,
-        episodes:        s.episodes || 0,
-        isAiring:        s.isAiring || false,
+        title:           s.title  || originalTitle,
+        episodes:        s.episodes      || 0,
+        isAiring:        s.isAiring      || false,
         latestEpisode:   s.latestEpisode || s.episodes || 0,
         watchedEpisodes: status==='Completed'?(s.episodes||0):0,
         image:           s.image  || image,
@@ -585,25 +605,25 @@ document.getElementById('addBtn').onclick = async () => {
     try {
         await setDoc(doc(db,"users",user.uid,"watchlist",String(malId)),{
             malId:        parseInt(malId),
-            seriesName:   seasonsData.seriesName||title,
-            title:        seasonsData.seriesName||title,
-            image:        seasons[0]?.image||image,
+            seriesName:   seasonsData.seriesName || baseTitle,
+            title:        seasonsData.seriesName || baseTitle,
+            image:        seasons[0]?.image || image,
             type:         contentType,
             status,
             userScore:    0,
             isSeriesCard: true,
-            activeSeason: seasons[0]?.num||1,
+            activeSeason: seasons[0]?.num || 1,
             seasons,
             addedAt:      serverTimestamp(),
             addedAtMs:    now
         });
-        await logActivity(seasonsData.seriesName||title,status);
+        await logActivity(seasonsData.seriesName||baseTitle, status);
         setAddedState(status);
     } catch(e){
         console.error('Save error:',e);
         alert("Failed to add. Please try again.");
     }
-    btn.disabled=false;setAiStatus('');
+    btn.disabled=false; setAiStatus('');
 };
 
 async function logActivity(animeTitle,status) {
@@ -615,7 +635,7 @@ async function logActivity(animeTitle,status) {
             uid:user.uid,
             userName:ud.username||user.displayName||"Anonymous",
             userImg:ud.avatar||'https://cdn-icons-png.flaticon.com/512/149/149071.png',
-            animeTitle,malId,type:contentType,
+            animeTitle, malId, type:contentType,
             action:status==='Watching'?'started watching':
                    status==='Completed'?'completed':'added to list',
             timestamp:serverTimestamp()
@@ -671,20 +691,23 @@ async function fetchRecommendations() {
 
 function loadComments() {
     if (!malId) return;
-    onSnapshot(query(collection(db,"anime_comments",String(malId),"entries"),orderBy("timestamp","desc")),snap=>{
-        const cu=auth.currentUser;
-        const list=document.getElementById('commentsList');
-        if (snap.empty){list.innerHTML='<p style="color:var(--dim);font-size:13px;text-align:center;">No comments yet. Be the first!</p>';return;}
-        list.innerHTML=snap.docs.map((d,i)=>{
-            const data=d.data(),isOwner=cu&&cu.uid===data.uid;
-            const time=data.timestamp?.toDate?timeAgo(data.timestamp.toDate()):'Just now';
-            return `<div class="comment-card" style="animation-delay:${i*.04}s">
-                <div class="comment-head"><span class="comment-user">${data.userName}</span>
-                <div class="comment-meta"><span class="comment-time">${time}</span>
-                ${isOwner?`<button class="comment-del" onclick="deleteComment('${d.id}')"><i class="fa-solid fa-trash"></i></button>`:''}</div></div>
-                <p class="comment-text">${data.text}</p></div>`;
-        }).join('');
-    });
+    onSnapshot(
+        query(collection(db,"anime_comments",String(malId),"entries"),orderBy("timestamp","desc")),
+        snap=>{
+            const cu=auth.currentUser;
+            const list=document.getElementById('commentsList');
+            if (snap.empty){list.innerHTML='<p style="color:var(--dim);font-size:13px;text-align:center;">No comments yet!</p>';return;}
+            list.innerHTML=snap.docs.map((d,i)=>{
+                const data=d.data(),isOwner=cu&&cu.uid===data.uid;
+                const time=data.timestamp?.toDate?timeAgo(data.timestamp.toDate()):'Just now';
+                return `<div class="comment-card" style="animation-delay:${i*.04}s">
+                    <div class="comment-head"><span class="comment-user">${data.userName}</span>
+                    <div class="comment-meta"><span class="comment-time">${time}</span>
+                    ${isOwner?`<button class="comment-del" onclick="deleteComment('${d.id}')"><i class="fa-solid fa-trash"></i></button>`:''}</div></div>
+                    <p class="comment-text">${data.text}</p></div>`;
+            }).join('');
+        }
+    );
 }
 window.deleteComment=async id=>{
     if (!confirm("Delete?"))return;
