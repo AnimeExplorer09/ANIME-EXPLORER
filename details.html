@@ -559,7 +559,8 @@ document.getElementById('addBtn').onclick = async () => {
             headers:{'Content-Type':'application/json'},
             body: JSON.stringify({
                 title: baseTitle,
-                originalTitle: originalTitle  // Context ke liye
+                originalTitle: originalTitle,  // Context ke liye
+                malId: parseInt(malId)          // Anchor for Season 1 direct lookup
             })
         });
         if (gemRes.ok) {
@@ -731,3 +732,6 @@ document.getElementById('postCommentBtn').onclick=async()=>{
 </script>
 </body>
 </html>
+
+
+
