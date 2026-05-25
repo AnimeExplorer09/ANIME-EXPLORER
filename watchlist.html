@@ -13,11 +13,15 @@
         :root{--primary:#5738B0;--primary-glow:rgba(87,56,176,.35);--bg:#0f1014;--card:#16181f;--card2:#1e2029;--border:rgba(255,255,255,.06);--dim:#64748b;}
         @keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
         @keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+
+        /* ── TYPE SWITCHER ── */
         .type-switcher{display:flex;background:#1a1c22;margin:14px;padding:4px;border-radius:14px;border:1px solid #2a2a35;position:relative;}
         .type-btn{flex:1;padding:10px;border:none;background:transparent;color:#666;font-size:13px;font-weight:700;z-index:2;cursor:pointer;transition:.3s;display:flex;align-items:center;justify-content:center;gap:8px;border-radius:10px;}
         .type-btn.active{color:white;}
         .type-indicator{position:absolute;top:4px;left:4px;width:calc(50% - 4px);height:calc(100% - 8px);background:var(--primary);border-radius:10px;transition:transform .3s cubic-bezier(.4,0,.2,1);z-index:1;}
         .type-switcher[data-active="manga"] .type-indicator{transform:translateX(100%);}
+
+        /* ── FILTERS ── */
         .filter-container{display:flex;gap:8px;padding:0 14px 14px;overflow-x:auto;scrollbar-width:none;}
         .filter-container::-webkit-scrollbar{display:none;}
         .filter-btn{display:flex;align-items:center;gap:6px;padding:7px 16px;background:rgba(255,255,255,.05);color:#666;border-radius:30px;font-size:12px;font-weight:700;white-space:nowrap;border:1px solid transparent;cursor:pointer;transition:.25s;flex-shrink:0;}
@@ -26,7 +30,8 @@
         .filter-btn[data-filter="watching"].active{background:#1565c0;}
         .filter-btn[data-filter="completed"].active{background:#1b5e20;color:#4ade80;}
         .filter-btn[data-filter="plan"].active{background:#e65100;color:#ffcc80;}
-        /* BOOK CARD */
+
+        /* ── BOOK CARD ── */
         .book-card{margin:10px 12px;border-radius:20px;background:var(--card);border:1px solid var(--border);overflow:hidden;box-shadow:0 8px 32px rgba(0,0,0,.5);position:relative;animation:fadeUp .3s ease both;}
         .book-banner{position:relative;height:130px;overflow:hidden;}
         .book-banner-bg{position:absolute;inset:-10px;background-size:cover;background-position:center;filter:blur(18px) brightness(.35) saturate(1.4);transform:scale(1.1);transition:background-image 0.4s ease;}
@@ -42,7 +47,7 @@
         .banner-ep-text{font-size:11px;font-weight:800;color:rgba(255,255,255,.85);white-space:nowrap;}
         .book-rate-btn{position:absolute;top:10px;right:10px;width:36px;height:36px;border-radius:50%;border:1.5px solid rgba(255,215,0,.4);background:rgba(0,0,0,.5);backdrop-filter:blur(8px);color:#ffd700;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;cursor:pointer;transition:.2s;z-index:5;}
         .book-rate-btn:active{transform:scale(.88);}
-        .book-ep-controls{display:flex;align-items:center;justify-content:space-between;padding:10px 14px 8px;border-bottom:1px solid var(--border);gap:12px;}
+        .book-ep-controls{display:flex;align-items:center;justify-content:space-between;padding:10px 14px 8px;border-bottom:1px solid var(--border);gap:8px;}
         .ep-ctrl-label{font-size:10px;font-weight:800;color:var(--dim);text-transform:uppercase;letter-spacing:.5px;display:flex;align-items:center;gap:5px;flex:1;flex-wrap:wrap;}
         .ep-ctrl-box{display:flex;align-items:center;background:var(--bg);border-radius:12px;border:1px solid rgba(255,255,255,.1);height:38px;overflow:hidden;flex-shrink:0;}
         .ep-ctrl-btn{width:36px;height:100%;background:transparent;color:white;border:none;cursor:pointer;font-size:12px;display:flex;align-items:center;justify-content:center;transition:background .15s;}
@@ -59,7 +64,8 @@
         .new-ep-badge{background:#ef4444;color:white;font-size:9px;font-weight:900;padding:2px 7px;border-radius:20px;animation:pulse 1.5s infinite;}
         .airing-dot{display:inline-flex;align-items:center;gap:3px;font-size:9px;font-weight:800;color:#4ade80;}
         .airing-dot span{width:6px;height:6px;background:#4ade80;border-radius:50%;display:inline-block;animation:pulse 1.5s infinite;}
-        /* SIMPLE CARD */
+
+        /* ── SIMPLE CARD ── */
         .simple-card{margin:10px 12px;border-radius:16px;background:var(--card);border:1px solid var(--border);display:flex;align-items:stretch;overflow:hidden;box-shadow:0 4px 16px rgba(0,0,0,.35);position:relative;min-height:105px;animation:fadeUp .3s ease both;}
         .simple-status-bar{width:4px;flex-shrink:0;}
         .simple-cover{width:72px;object-fit:cover;flex-shrink:0;cursor:pointer;}
@@ -72,7 +78,57 @@
         .simple-ctrl-btn{flex:1;background:transparent;color:white;border:none;cursor:pointer;font-size:11px;}
         .simple-ep-display{flex:1.5;font-size:10px;font-weight:800;color:white;text-align:center;cursor:pointer;}
         .simple-progress{position:absolute;bottom:0;left:0;height:3px;transition:width .4s ease;}
-        /* MODALS */
+
+        /* ── EP RATE STAR BUTTON (on cards) ── */
+        .ep-rate-star-btn{background:rgba(255,215,0,.08);border:1px solid rgba(255,215,0,.22);color:#FFD700;padding:4px 10px;border-radius:20px;font-size:9px;font-weight:800;cursor:pointer;display:inline-flex;align-items:center;gap:3px;flex-shrink:0;line-height:1;transition:.15s;}
+        .ep-rate-star-btn:active{transform:scale(.9);background:rgba(255,215,0,.16);}
+
+        /* ── EP RATING PANEL (main bottom sheet) ── */
+        .ep-panel-overlay{position:fixed;inset:0;background:rgba(0,0,0,.9);z-index:2500;display:flex;justify-content:center;align-items:flex-end;visibility:hidden;opacity:0;transition:.22s;backdrop-filter:blur(12px);}
+        .ep-panel-overlay.show{visibility:visible;opacity:1;}
+        .ep-panel-sheet{background:#1a1c24;width:100%;border-radius:24px 24px 0 0;padding:0;border-top:1px solid rgba(87,56,176,.3);transform:translateY(100%);transition:transform .3s cubic-bezier(.4,0,.2,1);max-height:88vh;display:flex;flex-direction:column;overflow:hidden;}
+        .ep-panel-overlay.show .ep-panel-sheet{transform:translateY(0);}
+        .ep-panel-handle{width:36px;height:4px;background:#333;border-radius:2px;margin:12px auto 0;flex-shrink:0;}
+        .ep-panel-header{padding:14px 16px 10px;flex-shrink:0;}
+        .ep-panel-body{flex:1;overflow-y:auto;padding:0 16px 8px;}
+        .ep-panel-footer{padding:10px 16px 36px;flex-shrink:0;border-top:1px solid var(--border);}
+
+        /* Season tabs in panel */
+        .ep-panel-season-tabs{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;padding-bottom:2px;margin-bottom:12px;}
+        .ep-panel-season-tabs::-webkit-scrollbar{display:none;}
+        .ep-season-tab{flex-shrink:0;padding:5px 14px;border-radius:20px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);color:#666;font-size:11px;font-weight:700;cursor:pointer;transition:.2s;}
+        .ep-season-tab.active{background:var(--primary);border-color:var(--primary);color:white;}
+
+        /* Episode cells */
+        .ep-cell{border-radius:9px;padding:6px 3px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;cursor:pointer;transition:.15s;border:1px solid rgba(0,0,0,.15);min-height:46px;}
+        .ep-cell:active{transform:scale(.92);filter:brightness(1.2);}
+        .ep-cell-num{font-size:8px;font-weight:700;color:rgba(255,255,255,.55);line-height:1;}
+        .ep-cell-score{font-size:13px;font-weight:900;color:white;line-height:1;}
+        .ep-cell-score.no-score{font-size:17px;color:rgba(255,255,255,.18);}
+        .ep-cell.ep-empty{background:rgba(255,255,255,.03);border:1px dashed rgba(255,255,255,.08);}
+        .r-awesome{background:linear-gradient(135deg,#21a453,#1a7d40);}
+        .r-great{background:linear-gradient(135deg,#57c26e,#43a857);}
+        .r-good{background:linear-gradient(135deg,#d4b84a,#b89a35);}
+        .r-regular{background:linear-gradient(135deg,#e07b39,#c5642a);}
+        .r-bad{background:linear-gradient(135deg,#c94040,#a52e2e);}
+
+        /* Legend */
+        .ep-legend{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px;}
+        .legend-item{display:flex;align-items:center;gap:4px;font-size:9px;color:var(--dim);}
+        .legend-dot{width:9px;height:9px;border-radius:2px;}
+
+        /* ── SINGLE EP RATE MODAL ── */
+        .single-ep-overlay{position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:3000;display:flex;justify-content:center;align-items:flex-end;visibility:hidden;opacity:0;transition:.2s;backdrop-filter:blur(8px);}
+        .single-ep-overlay.show{visibility:visible;opacity:1;}
+        .single-ep-sheet{background:#1e2029;width:100%;border-radius:22px 22px 0 0;padding:20px 20px 44px;border-top:1px solid rgba(87,56,176,.3);transform:translateY(100%);transition:transform .3s cubic-bezier(.4,0,.2,1);}
+        .single-ep-overlay.show .single-ep-sheet{transform:translateY(0);}
+        .single-ep-handle{width:36px;height:4px;background:#333;border-radius:2px;margin:0 auto 16px;}
+        .ep-score-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin-bottom:16px;}
+        .ep-score-btn{background:var(--bg);border:1px solid #2a2a35;padding:12px 0;border-radius:10px;font-size:15px;font-weight:800;color:#666;cursor:pointer;text-align:center;transition:.2s;font-family:inherit;}
+        .ep-score-btn.sel{background:var(--primary);color:white;border-color:var(--primary);transform:scale(1.05);}
+        .ep-score-btn:active{opacity:.8;}
+
+        /* ── COMMON MODALS ── */
         .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.88);z-index:2000;display:flex;justify-content:center;align-items:center;visibility:hidden;opacity:0;transition:.22s;backdrop-filter:blur(8px);}
         .modal-overlay.show{visibility:visible;opacity:1;}
         .modal-box{background:#1e2029;width:88%;max-width:320px;border-radius:22px;padding:24px 20px;text-align:center;border:1px solid rgba(255,255,255,.08);transform:scale(.9);transition:transform .22s;}
@@ -86,10 +142,12 @@
         .btn-modal-danger{background:#c62828;color:white;border:none;padding:14px;border-radius:12px;font-weight:900;cursor:pointer;font-size:14px;flex:1;font-family:inherit;}
         .btn-modal-cancel{background:transparent;color:#888;border:1px solid #2a2a35;padding:14px;border-radius:12px;cursor:pointer;font-size:14px;flex:1;font-family:inherit;}
         .modal-btn-row{display:flex;gap:10px;}
-        /* TOAST */
+
+        /* ── TOAST ── */
         .fetch-toast{position:fixed;bottom:90px;left:50%;transform:translateX(-50%) translateY(20px);background:rgba(87,56,176,.95);color:white;font-size:11px;font-weight:700;padding:8px 18px;border-radius:20px;backdrop-filter:blur(10px);opacity:0;transition:.3s;pointer-events:none;z-index:100;white-space:nowrap;}
         .fetch-toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
-        /* NAV */
+
+        /* ── NAV ── */
         .bottom-nav{background:#161c24!important;border-radius:25px 25px 0 0;height:80px;border-top:1px solid rgba(255,255,255,.05)!important;box-shadow:0 -10px 30px rgba(0,0,0,.5);}
         .nav-item{text-decoration:none;color:#94a3b8;display:flex;flex-direction:column;align-items:center;justify-content:center;flex:1;gap:4px;transition:.2s ease;}
         .nav-item i{font-size:20px;}
@@ -109,10 +167,10 @@
             <button class="type-btn" onclick="switchType('manga')"><i class="fa-solid fa-book-open"></i> Manga</button>
         </div>
         <div class="filter-container">
-            <button class="filter-btn active" data-filter="all" onclick="filterList('all',this)"><i class="fa-solid fa-layer-group"></i> All</button>
-            <button class="filter-btn" data-filter="watching" onclick="filterList('watching',this)"><i class="fa-solid fa-eye"></i> Watching</button>
-            <button class="filter-btn" data-filter="completed" onclick="filterList('completed',this)"><i class="fa-solid fa-check-circle"></i> Completed</button>
-            <button class="filter-btn" data-filter="plan" onclick="filterList('plan',this)"><i class="fa-solid fa-clock"></i> Plan</button>
+            <button class="filter-btn active" data-filter="all"       onclick="filterList('all',this)"><i class="fa-solid fa-layer-group"></i> All</button>
+            <button class="filter-btn" data-filter="watching"         onclick="filterList('watching',this)"><i class="fa-solid fa-eye"></i> Watching</button>
+            <button class="filter-btn" data-filter="completed"        onclick="filterList('completed',this)"><i class="fa-solid fa-check-circle"></i> Completed</button>
+            <button class="filter-btn" data-filter="plan"             onclick="filterList('plan',this)"><i class="fa-solid fa-clock"></i> Plan</button>
         </div>
         <div id="loadingSpinner" class="text-center" style="margin-top:60px;">
             <i class="fa-solid fa-circle-notch fa-spin" style="font-size:32px;color:#5738B0;"></i>
@@ -125,11 +183,13 @@
         </div>
     </div>
 
+    <!-- FETCH TOAST -->
     <div class="fetch-toast" id="fetchToast">
         <i class="fa-solid fa-circle-notch fa-spin" style="margin-right:6px;"></i>
         <span id="fetchToastMsg">Updating...</span>
     </div>
 
+    <!-- RATE MODAL (series score) -->
     <div id="rateModal" class="modal-overlay">
         <div class="modal-box">
             <h3 id="rateTitle">Rate Anime</h3><p>Tap your score</p>
@@ -140,6 +200,7 @@
         </div>
     </div>
 
+    <!-- COMPLETED MODAL -->
     <div id="completedModal" class="modal-overlay">
         <div class="modal-box">
             <div style="font-size:36px;margin-bottom:10px;">🎉</div>
@@ -155,6 +216,7 @@
         </div>
     </div>
 
+    <!-- DELETE MODAL -->
     <div id="deleteModal" class="modal-overlay">
         <div class="modal-box">
             <div style="font-size:32px;margin-bottom:10px;">🗑️</div>
@@ -168,6 +230,77 @@
         </div>
     </div>
 
+    <!-- ══════════════════════════════════════════════════
+         EPISODE RATING PANEL (main bottom sheet)
+    ══════════════════════════════════════════════════ -->
+    <div class="ep-panel-overlay" id="epRatePanel">
+        <div class="ep-panel-sheet">
+            <div class="ep-panel-handle"></div>
+
+            <!-- Header -->
+            <div class="ep-panel-header">
+                <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:10px;">
+                    <div style="flex:1;min-width:0;">
+                        <div style="font-size:10px;color:var(--dim);font-weight:700;text-transform:uppercase;letter-spacing:.5px;margin-bottom:3px;">
+                            <i class="fa-solid fa-star" style="color:#FFD700;font-size:9px;"></i> Episode Ratings
+                        </div>
+                        <div id="epPanelTitle" style="font-size:15px;font-weight:900;color:white;line-height:1.3;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;"></div>
+                    </div>
+                    <div style="text-align:right;flex-shrink:0;margin-left:12px;">
+                        <div id="epPanelAvg" style="font-size:24px;font-weight:900;color:#FFD700;line-height:1;">—</div>
+                        <div style="font-size:9px;color:var(--dim);font-weight:700;text-transform:uppercase;letter-spacing:.4px;">My Avg</div>
+                    </div>
+                </div>
+                <!-- Legend -->
+                <div class="ep-legend">
+                    <div class="legend-item"><div class="legend-dot r-awesome"></div>9-10</div>
+                    <div class="legend-item"><div class="legend-dot r-great"></div>8+</div>
+                    <div class="legend-item"><div class="legend-dot r-good"></div>7+</div>
+                    <div class="legend-item"><div class="legend-dot r-regular"></div>6+</div>
+                    <div class="legend-item"><div class="legend-dot r-bad"></div>&lt;6</div>
+                </div>
+                <!-- Season tabs -->
+                <div class="ep-panel-season-tabs hidden" id="epPanelSeasonTabs"></div>
+            </div>
+
+            <!-- Scrollable grid body -->
+            <div class="ep-panel-body" id="epPanelGrid">
+                <div style="text-align:center;padding:32px;color:var(--dim);font-size:13px;">
+                    <i class="fa-solid fa-circle-notch fa-spin"></i>
+                </div>
+            </div>
+
+            <!-- Footer close -->
+            <div class="ep-panel-footer">
+                <button onclick="closeEpPanel()"
+                    style="width:100%;background:rgba(255,255,255,.06);border:1px solid var(--border);color:var(--dim);padding:13px;border-radius:14px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;">
+                    Close
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ══════════════════════════════════════════════════
+         SINGLE EPISODE RATE MODAL
+    ══════════════════════════════════════════════════ -->
+    <div class="single-ep-overlay" id="singleEpModal">
+        <div class="single-ep-sheet">
+            <div class="single-ep-handle"></div>
+            <div id="singleEpLabel" style="font-size:10px;color:var(--dim);font-weight:700;text-transform:uppercase;letter-spacing:.6px;margin-bottom:4px;"></div>
+            <div id="singleEpTitle" style="font-size:16px;font-weight:800;color:white;margin-bottom:18px;"></div>
+            <div class="ep-score-grid" id="singleEpScoreGrid"></div>
+            <button onclick="saveSingleEpRating()"
+                style="background:var(--primary);color:white;border:none;width:100%;padding:14px;border-radius:12px;font-size:14px;font-weight:800;cursor:pointer;font-family:inherit;">
+                Save Rating
+            </button>
+            <button onclick="closeSingleEpModal()"
+                style="background:transparent;color:#555;border:none;width:100%;padding:10px;font-size:13px;cursor:pointer;font-family:inherit;margin-top:4px;">
+                Cancel
+            </button>
+        </div>
+    </div>
+
+    <!-- NAV -->
     <nav class="bottom-nav">
         <a href="index.html" class="nav-item">
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" style="width:24px;height:24px;">
@@ -208,7 +341,10 @@
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
 import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-import { getFirestore, collection, getDocs, doc, updateDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+import {
+    getFirestore, collection, getDocs, doc, updateDoc, deleteDoc,
+    getDoc, setDoc, serverTimestamp, runTransaction, onSnapshot
+} from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
 const firebaseConfig = {
     apiKey:"AIzaSyDLd3TW-y89lwShUmcIHw3YGzDjo4cg3y4",
@@ -249,14 +385,9 @@ async function loadList(uid){
     }
 }
 
-/* ═══════════════════════════════════════════════════════
+/* ══════════════════════════════════════════════════════
    AUTO FETCH EPISODES via Gemini AI
-
-   isNewAnime=true  → fetch ALL seasons immediately (new add)
-   isNewAnime=false → check 3h (ongoing) / 3d (finished) threshold
-
-   After first auto-run, schedules itself every 3h for ongoing anime
-═══════════════════════════════════════════════════════ */
+══════════════════════════════════════════════════════ */
 async function autoFetchEpisodes(uid,isNewAnime=false,specificMalId=null){
     const now=Date.now();
     let anyUpdate=false;
@@ -419,6 +550,11 @@ function rebuildBookCard(card,anime){
                 <i class="fa-solid fa-play" style="font-size:8px;color:var(--primary);"></i>
                 Episodes ${newEpBadge}
             </span>
+            <!-- ⭐ Rate Episodes button -->
+            <button class="ep-rate-star-btn"
+                    onclick="event.stopPropagation();openEpRatePanel('${anime.malId}')">
+                <i class="fa-solid fa-star" style="font-size:8px;"></i> Rate Eps
+            </button>
             <div class="ep-ctrl-box">
                 <button class="ep-ctrl-btn" onclick="updateBookEp('${anime.malId}',${activeSn.num},-1)">
                     <i class="fa-solid fa-minus" style="font-size:10px;"></i>
@@ -448,31 +584,17 @@ window.selectSeason=async(rootId,seasonNum)=>{
     updateDoc(doc(db,"users",currentUid,"watchlist",String(rootId)),{activeSeason:seasonNum}).catch(console.error);
     const card=container.querySelector(`[data-mid="${rootId}"]`);
     if(!card)return;
-
     const activeSn=anime.seasons.find(s=>s.num===seasonNum)||anime.seasons[0];
-
-    // Smooth banner image transition
     const bannerBg=card.querySelector('.book-banner-bg');
     if(bannerBg){
         bannerBg.style.opacity='0';
-        setTimeout(()=>{
-            bannerBg.style.backgroundImage=`url('${activeSn.image}')`;
-            bannerBg.style.opacity='1';
-        },200);
+        setTimeout(()=>{bannerBg.style.backgroundImage=`url('${activeSn.image}')`;bannerBg.style.opacity='1';},200);
     }
-
-    // Update thumb image
     const thumb=card.querySelector('.active-thumb');
     if(thumb){
         thumb.style.opacity='0';
-        setTimeout(()=>{
-            thumb.src=activeSn.image;
-            thumb.onclick=()=>location.href=`details.html?id=${activeSn.malId}&type=anime`;
-            thumb.style.opacity='1';
-        },200);
+        setTimeout(()=>{thumb.src=activeSn.image;thumb.onclick=()=>location.href=`details.html?id=${activeSn.malId}&type=anime`;thumb.style.opacity='1';},200);
     }
-
-    // Full rebuild for rest of card (ep count, chips, labels)
     rebuildBookCard(card,anime);
 };
 
@@ -577,7 +699,14 @@ function renderSimpleCard(anime){
         <div class="simple-info"
              onclick="location.href='details.html?id=${anime.malId}&type=${anime.type||'anime'}'">
             <div class="simple-title">${anime.title}</div>
-            <span class="simple-status-pill" style="background:${sc}20;color:${sc};">${anime.status}</span>
+            <div style="display:flex;align-items:center;gap:6px;margin-top:5px;">
+                <span class="simple-status-pill" style="background:${sc}20;color:${sc};">${anime.status}</span>
+                <button class="ep-rate-star-btn"
+                        style="font-size:8px;padding:2px 8px;"
+                        onclick="event.stopPropagation();openEpRatePanel('${anime.malId}')">
+                    <i class="fa-solid fa-star" style="font-size:7px;"></i> Rate
+                </button>
+            </div>
         </div>
         <div class="simple-controls">
             <div class="simple-rate-btn" onclick="event.stopPropagation();openRateModal('${anime.malId}')">
@@ -652,7 +781,7 @@ window.simpleStartEdit=function(id,field,el){
     input.onkeydown=e=>{if(e.key==='Enter')input.blur();};
 };
 
-/* ══════════════ COMMON ══════════════ */
+/* ══════════════ COMMON LIST ACTIONS ══════════════ */
 window.filterList=(filter,btn)=>{
     document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active'));
     btn.classList.add('active');renderList(filter);
@@ -707,6 +836,233 @@ function attachLongPress(el,cb){
 }
 function showToast(msg){document.getElementById('fetchToastMsg').innerText=msg;document.getElementById('fetchToast').classList.add('show');}
 function hideToast(){document.getElementById('fetchToast').classList.remove('show');}
+
+/* ════════════════════════════════════════════════════════════════
+   EPISODE RATING SYSTEM
+   ─────────────────────────────────────────────────────────────
+   - Har anime/season ke liye episode grid dikhaata hai
+   - User har episode ko 1-10 rate kar sakta hai
+   - Ratings same Firebase collection use karti hain jaise details.html
+   - episode_cache se titles bhi load hoti hain (shared cache)
+════════════════════════════════════════════════════════════════ */
+const RATING_LABELS={1:'😞 Appalling',2:'😑 Horrible',3:'😕 Very Bad',4:'🙁 Bad',5:'😐 Average',6:'🙂 Fine',7:'😊 Good',8:'😃 Very Good',9:'🤩 Great',10:'⚡ Masterpiece'};
+const COLS=6;
+
+let panelAnime=null;           // currently open anime object
+let panelSeasonMalId=null;     // malId of currently shown season
+let panelSeasonNum=1;          // season number currently shown
+let panelEpRatings={};         // { [epNum]: myRating (0 = not rated) }
+let panelEpisodes=[];          // episode list for current season
+let panelUnsubscribe=null;     // onSnapshot cleanup
+let singleEpNum=null;          // episode being rated in single modal
+let singleEpSeasonMalId=null;
+let selectedSingleScore=0;
+
+function getRatingClass(score){
+    if(!score||score===0)return'';
+    if(score>=9)return'r-awesome';
+    if(score>=8)return'r-great';
+    if(score>=7)return'r-good';
+    if(score>=6)return'r-regular';
+    return'r-bad';
+}
+
+// ── Open panel ──
+window.openEpRatePanel=async(rootId)=>{
+    vib();
+    const anime=allAnime.find(a=>String(a.malId)===String(rootId));
+    if(!anime)return;
+    panelAnime=anime;
+
+    // Build season list — series card has seasons[], simple card gets a fake single season
+    const seasons=anime.isSeriesCard&&Array.isArray(anime.seasons)
+        ?anime.seasons
+        :[{num:1,malId:anime.malId,episodes:anime.totalEpisodes||anime.episodes||0,title:anime.title}];
+
+    // Title
+    document.getElementById('epPanelTitle').innerText=anime.seriesName||anime.title;
+
+    // Season tabs — show only if more than 1 season
+    const tabsEl=document.getElementById('epPanelSeasonTabs');
+    if(seasons.length>1){
+        tabsEl.classList.remove('hidden');
+        tabsEl.innerHTML=seasons.map(s=>
+            `<div class="ep-season-tab${s.num===(anime.activeSeason||1)?' active':''}"
+                  onclick="switchPanelSeason(${s.num})">S${s.num}</div>`
+        ).join('');
+    }else{
+        tabsEl.classList.add('hidden');
+    }
+
+    // Open panel
+    document.getElementById('epRatePanel').classList.add('show');
+
+    // Load the active/first season
+    const startSeason=seasons.find(s=>s.num===(anime.activeSeason||1))||seasons[0];
+    panelSeasonNum=startSeason.num;
+    await loadPanelSeason(startSeason);
+};
+
+// ── Switch season in panel ──
+window.switchPanelSeason=async(num)=>{
+    vib();
+    const seasons=panelAnime.isSeriesCard&&Array.isArray(panelAnime.seasons)?panelAnime.seasons:[];
+    const sn=seasons.find(s=>s.num===num);
+    if(!sn)return;
+    panelSeasonNum=num;
+    document.querySelectorAll('.ep-season-tab').forEach(t=>
+        t.classList.toggle('active',parseInt(t.innerText.replace('S',''))===num)
+    );
+    await loadPanelSeason(sn);
+};
+
+// ── Load season data + ratings ──
+async function loadPanelSeason(sn){
+    panelSeasonMalId=sn.malId;
+    panelEpRatings={};
+
+    // Show spinner
+    document.getElementById('epPanelGrid').innerHTML=
+        '<div style="text-align:center;padding:40px;color:#444;"><i class="fa-solid fa-circle-notch fa-spin" style="font-size:24px;"></i></div>';
+
+    // Unsubscribe old listener
+    if(panelUnsubscribe){panelUnsubscribe();panelUnsubscribe=null;}
+
+    // Load episodes
+    panelEpisodes=await getPanelEpisodes(sn.malId,sn.episodes||0);
+
+    // Live ratings listener
+    panelUnsubscribe=onSnapshot(
+        collection(db,"anime_ep_ratings",String(sn.malId),"episodes"),
+        snap=>{
+            panelEpRatings={};
+            snap.forEach(d=>{
+                const epNum=parseInt(d.id);
+                const myR=currentUid?(d.data()[`user_${currentUid}`]||0):0;
+                panelEpRatings[epNum]=myR;
+            });
+            updatePanelAvg();
+            renderPanelGrid();
+        }
+    );
+}
+
+// ── Get episodes (from cache or placeholders) ──
+async function getPanelEpisodes(seasonMalId,totalEps){
+    try{
+        const snap=await getDoc(doc(db,"episode_cache",String(seasonMalId)));
+        if(snap.exists()&&Array.isArray(snap.data().episodes)&&snap.data().episodes.length>0){
+            console.log('[EP Panel] Cache hit for malId:',seasonMalId);
+            return snap.data().episodes;
+        }
+    }catch(e){console.warn('[EP Panel] Cache read error:',e);}
+
+    // Fallback: generate placeholder titles
+    const count=Math.min(totalEps||12,2000);
+    if(count===0)return[];
+    return Array.from({length:count},(_,i)=>({num:i+1,title:`Episode ${i+1}`}));
+}
+
+// ── Render episode grid ──
+function renderPanelGrid(){
+    const eps=panelEpisodes;
+    if(!eps.length){
+        document.getElementById('epPanelGrid').innerHTML=
+            '<p style="color:var(--dim);font-size:13px;text-align:center;padding:20px;">No episode data available.</p>';
+        return;
+    }
+    let html='<div style="padding:2px 0 8px;">';
+    for(let i=0;i<eps.length;i+=COLS){
+        html+='<div style="display:grid;grid-template-columns:repeat(6,1fr);gap:5px;margin-bottom:5px;">';
+        for(let j=i;j<i+COLS;j++){
+            const ep=eps[j];
+            if(!ep){html+='<div></div>';continue;}
+            const myR=panelEpRatings[ep.num]||0;
+            const cls=myR>0?getRatingClass(myR):'ep-empty';
+            const scoreHtml=myR>0
+                ?`<span class="ep-cell-score">${myR}</span>`
+                :`<span class="ep-cell-score no-score">+</span>`;
+            html+=`<div class="ep-cell ${cls}"
+                title="E${ep.num}: ${ep.title}"
+                onclick="openSingleEpSheet(${ep.num},'${ep.title.replace(/'/g,"\\'")}')">
+                <span class="ep-cell-num">E${ep.num}</span>
+                ${scoreHtml}
+            </div>`;
+        }
+        html+='</div>';
+    }
+    html+='</div>';
+    document.getElementById('epPanelGrid').innerHTML=html;
+}
+
+// ── Update avg score display ──
+function updatePanelAvg(){
+    const rated=Object.values(panelEpRatings).filter(v=>v>0);
+    document.getElementById('epPanelAvg').innerText=rated.length
+        ?(rated.reduce((s,v)=>s+v,0)/rated.length).toFixed(1)
+        :'—';
+}
+
+// ── Close panel ──
+window.closeEpPanel=()=>{
+    document.getElementById('epRatePanel').classList.remove('show');
+    if(panelUnsubscribe){panelUnsubscribe();panelUnsubscribe=null;}
+    panelAnime=null;panelEpisodes=[];panelEpRatings={};
+};
+
+/* ── Single Episode Rate Modal ── */
+window.openSingleEpSheet=(epNum,epTitle)=>{
+    if(!currentUid){alert("Please login to rate episodes");return;}
+    singleEpNum=epNum;
+    singleEpSeasonMalId=panelSeasonMalId;
+    selectedSingleScore=panelEpRatings[epNum]||0;
+
+    document.getElementById('singleEpLabel').innerText=`Season ${panelSeasonNum} · Episode ${epNum}`;
+    document.getElementById('singleEpTitle').innerText=epTitle;
+
+    // Build 1–10 grid
+    const grid=document.getElementById('singleEpScoreGrid');
+    grid.innerHTML='';
+    for(let i=1;i<=10;i++){
+        const btn=document.createElement('button');
+        btn.className=`ep-score-btn${i===selectedSingleScore?' sel':''}`;
+        btn.innerText=i;btn.title=RATING_LABELS[i]||'';
+        btn.onclick=()=>{
+            selectedSingleScore=i;
+            document.querySelectorAll('.ep-score-btn').forEach((b,idx)=>
+                b.classList.toggle('sel',idx+1===i)
+            );
+        };
+        grid.appendChild(btn);
+    }
+    document.getElementById('singleEpModal').classList.add('show');
+};
+
+window.closeSingleEpModal=()=>{
+    document.getElementById('singleEpModal').classList.remove('show');
+    singleEpNum=null;selectedSingleScore=0;
+};
+
+window.saveSingleEpRating=async()=>{
+    if(!currentUid||!singleEpNum||!selectedSingleScore)return;
+    const epRef=doc(db,"anime_ep_ratings",String(singleEpSeasonMalId),"episodes",String(singleEpNum));
+    try{
+        await runTransaction(db,async tx=>{
+            const snap=await tx.get(epRef);
+            const prevKey=`user_${currentUid}`;
+            const prev=snap.exists()?(snap.data()[prevKey]||0):0;
+            const isNew=prev===0;
+            let tv=snap.exists()?(snap.data().totalVotes||0):0;
+            let ts=snap.exists()?(snap.data().totalSum  ||0):0;
+            if(isNew){tv+=1;}else{ts-=prev;}
+            ts+=selectedSingleScore;
+            tx.set(epRef,{totalVotes:tv,totalSum:ts,[prevKey]:selectedSingleScore,lastUpdated:serverTimestamp()},{merge:true});
+        });
+        closeSingleEpModal();
+        // panelEpRatings update onSnapshot se automatically ho jaayega
+    }catch(e){console.error(e);alert("Failed. Try again.");}
+};
+
 </script>
 </body>
 </html>
